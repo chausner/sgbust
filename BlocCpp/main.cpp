@@ -9,7 +9,7 @@ int main()
 {
 	unsigned int smallestGroupSize;
 
-	BlockGrid blockGrid("E:\\Users\\Christoph\\Documents\\Visual Studio 2015\\Projects\\Bloc\\wikipedia.bgf", smallestGroupSize);
+	BlockGrid blockGrid("E:\\Users\\Christoph\\Documents\\Visual Studio 2015\\Projects\\Bloc\\boop.bgf", smallestGroupSize);
 
 	//for (char c : "AEEICBFG")
 	//	if (c != '\0')
@@ -19,7 +19,7 @@ int main()
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 
-	solver.Solve(blockGrid, smallestGroupSize, 3000000, 15, false, false);
+	solver.Solve(blockGrid, smallestGroupSize, 3000000, UINT_MAX, false, false);
 
 	auto endTime = std::chrono::high_resolution_clock::now();
 
