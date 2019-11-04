@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 #include "BlockGrid.h"
 
 class BlocSolver
@@ -19,10 +20,10 @@ class BlocSolver
 	unsigned int dbSize;
 
 public:
-	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, unsigned int maxDBSize, unsigned int maxDepth, bool save, bool dontAddToDBLastDepth);
+	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std::optional<unsigned int> maxDBSize, std::optional<unsigned int> maxDepth, bool save, bool dontAddToDBLastDepth);
 
 private:
-	void SolveDepth(unsigned int maxDBSize, bool& stop, bool dontAddToDB = false);
+	void SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB = false);
 	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks, unsigned int hash,
 		std::vector<std::vector<std::vector<BlockGrid>*>*>& newBlockGrids,
 		unsigned int& newWorstNumberOfBlocks, unsigned int& newWorstHash, bool& stop, bool dontAddToDB = false);

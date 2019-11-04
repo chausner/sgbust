@@ -3,17 +3,12 @@
 #include "BlockGrid.h"
 #include "BlocSolver.h"
 
-#include <vector>
-
 int main()
 {
 	unsigned int smallestGroupSize;
 
 	BlockGrid blockGrid("E:\\Users\\Christoph\\Documents\\Visual Studio 2015\\Projects\\Bloc\\wikipedia.bgf", smallestGroupSize);
 
-	//for (char c : "AEEICBFG")
-	//	if (c != '\0')
-	//        blockGrid.RemoveGroup(blockGrid.GetGroups(smallestGroupSize)[c - 'A']);
 
 	BlocSolver solver;
 

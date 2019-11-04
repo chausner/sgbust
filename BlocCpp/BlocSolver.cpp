@@ -1,7 +1,7 @@
 #include <iostream>
 #include "BlocSolver.h"
 
-void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, unsigned int maxDBSize, unsigned int maxDepth, bool save, bool dontAddToDBLastDepth)
+void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std::optional<unsigned int> maxDBSize, std::optional<unsigned int> maxDepth, bool save, bool dontAddToDBLastDepth)
 {
 	this->smallestGroupSize = smallestGroupSize;
 
@@ -22,18 +22,18 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, uns
 	(*blockGrids[numberOfBlocks])[hash]->push_back(blockGrid);
 
 	bestGrid = nullptr;
-	bestScore = UINT_MAX;
+	bestScore = std::numeric_limits<unsigned int>::max();
 
 	depth = 0;
 	dbSize = 1;
 
 	bool stop = false;
 
-	while (!stop && depth < maxDepth)
+	while (!stop && (!maxDepth || depth < maxDepth))
 	{
 		std::cout << "Depth: " << depth << ", Database size: " << dbSize << std::endl;
 
-		SolveDepth(maxDBSize, stop, dontAddToDBLastDepth && depth == maxDepth - 1);          
+		SolveDepth(maxDBSize, stop, dontAddToDBLastDepth && maxDepth && depth == *maxDepth - 1);
 
 		depth++;
 
@@ -48,11 +48,11 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, uns
 	//				for (auto c : *b)
 	//					std::cout << c.GetSolutionAsString() << "    " << c.GetNumberOfBlocks() << std::endl;
 
-	if (bestScore != UINT_MAX)
+	if (bestScore != std::numeric_limits<unsigned int>::max())
 		blockGrid.Solution = bestGrid->Solution;
 }
 
-void BlocSolver::SolveDepth(unsigned int maxDBSize, bool& stop, bool dontAddToDB)
+void BlocSolver::SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB)
 {
 	std::vector<std::vector<std::vector<BlockGrid>*>*> newBlockGrids;
 
@@ -70,14 +70,14 @@ void BlocSolver::SolveDepth(unsigned int maxDBSize, bool& stop, bool dontAddToDB
 			{
 				if ((*blockGrids[i])[j] != nullptr)
 				{
-					if (!stop && newDBSize < maxDBSize)
+					if (!stop && (!maxDBSize || newDBSize < maxDBSize))
 						for (int k = 0; k < (*blockGrids[i])[j]->size(); k++)
 						{
 							newDBSize += SolveBlockGrid((*(*blockGrids[i])[j])[k], i, j, newBlockGrids, newWorstNumberOfBlocks, newWorstHash, stop, dontAddToDB);
 
 							blockGridsSolved++;
 
-							if (stop || newDBSize >= maxDBSize)
+							if (stop || (maxDBSize && newDBSize >= maxDBSize))
 								break;
 						}
 

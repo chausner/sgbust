@@ -1,5 +1,7 @@
 #include <cstring>
 #include <fstream>
+#include <limits>
+#include <stdexcept>
 #include "BlockGrid.h"
 
 #define XY(x,y) ((y) * Width + (x))
@@ -13,7 +15,7 @@ BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize) :
 	file.read(&header[0], 4);
 
 	if (std::string(&header[0], 4) != "BGF2")
-		throw std::exception();//"Invalid bloc grid file.");
+		throw std::runtime_error("Invalid bloc grid file.");
 
 	Width = file.get();
 	Height = file.get();
@@ -102,14 +104,12 @@ void BlockGrid::GetAdjacentBlocksRecursive(std::vector<Position>& blockList, boo
 
 void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 {
-	int left = INT_MAX;
-	int right = INT_MIN;
-	int bottom = INT_MIN;
+	int left = std::numeric_limits<int>::max();
+	int right = std::numeric_limits<int>::min();
+	int bottom = std::numeric_limits<int>::min();
 
-	for (int i = 0; i < group.size(); i++)
+	for (Position p : group)
 	{
-		Position p = group[i];
-
 		if (p.X < left)
 			left = p.X;
 		if (p.X > right)
@@ -219,10 +219,8 @@ std::string BlockGrid::GetSolutionAsString() const
 {
 	std::string solution;
 
-	for (int i = 0; i < Solution.size(); i++)
+	for (unsigned char b : Solution)
 	{
-		unsigned char b = Solution[i];
-
 		if (b < 26)
 			solution.push_back((char)(b + 65));
 		else
