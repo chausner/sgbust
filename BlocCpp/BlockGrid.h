@@ -45,6 +45,5 @@ struct BlockGrid
 	unsigned int GetHash() const;
 
 private:
-	std::vector<Position> GetAdjacentBlocks(unsigned int x, unsigned int y, bool* flags) const;
 	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, BlockColor color, unsigned int x, unsigned int y) const;
 };

@@ -92,7 +92,7 @@ void BlocSolver::SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, b
 		stop = true;
 
 stop:
-	blockGrids = newBlockGrids;
+	blockGrids = std::move(newBlockGrids);
 	dbSize = newDBSize;
 	worstNumberOfBlocks = newWorstNumberOfBlocks;
 	worstHash = newWorstHash;
@@ -151,16 +151,18 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 			return c + 1;
 		}
 
-		bg.RemoveGroup(groups[i]);
-
 		if (!dontAddToDB)
+		{
+			bg.RemoveGroup(groups[i]);
+
 			if (!IsInDatabase(bg, newNumberOfBlocks, newHash, newBlockGrids))
 			{
 				bg.Solution.push_back(i);
-				(*newBlockGrids[newNumberOfBlocks])[newHash]->push_back(bg);
+				(*newBlockGrids[newNumberOfBlocks])[newHash]->push_back(std::move(bg));
 
 				c++;
 			}
+		}
 	}
 
 	return c;

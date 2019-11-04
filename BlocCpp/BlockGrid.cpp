@@ -58,6 +58,8 @@ std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGro
 
 	std::memset(flags, 0, Width * Height * sizeof(bool));
 
+	std::vector<Position> adjacentBlocks;
+
 	for (int y = 0; y < Height; y++)
 		for (int x = 0; x < Width; x++)
 			if (!flags[XY(x, y)] && Blocks[XY(x, y)] != BlockColor::None)
@@ -68,29 +70,23 @@ std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGro
 					continue;
 				}
 
-				std::vector<Position> adjacentBlocks = GetAdjacentBlocks(x, y, flags);
+				GetAdjacentBlocksRecursive(adjacentBlocks, flags, Blocks[i], x, y);
 
 				if (adjacentBlocks.size() >= smallestGroupSize)
 					groups.push_back(adjacentBlocks);
+
+				adjacentBlocks.clear();
 			}
+		}
 
 	return groups;
-}
-
-std::vector<Position> BlockGrid::GetAdjacentBlocks(unsigned int x, unsigned int y, bool* flags) const
-{
-	std::vector<Position> blockList;
-
-	GetAdjacentBlocksRecursive(blockList, flags, Blocks[XY(x, y)], x, y);
-
-	return blockList;
 }
 
 void BlockGrid::GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, BlockColor color, unsigned int x, unsigned int y) const
 {
 	flags[XY(x, y)] = true;
 
-	blockList.push_back(Position(x, y));
+	blockList.emplace_back(x, y);
 
 	if (x > 0 && !flags[XY(x - 1, y)] && Blocks[XY(x - 1, y)] == color)
 		GetAdjacentBlocksRecursive(blockList, flags, color, x - 1, y);
