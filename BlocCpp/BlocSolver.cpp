@@ -91,7 +91,6 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 
 	if (groups.empty())
 	{
-		numberOfBlocks = blockGrid.GetNumberOfBlocks();
 		int score = (100 * numberOfBlocks) + blockGrid.Solution.size();
 
 		if (score < bestScore)
@@ -111,7 +110,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 	{
 		BlockGrid bg = blockGrid;
 
-		int newNumberOfBlocks = numberOfBlocks;// - groups[i].size();
+		int newNumberOfBlocks = numberOfBlocks - groups[i].size();
 
 		if (newNumberOfBlocks > newWorstNumberOfBlocks)
 			newWorstNumberOfBlocks = newNumberOfBlocks;
@@ -153,8 +152,6 @@ bool BlocSolver::IsInDatabase(const BlockGrid& blockGrid, unsigned int numberOfB
 	if (newBlockGrids[numberOfBlocks] == nullptr)
 	{
 		newBlockGrids[numberOfBlocks] = new std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>();
-		newBlockGrids[numberOfBlocks]->max_load_factor(0.5);
-		newBlockGrids[numberOfBlocks]->reserve(150000);
 	    return false;
 	}
 
