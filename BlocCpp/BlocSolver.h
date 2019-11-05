@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 #include <unordered_set>
 #include "BlockGrid.h"
 
@@ -9,21 +10,24 @@ struct BlockGridHash
 {
 	size_t operator()(const BlockGrid& blockGrid) const
 	{
-#if SIZE_MAX == UINT32_MAX
-		size_t hash = 2166136261;
+		if constexpr (sizeof(size_t) == 4)
+		{
+			size_t hash = 2166136261;
 
-		for (int i = 0; i < blockGrid.Width * blockGrid.Height; i++)
-			hash = (hash ^ (int)blockGrid.Blocks[i]) * 16777619;
+			for (int i = 0; i < blockGrid.Width * blockGrid.Height; i++)
+				hash = (hash ^ (int)blockGrid.Blocks[i]) * 16777619;
 
-		return hash;
-#elif SIZE_MAX == UINT64_MAX
-		size_t hash = 14695981039346656037;
+			return hash;
+		}
+		else if constexpr (sizeof(size_t) == 8)
+		{
+			size_t hash = 14695981039346656037;
 
-		for (int i = 0; i < blockGrid.Width * blockGrid.Height; i++)
-		    hash = (hash ^ (int)blockGrid.Blocks[i]) * 1099511628211;
+			for (int i = 0; i < blockGrid.Width * blockGrid.Height; i++)
+				hash = (hash ^ (int)blockGrid.Blocks[i]) * 1099511628211;
 
-		return hash;
-#endif
+			return hash;
+		}
 	}
 };
 
@@ -49,10 +53,10 @@ class BlocSolver
 	unsigned int dbSize;
 
 public:
-	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, unsigned int maxDBSize, unsigned int maxDepth, bool save, bool dontAddToDBLastDepth);
+	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std::optional<unsigned int> maxDBSize, std::optional<unsigned int> maxDepth, bool save, bool dontAddToDBLastDepth);
 
 private:
-	void SolveDepth(unsigned int maxDBSize, bool& stop, bool dontAddToDB = false);
+	void SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB = false);
 	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks,
 		std::vector<std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>*>& newBlockGrids,
 		unsigned int& newWorstNumberOfBlocks, bool& stop, bool dontAddToDB = false);

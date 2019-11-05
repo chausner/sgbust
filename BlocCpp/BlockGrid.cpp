@@ -1,5 +1,7 @@
 #include <cstring>
 #include <fstream>
+#include <limits>
+#include <stdexcept>
 #include "BlockGrid.h"
 
 #define XY(x,y) ((y) * Width + (x))
@@ -13,7 +15,7 @@ BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize) :
 	file.read(&header[0], 4);
 
 	if (std::string(&header[0], 4) != "BGF2")
-		throw std::exception();//"Invalid bloc grid file.");
+		throw std::runtime_error("Invalid bloc grid file.");
 
 	Width = file.get();
 	Height = file.get();
@@ -56,6 +58,8 @@ std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGro
 
 	std::memset(flags, 0, Width * Height * sizeof(bool));
 
+	std::vector<Position> adjacentBlocks;
+
 	for (int y = 0; y < Height; y++)
 		for (int x = 0; x < Width; x++)
 			if (!flags[XY(x, y)] && Blocks[XY(x, y)] != BlockColor::None)
@@ -66,29 +70,22 @@ std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGro
 					continue;
 				}
 
-				std::vector<Position> adjacentBlocks = GetAdjacentBlocks(x, y, flags);
+				GetAdjacentBlocksRecursive(adjacentBlocks, flags, Blocks[XY(x, y)], x, y);
 
 				if (adjacentBlocks.size() >= smallestGroupSize)
 					groups.push_back(adjacentBlocks);
+
+				adjacentBlocks.clear();
 			}
 
 	return groups;
-}
-
-std::vector<Position> BlockGrid::GetAdjacentBlocks(unsigned int x, unsigned int y, bool* flags) const
-{
-	std::vector<Position> blockList;
-
-	GetAdjacentBlocksRecursive(blockList, flags, Blocks[XY(x, y)], x, y);
-
-	return blockList;
 }
 
 void BlockGrid::GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, BlockColor color, unsigned int x, unsigned int y) const
 {
 	flags[XY(x, y)] = true;
 
-	blockList.push_back(Position(x, y));
+	blockList.emplace_back(x, y);
 
 	if (x > 0 && !flags[XY(x - 1, y)] && Blocks[XY(x - 1, y)] == color)
 		GetAdjacentBlocksRecursive(blockList, flags, color, x - 1, y);
@@ -102,14 +99,12 @@ void BlockGrid::GetAdjacentBlocksRecursive(std::vector<Position>& blockList, boo
 
 void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 {
-	int left = INT_MAX;
-	int right = INT_MIN;
-	int bottom = INT_MIN;
+	int left = std::numeric_limits<int>::max();
+	int right = std::numeric_limits<int>::min();
+	int bottom = std::numeric_limits<int>::min();
 
-	for (int i = 0; i < group.size(); i++)
+	for (Position p : group)
 	{
-		Position p = group[i];
-
 		if (p.X < left)
 			left = p.X;
 		if (p.X > right)
@@ -219,10 +214,8 @@ std::string BlockGrid::GetSolutionAsString() const
 {
 	std::string solution;
 
-	for (int i = 0; i < Solution.size(); i++)
+	for (unsigned char b : Solution)
 	{
-		unsigned char b = Solution[i];
-
 		if (b < 26)
 			solution.push_back((char)(b + 65));
 		else

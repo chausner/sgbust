@@ -1,0 +1,6 @@
+﻿/.vs
+/BlocCpp/x86
+/BlocCpp/x64
+/x86
+/x64
+*.vcxproj.user

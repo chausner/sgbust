@@ -1,7 +1,7 @@
 #include <iostream>
 #include "BlocSolver.h"
 
-void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, unsigned int maxDBSize, unsigned int maxDepth, bool save, bool dontAddToDBLastDepth)
+void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std::optional<unsigned int> maxDBSize, std::optional<unsigned int> maxDepth, bool save, bool dontAddToDBLastDepth)
 {
 	this->smallestGroupSize = smallestGroupSize;
 
@@ -16,18 +16,18 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, uns
 	blockGrids[numberOfBlocks]->insert(blockGrid);
 
 	bestGrid = nullptr;
-	bestScore = UINT_MAX;
+	bestScore = std::numeric_limits<unsigned int>::max();
 
 	depth = 0;
 	dbSize = 1;
 
 	bool stop = false;
 
-	while (!stop && depth < maxDepth)
+	while (!stop && (!maxDepth || depth < maxDepth))
 	{
 		std::cout << "Depth: " << depth << ", Database size: " << dbSize << std::endl;
 
-		SolveDepth(maxDBSize, stop, dontAddToDBLastDepth && depth == maxDepth - 1);          
+		SolveDepth(maxDBSize, stop, dontAddToDBLastDepth && maxDepth && depth == *maxDepth - 1);
 
 		depth++;
 
@@ -42,11 +42,11 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, uns
 	//				for (auto c : *b)
 	//					std::cout << c.GetSolutionAsString() << "    " << c.GetNumberOfBlocks() << std::endl;
 
-	if (bestScore != UINT_MAX)
+	if (bestScore != std::numeric_limits<unsigned int>::max())
 		blockGrid.Solution = bestGrid->Solution;
 }
 
-void BlocSolver::SolveDepth(unsigned int maxDBSize, bool& stop, bool dontAddToDB)
+void BlocSolver::SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB)
 {
 	std::vector<std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>*> newBlockGrids;
 
@@ -60,14 +60,14 @@ void BlocSolver::SolveDepth(unsigned int maxDBSize, bool& stop, bool dontAddToDB
 		if (blockGrids[i] != nullptr)
 		{
 			//std::cout << "Size " << i << ": " << blockGrids[i]->size() << std::endl;
-		    if (!stop && newDBSize < maxDBSize)
+			if (!stop && (!maxDBSize || newDBSize < maxDBSize))
 				for (const BlockGrid& blockGrid : *(blockGrids[i]))
 				{
 					newDBSize += SolveBlockGrid(blockGrid, i, newBlockGrids, newWorstNumberOfBlocks, stop, dontAddToDB);
 
 					blockGridsSolved++;
 
-					if (stop || newDBSize >= maxDBSize)
+					if (stop || (maxDBSize && newDBSize >= maxDBSize))
 						break;
 				}
 
@@ -78,7 +78,7 @@ void BlocSolver::SolveDepth(unsigned int maxDBSize, bool& stop, bool dontAddToDB
 		stop = true;
 
 stop:
-	blockGrids = newBlockGrids;
+	blockGrids = std::move(newBlockGrids);
 	dbSize = newDBSize;
 	worstNumberOfBlocks = newWorstNumberOfBlocks;
 }
@@ -130,16 +130,18 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 			return c + 1;
 		}
 
-		bg.RemoveGroup(groups[i]);
-
 		if (!dontAddToDB)
+		{
+			bg.RemoveGroup(groups[i]);
+
 			if (!IsInDatabase(bg, newNumberOfBlocks, newBlockGrids))
 			{
 				bg.Solution.push_back(i);
-				newBlockGrids[newNumberOfBlocks]->insert(bg);
+				newBlockGrids[newNumberOfBlocks]->insert(std::move(bg));
 
 				c++;
 			}
+		}
 	}
 
 	return c;

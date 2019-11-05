@@ -23,8 +23,9 @@ struct Position
 	Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
 };
 
+// factor for one BlockColor can be zero because total number of blocks is already stored separately
 const unsigned int h = 8;
-const unsigned int HASH_FACTORS[] = { 0, 0, 1, h, h * h, h * h * h, h * h * h * h, h * h * h * h * h, h * h * h * h * h * h };
+const unsigned int HASH_FACTORS[8] = { 0, 0, 1, h, h * h, h * h * h, h * h * h * h, h * h * h * h * h };
 
 struct BlockGrid
 {
@@ -45,6 +46,5 @@ struct BlockGrid
 	unsigned int GetHash() const;
 
 private:
-	std::vector<Position> GetAdjacentBlocks(unsigned int x, unsigned int y, bool* flags) const;
 	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, BlockColor color, unsigned int x, unsigned int y) const;
 };
