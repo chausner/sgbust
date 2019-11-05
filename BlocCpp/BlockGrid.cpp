@@ -70,14 +70,13 @@ std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGro
 					continue;
 				}
 
-				GetAdjacentBlocksRecursive(adjacentBlocks, flags, Blocks[i], x, y);
+				GetAdjacentBlocksRecursive(adjacentBlocks, flags, Blocks[XY(x, y)], x, y);
 
 				if (adjacentBlocks.size() >= smallestGroupSize)
 					groups.push_back(adjacentBlocks);
 
 				adjacentBlocks.clear();
 			}
-		}
 
 	return groups;
 }
