@@ -43,7 +43,6 @@ struct BlockGrid
 	void RemoveGroup(const std::vector<Position>& group);
 	std::string GetSolutionAsString() const;
 	unsigned int GetNumberOfBlocks() const;
-	unsigned int GetHash() const;
 
 private:
 	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, BlockColor color, unsigned int x, unsigned int y) const;

@@ -240,13 +240,3 @@ unsigned int BlockGrid::GetNumberOfBlocks() const
 
 	return numberOfBlocks;
 }
-
-unsigned int BlockGrid::GetHash() const
-{
-	unsigned int hash = 0;
-
-	for (int i = 0; i < Width * Height; i++)
-	    hash += HASH_FACTORS[(unsigned char)Blocks[i]];
-
-	return hash;
-}
