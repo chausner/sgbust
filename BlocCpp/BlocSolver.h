@@ -6,29 +6,13 @@
 #include "parallel_hashmap/phmap.h"
 #include <mutex>
 #include "BlockGrid.h"
+#include "xxh3.h"
 
 struct BlockGridHash
 {
 	size_t operator()(const BlockGrid& blockGrid) const
 	{
-		if constexpr (sizeof(size_t) == 4)
-		{
-			size_t hash = 2166136261;
-
-			for (int i = 0; i < blockGrid.Width * blockGrid.Height; i++)
-				hash = (hash ^ (int)blockGrid.Blocks[i]) * 16777619;
-
-			return hash;
-		}
-		else if constexpr (sizeof(size_t) == 8)
-		{
-			size_t hash = 14695981039346656037;
-
-			for (int i = 0; i < blockGrid.Width * blockGrid.Height; i++)
-				hash = (hash ^ (int)blockGrid.Blocks[i]) * 1099511628211;
-
-			return hash;
-		}
+		return XXH3_64bits(blockGrid.Blocks.get(), blockGrid.Width * blockGrid.Height * sizeof(BlockColor));
 	}
 };
 
