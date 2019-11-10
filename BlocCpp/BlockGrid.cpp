@@ -84,11 +84,12 @@ std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGro
 		for (int x = 0; x < Width; x++)
 			if (!flags[XY(x, y)] && Blocks[XY(x, y)] != BlockColor::None)
 			{
-				if (x != Width - 1 && y != Height - 1 && Blocks[XY(x, y)] != Blocks[XY(x + 1, y)] && Blocks[XY(x, y)] != Blocks[XY(x, y + 1)])
-				{
-					flags[XY(x, y)] = true;
-					continue;
-				}
+				if (smallestGroupSize > 1)
+					if (x != Width - 1 && y != Height - 1 && Blocks[XY(x, y)] != Blocks[XY(x + 1, y)] && Blocks[XY(x, y)] != Blocks[XY(x, y + 1)])
+					{
+						flags[XY(x, y)] = true;
+						continue;
+					}
 
 				GetAdjacentBlocksRecursive(adjacentBlocks, flags.get(), x, y);
 
