@@ -104,7 +104,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 
 	if (groups.empty())
 	{
-		int score = (100 * numberOfBlocks) + blockGrid.Solution.size();
+		unsigned int score = (100 * numberOfBlocks) + blockGrid.Solution.size();
 
 		if (score < bestScore)
 		{
@@ -123,7 +123,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 	{
 		BlockGrid bg = blockGrid;
 
-		int newNumberOfBlocks = numberOfBlocks - groups[i].size();
+		unsigned int newNumberOfBlocks = numberOfBlocks - groups[i].size();
 
 		atomicMax<unsigned int>(newWorstNumberOfBlocks, newNumberOfBlocks);
 

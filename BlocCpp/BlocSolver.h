@@ -28,16 +28,16 @@ using BlockGridHashSet = phmap::parallel_flat_hash_set<BlockGrid, BlockGridHash,
 
 class BlocSolver
 {
-	unsigned int smallestGroupSize;
+	unsigned int smallestGroupSize = 0;
 
 	std::vector<BlockGridHashSet*> blockGrids;
 
 	std::unique_ptr<BlockGrid> bestGrid;
-	unsigned int bestScore;
+	unsigned int bestScore = 0;
 
-	unsigned int depth;
-	unsigned int worstNumberOfBlocks;
-	unsigned int dbSize;
+	unsigned int depth = 0;
+	unsigned int worstNumberOfBlocks = 0;
+	unsigned int dbSize = 0;
 
 public:
 	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std::optional<unsigned int> maxDBSize, std::optional<unsigned int> maxDepth, bool save, bool dontAddToDBLastDepth);
