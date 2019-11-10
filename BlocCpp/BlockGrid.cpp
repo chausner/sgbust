@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <limits>
@@ -5,8 +6,8 @@
 #include "BlockGrid.h"
 
 #define XY(x,y) ((y) * Width + (x))
-
-BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize) : Solution()
+{
+BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
 {
 	std::ifstream file(path, std::ifstream::binary);
 
@@ -22,25 +23,46 @@ BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize) :
 
 	smallestGroupSize = file.get();
 
-	Blocks = new BlockColor[Width * Height];
+	Blocks = std::make_unique<BlockColor[]>(Width * Height);
 
 	file.read(reinterpret_cast<char*>(&Blocks[0]), Width * Height);
 }
 
-BlockGrid::BlockGrid(const BlockGrid& blockGrid)
+BlockGrid::BlockGrid(const BlockGrid& blockGrid) 
+	: Width(blockGrid.Width), Height(blockGrid.Height), Solution(blockGrid.Solution)
 {
-	Width = blockGrid.Width;
-	Height = blockGrid.Height;
-	Solution = blockGrid.Solution;
-
-	Blocks = new BlockColor[Width * Height];
+	Blocks = std::make_unique<BlockColor[]>(Width * Height);
 	
 	std::memcpy(&Blocks[0], &blockGrid.Blocks[0], Width * Height * sizeof(Blocks[0]));
 }
 
-BlockGrid::~BlockGrid()
+BlockGrid::BlockGrid(BlockGrid&& blockGrid) noexcept
+	: Width(blockGrid.Width), Height(blockGrid.Height), Blocks(std::move(blockGrid.Blocks)), Solution(std::move(blockGrid.Solution))
 {
-	delete[] Blocks;
+}
+
+BlockGrid& BlockGrid::operator=(const BlockGrid& blockGrid)
+{
+	if (Width * Height < blockGrid.Width * blockGrid.Height || Blocks == nullptr)
+		Blocks = std::make_unique<BlockColor[]>(blockGrid.Width * blockGrid.Height);
+
+	std::memcpy(&Blocks[0], &blockGrid.Blocks[0], blockGrid.Width * blockGrid.Height * sizeof(Blocks[0]));
+
+	Width = blockGrid.Width;
+	Height = blockGrid.Height;
+	Solution = blockGrid.Solution;
+
+	return *this;
+}
+
+BlockGrid& BlockGrid::operator=(BlockGrid&& blockGrid) noexcept
+{
+	Width = blockGrid.Width;
+	Height = blockGrid.Height;
+	Blocks = std::move(blockGrid.Blocks);
+	Solution = std::move(blockGrid.Solution);	
+
+	return *this;
 }
 
 bool BlockGrid::Equals(const BlockGrid& blockGrid) const
@@ -54,9 +76,7 @@ std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGro
 {
 	std::vector<std::vector<Position>> groups;
 
-	bool* flags = static_cast<bool*>(alloca(Width * Height * sizeof(bool)));
-
-	std::memset(flags, 0, Width * Height * sizeof(bool));
+	std::unique_ptr<bool[]> flags = std::make_unique<bool[]>(Width * Height);
 
 	std::vector<Position> adjacentBlocks;
 
@@ -70,7 +90,7 @@ std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGro
 					continue;
 				}
 
-				GetAdjacentBlocksRecursive(adjacentBlocks, flags, Blocks[XY(x, y)], x, y);
+				GetAdjacentBlocksRecursive(adjacentBlocks, flags.get(), x, y);
 
 				if (adjacentBlocks.size() >= smallestGroupSize)
 					groups.push_back(adjacentBlocks);
@@ -81,20 +101,22 @@ std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGro
 	return groups;
 }
 
-void BlockGrid::GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, BlockColor color, unsigned int x, unsigned int y) const
+void BlockGrid::GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, unsigned int x, unsigned int y) const
 {
 	flags[XY(x, y)] = true;
 
 	blockList.emplace_back(x, y);
 
+	BlockColor color = Blocks[XY(x, y)];
+
 	if (x > 0 && !flags[XY(x - 1, y)] && Blocks[XY(x - 1, y)] == color)
-		GetAdjacentBlocksRecursive(blockList, flags, color, x - 1, y);
+		GetAdjacentBlocksRecursive(blockList, flags, x - 1, y);
 	if (y > 0 && !flags[XY(x, y - 1)] && Blocks[XY(x, y - 1)] == color)
-		GetAdjacentBlocksRecursive(blockList, flags, color, x, y - 1);
+		GetAdjacentBlocksRecursive(blockList, flags, x, y - 1);
 	if (x < Width - 1 && !flags[XY(x + 1, y)] && Blocks[XY(x + 1, y)] == color)
-		GetAdjacentBlocksRecursive(blockList, flags, color, x + 1, y);
+		GetAdjacentBlocksRecursive(blockList, flags, x + 1, y);
 	if (y < Height - 1 && !flags[XY(x, y + 1)] && Blocks[XY(x, y + 1)] == color)
-		GetAdjacentBlocksRecursive(blockList, flags, color, x, y + 1);
+		GetAdjacentBlocksRecursive(blockList, flags, x, y + 1);
 }
 
 void BlockGrid::RemoveGroup(const std::vector<Position>& group)
@@ -195,7 +217,7 @@ void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 
 	if (newWidth != Width || newHeight != Height)
 	{
-		BlockColor* blocks = new BlockColor[newWidth * newHeight];
+		std::unique_ptr<BlockColor[]> blocks = std::make_unique<BlockColor[]>(newWidth * newHeight);
 
 		for (int y = 0; y < newHeight; y++)
 			for (int x = 0; x < newWidth; x++)
@@ -203,10 +225,7 @@ void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 
 		Width = newWidth;
 		Height = newHeight;
-
-		delete[] Blocks;
-
-		Blocks = blocks;
+		Blocks = std::move(blocks);
 	}
 }
 
@@ -232,11 +251,5 @@ std::string BlockGrid::GetSolutionAsString() const
 
 unsigned int BlockGrid::GetNumberOfBlocks() const
 {
-	unsigned int numberOfBlocks = 0;
-
-	for (int i = 0; i < Width * Height; i++)
-		if (Blocks[i] != BlockColor::None)
-			numberOfBlocks++;
-
-	return numberOfBlocks;
+	return std::count_if(Blocks.get(), Blocks.get() + Width * Height, [](auto c) { return c != BlockColor::None; });
 }

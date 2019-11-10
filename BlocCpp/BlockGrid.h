@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -23,20 +24,18 @@ struct Position
 	Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
 };
 
-// factor for one BlockColor can be zero because total number of blocks is already stored separately
-const unsigned int h = 8;
-const unsigned int HASH_FACTORS[8] = { 0, 0, 1, h, h * h, h * h * h, h * h * h * h, h * h * h * h * h };
-
 struct BlockGrid
 {
 	unsigned char Width;
 	unsigned char Height;
-	BlockColor* Blocks;
+	std::unique_ptr<BlockColor[]> Blocks;
 	std::vector<unsigned char> Solution;
 
 	BlockGrid(const std::string& path, unsigned int& smallestGroupSize);
 	BlockGrid(const BlockGrid& blockGrid);
-	~BlockGrid();
+	BlockGrid(BlockGrid&& blockGrid) noexcept;
+	BlockGrid& operator=(const BlockGrid& blockGrid);
+	BlockGrid& operator=(BlockGrid&& blockGrid) noexcept;
 
 	bool Equals(const BlockGrid& blockGrid) const;
 	std::vector<std::vector<Position>> GetGroups(unsigned int smallestGroupSize) const;
@@ -45,5 +44,5 @@ struct BlockGrid
 	unsigned int GetNumberOfBlocks() const;
 
 private:
-	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, BlockColor color, unsigned int x, unsigned int y) const;
+	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, unsigned int x, unsigned int y) const;
 };
