@@ -12,11 +12,11 @@ int main()
 
 	BlocSolver solver;
 
-	auto startTime = std::chrono::high_resolution_clock::now();
+	auto startTime = std::chrono::steady_clock::now();
 
 	solver.Solve(blockGrid, smallestGroupSize, 3000000, UINT_MAX, false, false);
 
-	auto endTime = std::chrono::high_resolution_clock::now();
+	auto endTime = std::chrono::steady_clock::now();
 
 	auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
 
