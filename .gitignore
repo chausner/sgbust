@@ -1,6 +1,8 @@
 ﻿/.vs
-/BlocCpp/x86
+/BlocCpp/Debug
+/BlocCpp/Release
 /BlocCpp/x64
-/x86
+/Debug
+/Release
 /x64
 *.vcxproj.user
