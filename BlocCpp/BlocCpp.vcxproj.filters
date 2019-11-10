@@ -32,5 +32,29 @@
     <ClInclude Include="BlockGrid.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="parallel_hashmap\meminfo.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel_hashmap\phmap.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel_hashmap\phmap_base.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel_hashmap\phmap_bits.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel_hashmap\phmap_config.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel_hashmap\phmap_dump.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel_hashmap\phmap_fwd_decl.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel_hashmap\phmap_utils.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

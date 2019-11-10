@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <atomic>
+#include <execution>
 #include <iostream>
 #include "BlocSolver.h"
 
@@ -12,7 +15,7 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std
 	blockGrids.clear();
 	blockGrids.resize(numberOfBlocks + 1);
 
-	blockGrids[numberOfBlocks] = new std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>();	
+	blockGrids[numberOfBlocks] = new BlockGridHashSet();	
 	blockGrids[numberOfBlocks]->insert(blockGrid);
 
 	bestGrid = nullptr;
@@ -48,28 +51,27 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std
 
 void BlocSolver::SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB)
 {
-	std::vector<std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>*> newBlockGrids;
+	std::vector<BlockGridHashSet*> newBlockGrids;
 
 	newBlockGrids.resize(worstNumberOfBlocks + 1);
 
-	unsigned int blockGridsSolved = 0;
-	unsigned int newDBSize = 0;
-	unsigned int newWorstNumberOfBlocks = 0;
+	std::atomic_uint blockGridsSolved = 0;
+	std::atomic_uint newDBSize = 0;
+	std::atomic_uint newWorstNumberOfBlocks = 0;
 
 	for (int i = 0; i < blockGrids.size(); i++)
 		if (blockGrids[i] != nullptr)
 		{
 			//std::cout << "Size " << i << ": " << blockGrids[i]->size() << std::endl;
 			if (!stop && (!maxDBSize || newDBSize < maxDBSize))
-				for (const BlockGrid& blockGrid : *(blockGrids[i]))
-				{
+				std::for_each(std::execution::par, blockGrids[i]->begin(), blockGrids[i]->end(), [&](const BlockGrid& blockGrid) {
+					if (stop || (maxDBSize && newDBSize >= maxDBSize))
+						return;
+
 					newDBSize += SolveBlockGrid(blockGrid, i, newBlockGrids, newWorstNumberOfBlocks, stop, dontAddToDB);
 
 					blockGridsSolved++;
-
-					if (stop || (maxDBSize && newDBSize >= maxDBSize))
-						break;
-				}
+				});
 
 			delete blockGrids[i];
 		}
@@ -77,15 +79,26 @@ void BlocSolver::SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, b
 	if (newDBSize == 0)
 		stop = true;
 
-stop:
 	blockGrids = std::move(newBlockGrids);
 	dbSize = newDBSize;
 	worstNumberOfBlocks = newWorstNumberOfBlocks;
 }
 
-unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks, 
-	std::vector<std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>*>& newBlockGrids, 
-	unsigned int& newWorstNumberOfBlocks, bool& stop, bool dontAddToDB)
+template <typename T>
+void atomicMax(std::atomic<T> &a, T b)
+{
+	bool success;
+	T oldValue = a;
+	do
+	{
+		if (b > oldValue)
+			success = a.compare_exchange_weak(oldValue, b);
+		else
+			break;
+	} while (!success);
+}
+
+unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks, std::vector<BlockGridHashSet*>& newBlockGrids, std::atomic_uint& newWorstNumberOfBlocks, bool& stop, bool dontAddToDB)
 {
 	std::vector<std::vector<Position>> groups = blockGrid.GetGroups(smallestGroupSize);
 
@@ -112,8 +125,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 
 		int newNumberOfBlocks = numberOfBlocks - groups[i].size();
 
-		if (newNumberOfBlocks > newWorstNumberOfBlocks)
-			newWorstNumberOfBlocks = newNumberOfBlocks;
+		atomicMax<unsigned int>(newWorstNumberOfBlocks, newNumberOfBlocks);
 
 		if (newNumberOfBlocks == 0)
 		{
@@ -133,27 +145,16 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 		{
 			bg.RemoveGroup(groups[i]);
 
-			if (!IsInDatabase(bg, newNumberOfBlocks, newBlockGrids))
-			{
-				bg.Solution.push_back(i);
-				newBlockGrids[newNumberOfBlocks]->insert(std::move(bg));
+			bg.Solution.push_back(i);
 
+			if (newBlockGrids[newNumberOfBlocks] == nullptr)
+				newBlockGrids[newNumberOfBlocks] = new BlockGridHashSet();
+
+			auto [it, inserted] = newBlockGrids[newNumberOfBlocks]->insert(std::move(bg));
+			if (inserted)
 				c++;
-			}
 		}
 	}
 
 	return c;
-}
-
-bool BlocSolver::IsInDatabase(const BlockGrid& blockGrid, unsigned int numberOfBlocks,
-	std::vector<std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>*>& newBlockGrids) const
-{
-	if (newBlockGrids[numberOfBlocks] == nullptr)
-	{
-		newBlockGrids[numberOfBlocks] = new std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>();
-	    return false;
-	}
-
-	return newBlockGrids[numberOfBlocks]->count(blockGrid) != 0;
 }

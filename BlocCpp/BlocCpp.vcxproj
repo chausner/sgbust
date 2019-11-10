@@ -153,6 +153,14 @@
   <ItemGroup>
     <ClInclude Include="BlockGrid.h" />
     <ClInclude Include="BlocSolver.h" />
+    <ClInclude Include="parallel_hashmap\meminfo.h" />
+    <ClInclude Include="parallel_hashmap\phmap.h" />
+    <ClInclude Include="parallel_hashmap\phmap_base.h" />
+    <ClInclude Include="parallel_hashmap\phmap_bits.h" />
+    <ClInclude Include="parallel_hashmap\phmap_config.h" />
+    <ClInclude Include="parallel_hashmap\phmap_dump.h" />
+    <ClInclude Include="parallel_hashmap\phmap_fwd_decl.h" />
+    <ClInclude Include="parallel_hashmap\phmap_utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,7 +3,8 @@
 #include <memory>
 #include <vector>
 #include <optional>
-#include <unordered_set>
+#include "parallel_hashmap/phmap.h"
+#include <mutex>
 #include "BlockGrid.h"
 
 struct BlockGridHash
@@ -39,11 +40,13 @@ struct BlockGridEqualTo
 	}
 };
 
+using BlockGridHashSet = phmap::parallel_flat_hash_set<BlockGrid, BlockGridHash, BlockGridEqualTo, phmap::container_internal::Allocator<BlockGrid>, 5, std::mutex>; // phmap::NullMutex
+
 class BlocSolver
 {
 	unsigned int smallestGroupSize;
 
-	std::vector<std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>*> blockGrids;
+	std::vector<BlockGridHashSet*> blockGrids;
 
 	std::unique_ptr<BlockGrid> bestGrid;
 	unsigned int bestScore;
@@ -58,7 +61,6 @@ public:
 private:
 	void SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB = false);
 	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks,
-		std::vector<std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>*>& newBlockGrids,
-		unsigned int& newWorstNumberOfBlocks, bool& stop, bool dontAddToDB = false);
-	bool IsInDatabase(const BlockGrid& blockGrid, unsigned int numberOfBlocks, std::vector<std::unordered_set<BlockGrid, BlockGridHash, BlockGridEqualTo>*>& newBlockGrids) const;
+		std::vector<BlockGridHashSet*>& newBlockGrids,
+		std::atomic_uint& newWorstNumberOfBlocks, bool& stop, bool dontAddToDB = false);
 };
