@@ -75,10 +75,12 @@ bool BlockGrid::Equals(const BlockGrid& blockGrid) const
 std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGroupSize) const
 {
 	std::vector<std::vector<Position>> groups;
+	groups.reserve(24);
 
 	std::unique_ptr<bool[]> flags = std::make_unique<bool[]>(Width * Height);
 
 	std::vector<Position> adjacentBlocks;
+	adjacentBlocks.reserve(24);
 
 	for (int y = 0; y < Height; y++)
 		for (int x = 0; x < Width; x++)
