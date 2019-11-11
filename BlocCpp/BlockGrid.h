@@ -37,14 +37,14 @@ struct BlockGrid
 	BlockGrid& operator=(const BlockGrid& blockGrid);
 	BlockGrid& operator=(BlockGrid&& blockGrid) noexcept;
 
-	bool Equals(const BlockGrid& blockGrid) const;
 	std::vector<std::vector<Position>> GetGroups(unsigned int smallestGroupSize) const;
 	void RemoveGroup(const std::vector<Position>& group);
 	std::string GetSolutionAsString() const;
 	unsigned int GetNumberOfBlocks() const;
 
+	BlockColor* BlocksBegin() const { return Blocks.get(); }
+	BlockColor* BlocksEnd() const { return Blocks.get() + Width * Height; }
+
 private:
 	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, unsigned int x, unsigned int y) const;
-	BlockColor* BlocksBegin() const { return Blocks.get(); } 
-	BlockColor* BlocksEnd() const { return Blocks.get() + Width * Height; } 
 };

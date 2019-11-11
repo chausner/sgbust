@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -8,23 +9,29 @@
 #include "BlockGrid.h"
 #include "xxh3.h"
 
-struct BlockGridHash
+template <>
+class std::hash<BlockGrid>
 {
-	size_t operator()(const BlockGrid& blockGrid) const
+public:
+	std::size_t operator()(const BlockGrid& key) const
 	{
-		return XXH3_64bits(blockGrid.Blocks.get(), blockGrid.Width * blockGrid.Height * sizeof(BlockColor));
+		return XXH3_64bits(key.Blocks.get(), key.Width * key.Height * sizeof(BlockColor));
 	}
 };
 
-struct BlockGridEqualTo
+template <>
+class std::equal_to<BlockGrid>
 {
-	bool operator()(const BlockGrid& blockGrid1, const BlockGrid& blockGrid2) const
+public:
+	constexpr bool operator()(const BlockGrid& lhs, const BlockGrid& rhs) const
 	{
-		return blockGrid1.Equals(blockGrid2);
+		return lhs.Width == rhs.Width &&
+			lhs.Height == rhs.Height &&
+			std::equal(lhs.BlocksBegin(), lhs.BlocksEnd(), rhs.BlocksBegin());
 	}
 };
 
-using BlockGridHashSet = phmap::parallel_flat_hash_set<BlockGrid, BlockGridHash, BlockGridEqualTo, phmap::container_internal::Allocator<BlockGrid>, 5, std::mutex>; // phmap::NullMutex
+using BlockGridHashSet = phmap::parallel_flat_hash_set<BlockGrid, std::hash<BlockGrid>, std::equal_to<BlockGrid>, std::allocator<BlockGrid>, 5, std::mutex>; // phmap::NullMutex
 
 class BlocSolver
 {

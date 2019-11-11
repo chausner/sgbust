@@ -70,13 +70,6 @@ BlockGrid& BlockGrid::operator=(BlockGrid&& blockGrid) noexcept
 	return *this;
 }
 
-bool BlockGrid::Equals(const BlockGrid& blockGrid) const
-{
-	return Width == blockGrid.Width &&
-		Height == blockGrid.Height &&
-		memcmp(&Blocks[0], &blockGrid.Blocks[0], Width * Height * sizeof(Blocks[0])) == 0;
-}
-
 std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGroupSize) const
 {
 	std::vector<std::vector<Position>> groups;
