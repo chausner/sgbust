@@ -28,17 +28,7 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std
 		SolveDepth(maxDBSize, stop, dontAddToDBLastDepth && maxDepth && depth == *maxDepth - 1);
 
 		depth++;
-
-		//if (save)
-		//	Save(string.Format(@"E:\Users\Christoph\Documents\Visual Studio 2015\Projects\Bloc\depth{ 0 }.dat", depth));
 	}
-
-	//for (auto a : blockGrids)
-	//	if (a != nullptr)
-	//		for (auto b : *a)
-	//			if (b != nullptr)
-	//				for (auto c : *b)
-	//					std::cout << c.GetSolutionAsString() << "    " << c.GetNumberOfBlocks() << std::endl;
 
 	if (bestScore != std::numeric_limits<unsigned int>::max())
 		blockGrid.Solution = std::move(solution);
@@ -53,7 +43,6 @@ void BlocSolver::SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, b
 
 	for (auto &[numberOfBlocks, hashSet] : blockGrids)
 	{
-		//std::cout << "Size " << i << ": " << hashSet->size() << std::endl;
 		if (!stop && (!maxDBSize || newDBSize < maxDBSize))
 			std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const BlockGrid& blockGrid) {
 				if (stop || (maxDBSize && newDBSize >= maxDBSize))
