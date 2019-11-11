@@ -6,7 +6,7 @@
 #include "BlockGrid.h"
 
 #define XY(x,y) ((y) * Width + (x))
-{
+
 BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
 {
 	std::ifstream file(path, std::ifstream::binary);
