@@ -32,7 +32,7 @@ class BlocSolver
 
 	std::vector<BlockGridHashSet*> blockGrids;
 
-	std::unique_ptr<BlockGrid> bestGrid;
+	std::vector<unsigned char> solution;
 	unsigned int bestScore = 0;
 
 	unsigned int depth = 0;

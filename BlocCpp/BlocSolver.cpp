@@ -18,7 +18,7 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std
 	blockGrids[numberOfBlocks] = new BlockGridHashSet();	
 	blockGrids[numberOfBlocks]->insert(blockGrid);
 
-	bestGrid = nullptr;
+	solution.clear();
 	bestScore = std::numeric_limits<unsigned int>::max();
 
 	depth = 0;
@@ -46,7 +46,7 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std
 	//					std::cout << c.GetSolutionAsString() << "    " << c.GetNumberOfBlocks() << std::endl;
 
 	if (bestScore != std::numeric_limits<unsigned int>::max())
-		blockGrid.Solution = bestGrid->Solution;
+		blockGrid.Solution = std::move(solution);
 }
 
 void BlocSolver::SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB)
@@ -109,7 +109,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 		if (score < bestScore)
 		{
 			bestScore = score;
-			bestGrid.reset(new BlockGrid(blockGrid));
+			solution = blockGrid.Solution;
 
 			std::cout << "Better solution found (" << score << "): " << blockGrid.GetSolutionAsString() << std::endl;
 		}
@@ -132,7 +132,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 			bg.Solution.push_back(i);
 
 			bestScore = bg.Solution.size();
-			bestGrid.reset(new BlockGrid(bg));
+			solution = bg.Solution;
 
 			std::cout << "Best solution found (" << bestScore << "): " << bg.GetSolutionAsString() << std::endl;
 
