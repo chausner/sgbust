@@ -29,8 +29,13 @@ BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
 }
 
 BlockGrid::BlockGrid(const BlockGrid& blockGrid) 
-	: Width(blockGrid.Width), Height(blockGrid.Height), Solution(blockGrid.Solution)
+	: Width(blockGrid.Width), Height(blockGrid.Height)
 {
+	// optimize for BlocSolver which calls this copy-constructor, followed by a Solution.push_back
+	Solution.reserve(blockGrid.Solution.size() + 1);
+	Solution.resize(blockGrid.Solution.size());
+	std::copy(blockGrid.Solution.begin(), blockGrid.Solution.end(), Solution.begin());
+
 	Blocks = std::make_unique<BlockColor[]>(Width * Height);
 	
 	std::copy(blockGrid.BlocksBegin(), blockGrid.BlocksEnd(), BlocksBegin());
