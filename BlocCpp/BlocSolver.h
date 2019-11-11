@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -37,13 +38,12 @@ class BlocSolver
 {
 	unsigned int smallestGroupSize = 0;
 
-	std::vector<BlockGridHashSet*> blockGrids;
+	std::map<unsigned int, BlockGridHashSet> blockGrids;
 
 	std::vector<unsigned char> solution;
 	unsigned int bestScore = 0;
 
 	unsigned int depth = 0;
-	unsigned int worstNumberOfBlocks = 0;
 	unsigned int dbSize = 0;
 
 public:
@@ -51,7 +51,5 @@ public:
 
 private:
 	void SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB = false);
-	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks,
-		std::vector<BlockGridHashSet*>& newBlockGrids,
-		std::atomic_uint& newWorstNumberOfBlocks, bool& stop, bool dontAddToDB = false);
+	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks, std::map<unsigned int, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB = false);
 };

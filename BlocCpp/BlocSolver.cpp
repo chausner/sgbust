@@ -9,14 +9,9 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std
 	this->smallestGroupSize = smallestGroupSize;
 
 	unsigned int numberOfBlocks = blockGrid.GetNumberOfBlocks();
-
-	worstNumberOfBlocks = numberOfBlocks;
 	
 	blockGrids.clear();
-	blockGrids.resize(numberOfBlocks + 1);
-
-	blockGrids[numberOfBlocks] = new BlockGridHashSet();	
-	blockGrids[numberOfBlocks]->insert(blockGrid);
+	blockGrids[numberOfBlocks].insert(blockGrid);
 
 	solution.clear();
 	bestScore = std::numeric_limits<unsigned int>::max();
@@ -51,54 +46,36 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std
 
 void BlocSolver::SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB)
 {
-	std::vector<BlockGridHashSet*> newBlockGrids;
-
-	newBlockGrids.resize(worstNumberOfBlocks + 1);
+	std::map<unsigned int, BlockGridHashSet> newBlockGrids;
 
 	std::atomic_uint blockGridsSolved = 0;
 	std::atomic_uint newDBSize = 0;
-	std::atomic_uint newWorstNumberOfBlocks = 0;
 
-	for (int i = 0; i < blockGrids.size(); i++)
-		if (blockGrids[i] != nullptr)
-		{
-			//std::cout << "Size " << i << ": " << blockGrids[i]->size() << std::endl;
-			if (!stop && (!maxDBSize || newDBSize < maxDBSize))
-				std::for_each(std::execution::par, blockGrids[i]->begin(), blockGrids[i]->end(), [&](const BlockGrid& blockGrid) {
-					if (stop || (maxDBSize && newDBSize >= maxDBSize))
-						return;
+	for (auto &[numberOfBlocks, hashSet] : blockGrids)
+	{
+		//std::cout << "Size " << i << ": " << hashSet->size() << std::endl;
+		if (!stop && (!maxDBSize || newDBSize < maxDBSize))
+			std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const BlockGrid& blockGrid) {
+				if (stop || (maxDBSize && newDBSize >= maxDBSize))
+					return;
 
-					newDBSize += SolveBlockGrid(blockGrid, i, newBlockGrids, newWorstNumberOfBlocks, stop, dontAddToDB);
+				newDBSize += SolveBlockGrid(blockGrid, numberOfBlocks, newBlockGrids, stop, dontAddToDB);
 
-					blockGridsSolved++;
-				});
+				blockGridsSolved++;
+			});
 
-			delete blockGrids[i];
-		}
+		// ideally delete from blockGrids if possible
+		hashSet.clear();
+	}
 
 	if (newDBSize == 0)
 		stop = true;
 
 	blockGrids = std::move(newBlockGrids);
 	dbSize = newDBSize;
-	worstNumberOfBlocks = newWorstNumberOfBlocks;
 }
 
-template <typename T>
-void atomicMax(std::atomic<T> &a, T b)
-{
-	bool success;
-	T oldValue = a;
-	do
-	{
-		if (b > oldValue)
-			success = a.compare_exchange_weak(oldValue, b);
-		else
-			break;
-	} while (!success);
-}
-
-unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks, std::vector<BlockGridHashSet*>& newBlockGrids, std::atomic_uint& newWorstNumberOfBlocks, bool& stop, bool dontAddToDB)
+unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks, std::map<unsigned int, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB)
 {
 	std::vector<std::vector<Position>> groups = blockGrid.GetGroups(smallestGroupSize);
 
@@ -125,8 +102,6 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 
 		unsigned int newNumberOfBlocks = numberOfBlocks - groups[i].size();
 
-		atomicMax<unsigned int>(newWorstNumberOfBlocks, newNumberOfBlocks);
-
 		if (newNumberOfBlocks == 0)
 		{
 			bg.Solution.push_back(i);
@@ -147,10 +122,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, unsigned int
 
 			bg.Solution.push_back(i);
 
-			if (newBlockGrids[newNumberOfBlocks] == nullptr)
-				newBlockGrids[newNumberOfBlocks] = new BlockGridHashSet();
-
-			auto [it, inserted] = newBlockGrids[newNumberOfBlocks]->insert(std::move(bg));
+			auto [it, inserted] = newBlockGrids[newNumberOfBlocks].insert(std::move(bg));
 			if (inserted)
 				c++;
 		}
