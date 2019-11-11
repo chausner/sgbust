@@ -33,7 +33,7 @@ BlockGrid::BlockGrid(const BlockGrid& blockGrid)
 {
 	Blocks = std::make_unique<BlockColor[]>(Width * Height);
 	
-	std::memcpy(&Blocks[0], &blockGrid.Blocks[0], Width * Height * sizeof(Blocks[0]));
+	std::copy(blockGrid.BlocksBegin(), blockGrid.BlocksEnd(), BlocksBegin());
 }
 
 BlockGrid::BlockGrid(BlockGrid&& blockGrid) noexcept
@@ -46,11 +46,11 @@ BlockGrid& BlockGrid::operator=(const BlockGrid& blockGrid)
 	if (Width * Height < blockGrid.Width * blockGrid.Height || Blocks == nullptr)
 		Blocks = std::make_unique<BlockColor[]>(blockGrid.Width * blockGrid.Height);
 
-	std::memcpy(&Blocks[0], &blockGrid.Blocks[0], blockGrid.Width * blockGrid.Height * sizeof(Blocks[0]));
-
 	Width = blockGrid.Width;
 	Height = blockGrid.Height;
 	Solution = blockGrid.Solution;
+
+	std::copy(blockGrid.BlocksBegin(), blockGrid.BlocksEnd(), BlocksBegin());
 
 	return *this;
 }
@@ -254,5 +254,5 @@ std::string BlockGrid::GetSolutionAsString() const
 
 unsigned int BlockGrid::GetNumberOfBlocks() const
 {
-	return std::count_if(Blocks.get(), Blocks.get() + Width * Height, [](auto c) { return c != BlockColor::None; });
+	return std::count_if(BlocksBegin(), BlocksEnd(), [](auto c) { return c != BlockColor::None; });
 }
