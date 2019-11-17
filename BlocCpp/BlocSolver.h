@@ -8,7 +8,7 @@
 #include <vector>
 #include "parallel_hashmap/phmap.h"
 #include "BlockGrid.h"
-#include "xxh3.h"
+#include "wyhash.h"
 
 template <>
 class std::hash<BlockGrid>
@@ -16,7 +16,7 @@ class std::hash<BlockGrid>
 public:
 	std::size_t operator()(const BlockGrid& key) const
 	{
-		return XXH3_64bits(key.Blocks.get(), key.Width * key.Height * sizeof(BlockColor));
+		return wyhash(key.Blocks.get(), key.Width * key.Height * sizeof(BlockColor), 0);
 	}
 };
 

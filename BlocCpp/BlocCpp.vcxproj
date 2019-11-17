@@ -149,7 +149,6 @@
     <ClCompile Include="BlockGrid.cpp" />
     <ClCompile Include="BlocSolver.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="xxhash.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlockGrid.h" />
@@ -162,8 +161,7 @@
     <ClInclude Include="parallel_hashmap\phmap_dump.h" />
     <ClInclude Include="parallel_hashmap\phmap_fwd_decl.h" />
     <ClInclude Include="parallel_hashmap\phmap_utils.h" />
-    <ClInclude Include="xxh3.h" />
-    <ClInclude Include="xxhash.h" />
+    <ClInclude Include="wyhash.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -24,21 +24,12 @@
     <ClCompile Include="BlocSolver.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="xxhash.c">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlocSolver.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="BlockGrid.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="xxhash.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="xxh3.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="parallel_hashmap\meminfo.h">
@@ -63,6 +54,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="parallel_hashmap\phmap_utils.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="wyhash.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
