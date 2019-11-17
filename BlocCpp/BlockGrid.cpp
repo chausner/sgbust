@@ -126,21 +126,18 @@ void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 	int right = std::numeric_limits<int>::min();
 	int bottom = std::numeric_limits<int>::min();
 
-	for (Position p : group)
+	for (auto [x, y] : group)
 	{
-		if (p.X < left)
-			left = p.X;
-		if (p.X > right)
-			right = p.X;
-		if (p.Y > bottom)
-			bottom = p.Y;
-
-		int x = p.X;
-		int y = p.Y;
+		if (x < left)
+			left = x;
+		if (x > right)
+			right = x;
+		if (y > bottom)
+			bottom = y;
 
 		Blocks[XY(x, y)] = BlockColor::None;
 	}
-
+	
 	for (int x = left; x <= right; x++)
 	{
 		int yy = bottom;
@@ -158,6 +155,8 @@ void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 			}
 	}
 
+	int newWidth = Width;
+
 	if (bottom == Height - 1)
 	{
 		int xx = left;
@@ -174,54 +173,27 @@ void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 
 				xx++;
 			}
+
+		newWidth = xx;
 	}
 
-	int newWidth;
-
-	if (bottom != Height - 1)
-		newWidth = Width;
-	else
-	{
-		newWidth = 0;
-		for (int x = Width - 1; x >= 0; x--)
-			if (Blocks[XY(x, Height - 1)] != BlockColor::None)
-			{
-				newWidth = x + 1;
-				break;
-			}
-	}
-
-	int newHeight = 0;
-
-	for (int y = 0; y < Height; y++)
-	{
-		bool empty = true;
-
-		for (int x = 0; x < newWidth; x++)
-			if (Blocks[XY(x, y)] != BlockColor::None)
-			{
-				empty = false;
-				break;
-			}
-
-		if (!empty)
-		{
-			newHeight = Height - y;
-			break;
-		}
-	}
+	BlockColor* firstBlock = std::find_if(BlocksBegin(), BlocksEnd(), [](auto b) { return b != BlockColor::None; });
+	int newHeight = Height - std::distance(BlocksBegin(), firstBlock) / Width;
 
 	if (newWidth != Width || newHeight != Height)
 	{
-		std::unique_ptr<BlockColor[]> blocks = std::make_unique<BlockColor[]>(newWidth * newHeight);
+		std::unique_ptr<BlockColor[]> newBlocks = std::make_unique<BlockColor[]>(newWidth * newHeight);
 
-		for (int y = 0; y < newHeight; y++)
-			for (int x = 0; x < newWidth; x++)
-				blocks[y * newWidth + x] = Blocks[XY(x, (Height - newHeight) + y)];
+		if (newWidth != Width)
+			for (int y = 0; y < newHeight; y++)
+				for (int x = 0; x < newWidth; x++)
+					newBlocks[y * newWidth + x] = Blocks[XY(x, (Height - newHeight) + y)];
+		else
+			std::copy(&Blocks[XY(0, Height - newHeight)], BlocksEnd(), newBlocks.get());
 
 		Width = newWidth;
 		Height = newHeight;
-		Blocks = std::move(blocks);
+		Blocks = std::move(newBlocks);
 	}
 }
 
