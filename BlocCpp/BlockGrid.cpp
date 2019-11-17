@@ -240,10 +240,10 @@ std::string BlockGrid::GetSolutionAsString() const
 			solution.push_back((char)(b + 65));
 		else
 		{
-			solution.push_back('_');
+			solution.push_back('(');
 			solution.push_back((char)((b / 26) + 64));
 			solution.push_back((char)((b % 26) + 65));
-			solution.push_back('_');
+			solution.push_back(')');
 		}
 	}
 
