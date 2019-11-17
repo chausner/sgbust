@@ -7,14 +7,17 @@ int main()
 {
 	unsigned int smallestGroupSize;
 
-	BlockGrid blockGrid("E:\\Users\\Christoph\\Documents\\Visual Studio 2015\\Projects\\Bloc\\boop.bgf", smallestGroupSize);
-
+	BlockGrid blockGrid("F:\\Users\\Christoph\\Documents\\Visual Studio 2015\\Projects\\Bloc\\fast.bgf", smallestGroupSize);
 
 	BlocSolver solver;
 
+	solver.MaxDBSize = 10000000;
+	solver.MaxDepth = std::nullopt;
+	solver.DontAddToDBLastDepth = false;
+
 	auto startTime = std::chrono::steady_clock::now();
 
-	solver.Solve(blockGrid, smallestGroupSize, 3000000, UINT_MAX, false, false);
+	solver.Solve(blockGrid, smallestGroupSize);
 
 	auto endTime = std::chrono::steady_clock::now();
 

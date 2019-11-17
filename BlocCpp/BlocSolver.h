@@ -34,22 +34,38 @@ public:
 
 using BlockGridHashSet = phmap::parallel_flat_hash_set<BlockGrid, std::hash<BlockGrid>, std::equal_to<BlockGrid>, std::allocator<BlockGrid>, 5, std::mutex>; // phmap::NullMutex
 
+struct Scoring
+{
+	int Score;
+
+	Scoring(const BlockGrid& blockGrid);
+	Scoring(int score): Score(score) {}
+	Scoring RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid);
+	bool IsPerfect() const;
+
+	bool operator<(const Scoring& other) const
+	{
+		return Score < other.Score;
+	}
+};
+
 class BlocSolver
 {
 	unsigned int smallestGroupSize = 0;
-
-	std::map<unsigned int, BlockGridHashSet> blockGrids;
-
+	std::map<Scoring, BlockGridHashSet> blockGrids;
 	std::vector<unsigned char> solution;
-	unsigned int bestScore = 0;
-
-	unsigned int depth = 0;
+	int bestScore = 0;
 	unsigned int dbSize = 0;
+	std::mutex mutex;
+
+	void SolveDepth(bool& stop, bool dontAddToDB);
+	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, Scoring scoring, std::map<Scoring, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB);
+	void CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool& stop);
 
 public:
-	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, std::optional<unsigned int> maxDBSize, std::optional<unsigned int> maxDepth, bool save, bool dontAddToDBLastDepth);
+	std::optional<unsigned int> MaxDBSize = std::nullopt;
+	std::optional<unsigned int> MaxDepth = std::nullopt;
+	bool DontAddToDBLastDepth = false;
 
-private:
-	void SolveDepth(std::optional<unsigned int> maxDBSize, bool& stop, bool dontAddToDB = false);
-	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, unsigned int numberOfBlocks, std::map<unsigned int, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB = false);
+	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize);
 };

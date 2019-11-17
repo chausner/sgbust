@@ -221,3 +221,8 @@ unsigned int BlockGrid::GetNumberOfBlocks() const
 {
 	return std::count_if(BlocksBegin(), BlocksEnd(), [](auto c) { return c != BlockColor::None; });
 }
+
+bool BlockGrid::IsEmpty() const
+{
+	return std::all_of(BlocksBegin(), BlocksEnd(), [](auto c) { return c == BlockColor::None; });
+}
