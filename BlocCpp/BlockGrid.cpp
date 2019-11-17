@@ -176,29 +176,24 @@ void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 			}
 	}
 
-	int newWidth = Width;
+	int newWidth;
 
-	for (int x = Width - 1; x >= 0; x--)
+	if (bottom != Height - 1)
+		newWidth = Width;
+	else
 	{
-		bool empty = true;
-
-		for (int y = Height - 1; y >= 0; y--)
-			if (Blocks[XY(x, y)] != BlockColor::None)
+		newWidth = 0;
+		for (int x = Width - 1; x >= 0; x--)
+			if (Blocks[XY(x, Height - 1)] != BlockColor::None)
 			{
-				empty = false;
+				newWidth = x + 1;
 				break;
 			}
-
-		if (!empty)
-		{
-			newWidth = x + 1;
-			break;
-		}
 	}
 
-	int newHeight = Height;
+	int newHeight = 0;
 
-	for (int y = 0; y < Height - 1; y++)
+	for (int y = 0; y < Height; y++)
 	{
 		bool empty = true;
 
