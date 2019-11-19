@@ -24,6 +24,7 @@ struct Position
 	Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
 };
 
+#pragma pack(push, 1)
 struct BlockGrid
 {
 	unsigned char Width;
@@ -51,3 +52,4 @@ struct BlockGrid
 private:
 	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, unsigned int x, unsigned int y) const;
 };
+#pragma pack(pop)
