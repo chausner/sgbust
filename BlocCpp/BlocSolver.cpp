@@ -138,6 +138,8 @@ void BlocSolver::CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool
 				<< ", steps: " << solution.size() << "): " << blockGrid.GetSolutionAsString() 
 				<< std::endl;
 
+			blockGrid.Print();
+
 			if (scoring.IsPerfect())
 				stop = true;
 		}

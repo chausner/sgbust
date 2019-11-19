@@ -46,6 +46,8 @@ struct BlockGrid
 	BlockColor* BlocksEnd() const { return Blocks.get() + Width * Height; }
 	bool IsEmpty() const;
 
+	void Print() const;
+
 private:
 	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, unsigned int x, unsigned int y) const;
 };

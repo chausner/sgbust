@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <limits>
 #include <stdexcept>
 #include "BlockGrid.h"
@@ -225,4 +226,47 @@ unsigned int BlockGrid::GetNumberOfBlocks() const
 bool BlockGrid::IsEmpty() const
 {
 	return std::all_of(BlocksBegin(), BlocksEnd(), [](auto c) { return c == BlockColor::None; });
+}
+
+void BlockGrid::Print() const
+{
+	for (int y = 0; y < Height; y++)
+	{
+		for (int x = 0; x < Width; x++)
+		{
+			const char* colorCode;
+
+			switch (Blocks[y * Width + x])
+			{
+			case BlockColor::None:
+				colorCode = "\x1B[40m";
+				break;
+			case BlockColor::Black:
+				colorCode = "\x1B[47m";
+				break;
+			case BlockColor::Red:
+				colorCode = "\x1B[41m";
+				break;
+			case BlockColor::Green:
+				colorCode = "\x1B[42m";
+				break;
+			case BlockColor::Blue:
+				colorCode = "\x1B[44m";
+				break;
+			case BlockColor::Magenta:
+				colorCode = "\x1B[45m";
+				break;
+			case BlockColor::Yellow:
+				colorCode = "\x1B[43m";
+				break;
+			case BlockColor::Cyan:
+				colorCode = "\x1B[46m";
+				break;
+			}
+
+			std::cout << colorCode << "  ";
+		}			
+
+		std::cout << "\x1B[0m" << std::endl;
+	}
 }

@@ -8,6 +8,7 @@ int main()
 	unsigned int smallestGroupSize;
 
 	BlockGrid blockGrid("F:\\Users\\Christoph\\Documents\\Visual Studio 2015\\Projects\\Bloc\\fast.bgf", smallestGroupSize);
+	blockGrid.Print();
 
 	BlocSolver solver;
 
