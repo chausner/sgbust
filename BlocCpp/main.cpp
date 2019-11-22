@@ -2,9 +2,14 @@
 #include <chrono>
 #include "BlockGrid.h"
 #include "BlocSolver.h"
+#include "utils.h"
 
 int main()
 {
+#ifdef _WIN32
+	EnableVTMode();
+#endif
+
 	unsigned int smallestGroupSize;
 
 	BlockGrid blockGrid("F:\\Users\\Christoph\\Documents\\Visual Studio 2015\\Projects\\Bloc\\fast.bgf", smallestGroupSize);
