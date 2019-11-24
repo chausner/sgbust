@@ -2,6 +2,7 @@
 #include <atomic>
 #include <execution>
 #include <iostream>
+#include <iterator>
 #include "BlocSolver.h"
 
 Scoring::Scoring(const BlockGrid& blockGrid) : Score(blockGrid.GetNumberOfBlocks())
@@ -61,6 +62,9 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 
 void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 {
+	if (TrimDB)
+	    TrimDatabase();
+
 	std::map<Scoring, BlockGridHashSet> newBlockGrids;
 
 	std::atomic_uint blockGridsSolved = 0;
@@ -80,6 +84,8 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 				blockGridsSolved++;
 			});
 	}
+
+	multiplier = static_cast<double>(newDBSize) / blockGridsSolved;
 
 	if (newDBSize == 0)
 		stop = true;
@@ -142,6 +148,35 @@ void BlocSolver::CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool
 
 			if (scoring.IsPerfect())
 				stop = true;
+		}
+	}
+}
+
+void BlocSolver::TrimDatabase()
+{
+	if (MaxDBSize && multiplier > 1)
+	{
+		unsigned int reducedDBSize = std::ceil(*MaxDBSize / multiplier * TrimmingSafetyFactor);
+
+		if (dbSize > reducedDBSize)
+		{
+			unsigned int accumulatedSize = 0;
+
+			auto it = blockGrids.begin();
+			for (; ; it++)
+			{
+				accumulatedSize += it->second.size();
+				if (accumulatedSize > reducedDBSize)
+					break;
+			}
+
+			BlockGridHashSet& hashSet = it->second;
+			auto it2 = hashSet.begin();
+			std::advance(it2, accumulatedSize - reducedDBSize);
+			hashSet.erase(hashSet.begin(), it2);
+
+			it++;
+			blockGrids.erase(it, blockGrids.end());
 		}
 	}
 }

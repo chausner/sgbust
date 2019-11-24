@@ -56,9 +56,11 @@ class BlocSolver
 	std::vector<unsigned char> solution;
 	int bestScore = 0;
 	unsigned int dbSize = 0;
+	double multiplier = 0;
 	std::mutex mutex;
 
 	void SolveDepth(bool& stop, bool dontAddToDB);
+	void TrimDatabase();
 	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, Scoring scoring, std::map<Scoring, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB);
 	void CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool& stop);
 
@@ -66,6 +68,8 @@ public:
 	std::optional<unsigned int> MaxDBSize = std::nullopt;
 	std::optional<unsigned int> MaxDepth = std::nullopt;
 	bool DontAddToDBLastDepth = false;
+	bool TrimDB = true;
+	double TrimmingSafetyFactor = 1.25;
 
 	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize);
 };
