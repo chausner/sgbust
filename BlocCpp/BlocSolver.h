@@ -8,6 +8,7 @@
 #include <vector>
 #include "parallel_hashmap/phmap.h"
 #include "BlockGrid.h"
+#include "Scoring.h"
 #include "wyhash.h"
 
 template <>
@@ -33,21 +34,6 @@ public:
 };
 
 using BlockGridHashSet = phmap::parallel_flat_hash_set<BlockGrid, std::hash<BlockGrid>, std::equal_to<BlockGrid>, std::allocator<BlockGrid>, 5, std::mutex>; // phmap::NullMutex
-
-struct Scoring
-{
-	int Score;
-
-	Scoring(const BlockGrid& blockGrid);
-	Scoring(int score): Score(score) {}
-	Scoring RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid);
-	bool IsPerfect() const;
-
-	bool operator<(const Scoring& other) const
-	{
-		return Score < other.Score;
-	}
-};
 
 class BlocSolver
 {

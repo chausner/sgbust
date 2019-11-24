@@ -5,39 +5,12 @@
 #include <iterator>
 #include "BlocSolver.h"
 
-Scoring::Scoring(const BlockGrid& blockGrid) : Score(blockGrid.GetNumberOfBlocks())
-{
-}
-
-Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid)
-{
-	return Score - group.size();
-
-	/*unsigned int numberOfBlocks = newBlockGrid.GetNumberOfBlocks();
-	auto groups = newBlockGrid.GetGroups(3);
-
-	unsigned int numberOfBlocksInGroups = 0;
-	for (auto& group : groups)
-		numberOfBlocksInGroups += group.size();
-
-	return numberOfBlocks - numberOfBlocksInGroups;*/
-
-	//return Score - group.size() * (group.size() - 1);
-
-	//return Score - ((group.size() - 2) * (group.size() - 2) + group.size());
-}
-
-bool Scoring::IsPerfect() const
-{
-	return Score == 0;
-}
-
 void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 {
 	this->smallestGroupSize = smallestGroupSize;
 	
 	blockGrids.clear();
-	blockGrids[Scoring(blockGrid)].insert(blockGrid);
+	blockGrids[Scoring(blockGrid, smallestGroupSize)].insert(blockGrid);
 
 	solution.clear();
 	bestScore = std::numeric_limits<int>::max();
@@ -110,7 +83,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scor
 		newBlockGrid.RemoveGroup(groups[i]);
 		newBlockGrid.Solution.push_back(i);
 
-		Scoring newScoring = scoring.RemoveGroup(blockGrid, groups[i], newBlockGrid);
+		Scoring newScoring = scoring.RemoveGroup(blockGrid, groups[i], newBlockGrid, smallestGroupSize);
 
 		if (newBlockGrid.IsEmpty())
 			CheckSolution(newScoring, newBlockGrid, stop);
