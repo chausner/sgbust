@@ -1,8 +1,11 @@
-#include <algorithm>
 #include <atomic>
+#include <cmath>
 #include <execution>
 #include <iostream>
 #include <iterator>
+#include <limits>
+#include <numeric>
+#include <utility>
 #include "BlocSolver.h"
 
 void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)

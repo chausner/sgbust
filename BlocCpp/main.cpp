@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <optional>
 #include "BlockGrid.h"
 #include "BlocSolver.h"
 #include "utils.h"

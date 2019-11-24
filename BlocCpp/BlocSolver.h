@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <mutex>

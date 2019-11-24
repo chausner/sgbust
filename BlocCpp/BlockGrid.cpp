@@ -4,6 +4,7 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
+#include <utility>
 #include "BlockGrid.h"
 
 #define XY(x,y) ((y) * Width + (x))
