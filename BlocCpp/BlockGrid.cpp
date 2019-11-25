@@ -9,6 +9,88 @@
 
 #define XY(x,y) ((y) * Width + (x))
 
+Solution::Solution(const Solution& solution)
+{
+	if (solution.steps != nullptr)
+	{
+		int length = solution.GetLength();
+		steps = std::make_unique<unsigned char[]>(length + 1);
+		std::copy(solution.steps.get(), solution.steps.get() + length + 1, steps.get());
+	}
+}
+
+Solution& Solution::operator=(const Solution& solution)
+{
+	if (solution.steps != nullptr)
+	{
+		int length = solution.GetLength();
+		steps = std::make_unique<unsigned char[]>(length + 1);
+		std::copy(solution.steps.get(), solution.steps.get() + length + 1, steps.get());
+	}
+	else
+		steps = nullptr;
+
+	return *this;
+}
+
+Solution Solution::Append(unsigned char step)
+{
+	Solution result;
+
+	if (steps != nullptr)
+	{
+		int length = GetLength();
+		result.steps = std::make_unique<unsigned char[]>(length + 2);
+		std::copy(steps.get(), steps.get() + length, result.steps.get());
+		result.steps[length] = step;
+		result.steps[length + 1] = 0xFF;
+	}
+	else
+	{		
+		result.steps = std::make_unique<unsigned char[]>(2);
+		result.steps[0] = step;
+		result.steps[1] = 0xFF;		
+	}
+
+	return result;
+}
+
+std::string Solution::AsString() const
+{
+	if (steps == nullptr)
+		return std::string();
+	
+	std::string solution;
+
+	for (unsigned char* step = steps.get(); *step != 0xFF; step++)
+	{
+		if (*step < 26)
+			solution.push_back((char)(*step + 65));
+		else
+		{
+			solution.push_back('(');
+			solution.push_back((char)((*step / 26) + 64));
+			solution.push_back((char)((*step % 26) + 65));
+			solution.push_back(')');
+		}
+	}
+
+	return solution;
+}
+
+unsigned int Solution::GetLength() const
+{
+	if (steps == nullptr)
+		return 0;
+
+	int length = 0;
+
+	while (steps[length] != 0xFF)
+		length++;
+
+	return length;
+}
+
 BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
 {
 	std::ifstream file(path, std::ifstream::binary);
@@ -31,13 +113,8 @@ BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
 }
 
 BlockGrid::BlockGrid(const BlockGrid& blockGrid) 
-	: Width(blockGrid.Width), Height(blockGrid.Height)
+	: Width(blockGrid.Width), Height(blockGrid.Height), Solution(blockGrid.Solution)
 {
-	// optimize for BlocSolver which calls this copy-constructor, followed by a Solution.push_back
-	Solution.reserve(blockGrid.Solution.size() + 1);
-	Solution.resize(blockGrid.Solution.size());
-	std::copy(blockGrid.Solution.begin(), blockGrid.Solution.end(), Solution.begin());
-
 	Blocks = std::make_unique<BlockColor[]>(Width * Height);
 	
 	std::copy(blockGrid.BlocksBegin(), blockGrid.BlocksEnd(), BlocksBegin());
@@ -197,26 +274,6 @@ void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 		Height = newHeight;
 		Blocks = std::move(newBlocks);
 	}
-}
-
-std::string BlockGrid::GetSolutionAsString() const
-{
-	std::string solution;
-
-	for (unsigned char b : Solution)
-	{
-		if (b < 26)
-			solution.push_back((char)(b + 65));
-		else
-		{
-			solution.push_back('(');
-			solution.push_back((char)((b / 26) + 64));
-			solution.push_back((char)((b % 26) + 65));
-			solution.push_back(')');
-		}
-	}
-
-	return solution;
 }
 
 unsigned int BlockGrid::GetNumberOfBlocks() const

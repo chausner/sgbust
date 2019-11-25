@@ -25,13 +25,29 @@ struct Position
 	Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
 };
 
+struct Solution
+{
+	Solution() = default;
+	Solution(const Solution& solution);
+	Solution(Solution&& solution) noexcept = default;
+	Solution& operator=(const Solution& solution);
+	Solution& operator=(Solution&& solution) noexcept = default;
+
+	Solution Append(unsigned char step);
+	std::string AsString() const;
+	unsigned int GetLength() const;
+
+private:
+	std::unique_ptr<unsigned char[]> steps;
+};
+
 #pragma pack(push, 1)
 struct BlockGrid
 {
 	unsigned char Width;
 	unsigned char Height;
 	std::unique_ptr<BlockColor[]> Blocks;
-	std::vector<unsigned char> Solution;
+	Solution Solution;
 
 	BlockGrid(const std::string& path, unsigned int& smallestGroupSize);
 	BlockGrid(const BlockGrid& blockGrid);
@@ -41,7 +57,6 @@ struct BlockGrid
 
 	std::vector<std::vector<Position>> GetGroups(unsigned int smallestGroupSize) const;
 	void RemoveGroup(const std::vector<Position>& group);
-	std::string GetSolutionAsString() const;
 	unsigned int GetNumberOfBlocks() const;
 
 	BlockColor* BlocksBegin() const { return Blocks.get(); }

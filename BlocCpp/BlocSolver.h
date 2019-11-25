@@ -5,7 +5,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <vector>
 #include "parallel_hashmap/phmap.h"
 #include "BlockGrid.h"
 #include "Scoring.h"
@@ -40,7 +39,7 @@ class BlocSolver
 	unsigned int smallestGroupSize = 0;
 	unsigned int depth = 0;
 	std::map<Scoring, BlockGridHashSet> blockGrids;
-	std::vector<unsigned char> solution;
+	Solution solution;
 	int bestScore = 0;
 	unsigned int dbSize = 0;
 	double multiplier = 0;

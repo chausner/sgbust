@@ -7,6 +7,7 @@
 #include <limits>
 #include <numeric>
 #include <utility>
+#include <vector>
 #include "BlocSolver.h"
 
 void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
@@ -16,7 +17,7 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 	blockGrids.clear();
 	blockGrids[Scoring(blockGrid, smallestGroupSize)].insert(blockGrid);
 
-	solution.clear();
+	solution = Solution();
 	bestScore = std::numeric_limits<int>::max();
 
 	dbSize = 1;
@@ -98,7 +99,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scor
 		BlockGrid newBlockGrid = blockGrid;
 
 		newBlockGrid.RemoveGroup(groups[i]);
-		newBlockGrid.Solution.push_back(i);
+		newBlockGrid.Solution = newBlockGrid.Solution.Append(i);
 
 		Scoring newScoring = scoring.RemoveGroup(blockGrid, groups[i], newBlockGrid, smallestGroupSize);
 
@@ -131,7 +132,7 @@ void BlocSolver::CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool
 
 			std::cout << "Better solution found (score: " << score 
 				<< ", blocks: " << blockGrid.GetNumberOfBlocks() 
-				<< ", steps: " << solution.size() << "): " << blockGrid.GetSolutionAsString() 
+				<< ", steps: " << solution.GetLength() << "): " << blockGrid.Solution.AsString()
 				<< std::endl;
 
 			blockGrid.Print();
