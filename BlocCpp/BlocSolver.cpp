@@ -1,6 +1,7 @@
 #include <atomic>
 #include <cmath>
 #include <execution>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -22,9 +23,9 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 
 	bool stop = false;
 
-	for (int depth = 0; depth < MaxDepth || !MaxDepth; depth++)
+	for (depth = 0; depth < MaxDepth || !MaxDepth; depth++)
 	{
-		std::cout << "Depth: " << depth << ", Database size: " << dbSize << std::endl;
+		PrintStats();
 
 		SolveDepth(stop, DontAddToDBLastDepth && MaxDepth && depth == *MaxDepth - 1);
 
@@ -35,6 +36,19 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 	if (bestScore != std::numeric_limits<int>::max())
 		blockGrid.Solution = std::move(solution);
 }
+
+void BlocSolver::PrintStats() const
+{	
+	int minScore = blockGrids.begin()->first.Score;
+	int maxScore = blockGrids.rbegin()->first.Score;
+	long long scoreSum = std::transform_reduce(blockGrids.begin(), blockGrids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Score * b.second.size(); });
+	double avgScore = static_cast<double>(scoreSum) / dbSize;
+	std::cout << 
+		"Depth: " << std::setw(3) << depth << 
+		", grids: " << std::setw(8) << dbSize << 
+		", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore << std::endl;
+}
+
 
 void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 {

@@ -38,6 +38,7 @@ using BlockGridHashSet = phmap::parallel_flat_hash_set<BlockGrid, std::hash<Bloc
 class BlocSolver
 {
 	unsigned int smallestGroupSize = 0;
+	unsigned int depth = 0;
 	std::map<Scoring, BlockGridHashSet> blockGrids;
 	std::vector<unsigned char> solution;
 	int bestScore = 0;
@@ -58,4 +59,5 @@ public:
 	double TrimmingSafetyFactor = 1.25;
 
 	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize);
+	void PrintStats() const;
 };
