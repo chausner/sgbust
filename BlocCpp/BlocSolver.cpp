@@ -46,7 +46,7 @@ void BlocSolver::PrintStats() const
 	double avgScore = static_cast<double>(scoreSum) / dbSize;
 	std::cout << 
 		"Depth: " << std::setw(3) << depth << 
-		", grids: " << std::setw(8) << dbSize << 
+		", grids: " << std::setw(9) << dbSize << 
 		", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore << std::endl;
 }
 
