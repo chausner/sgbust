@@ -5,32 +5,49 @@
 
 //Scoring::Scoring(const BlockGrid& blockGrid, unsigned int smallestGroupSize)
 //{
-//	auto blocks = blockGrid.Expand();
-//	Score = blockGrid.GetNumberOfBlocks(blocks.get());
+//	Score = blockGrid.GetNumberOfBlocks();
 //}
 //
 //Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize)
 //{
 //	return Score - group.size();
-//
-//	/*unsigned int numberOfBlocks = newBlockGrid.GetNumberOfBlocks();
-//	auto groups = newBlockGrid.GetGroups(3);
-//
-//	unsigned int numberOfBlocksInGroups = 0;
-//	for (auto& group : groups)
-//		numberOfBlocksInGroups += group.size();
-//
-//	return numberOfBlocks - numberOfBlocksInGroups;*/
-//
-//	//return Score - group.size() * (group.size() - 1);
-//
-//	//return Score - ((group.size() - 2) * (group.size() - 2) + group.size());
 //}
 //
 //bool Scoring::IsPerfect() const
 //{
 //	return Score == 0;
 //}
+
+
+//Scoring::Scoring(const BlockGrid& blockGrid, unsigned int smallestGroupSize) : Score(0)
+//{
+//}
+//
+//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize)
+//{
+//	return Score - group.size() * (group.size() - 1);
+//}
+//
+//bool Scoring::IsPerfect() const
+//{
+//	return false;
+//}
+
+
+//Scoring::Scoring(const BlockGrid& blockGrid, unsigned int smallestGroupSize) : Score(0)
+//{
+//}
+//
+//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize)
+//{
+//	return Score - ((group.size() - 2) * (group.size() - 2) + group.size());
+//}
+//
+//bool Scoring::IsPerfect() const
+//{
+//	return false;
+//}
+
 
 Scoring::Scoring(const BlockGrid& blockGrid, unsigned int smallestGroupSize)
 {
@@ -52,8 +69,9 @@ Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Po
 
 bool Scoring::IsPerfect() const
 {
-	return false;
+	return Score == 0;
 }
+
 
 //Scoring::Scoring(const BlockGrid& blockGrid, unsigned int smallestGroupSize)
 //{
@@ -77,5 +95,5 @@ bool Scoring::IsPerfect() const
 //
 //bool Scoring::IsPerfect() const
 //{
-//	return false;
+//	return Score == 0;
 //}
