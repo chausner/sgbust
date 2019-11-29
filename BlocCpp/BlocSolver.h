@@ -49,6 +49,7 @@ class BlocSolver
 	void TrimDatabase();
 	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, Scoring scoring, std::map<Scoring, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB);
 	void CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool& stop);
+	void PrintStats() const;
 
 public:
 	std::optional<unsigned int> MaxDBSize = std::nullopt;
@@ -58,5 +59,4 @@ public:
 	double TrimmingSafetyFactor = 1.25;
 
 	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize);
-	void PrintStats() const;
 };

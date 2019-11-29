@@ -49,6 +49,7 @@ struct BlockGrid
 	std::unique_ptr<BlockColor[]> Blocks;
 	Solution Solution;
 
+	BlockGrid(unsigned char width, unsigned char height);
 	BlockGrid(const std::string& path, unsigned int& smallestGroupSize);
 	BlockGrid(const BlockGrid& blockGrid);
 	BlockGrid(BlockGrid&& blockGrid) noexcept;
@@ -59,8 +60,10 @@ struct BlockGrid
 	void RemoveGroup(const std::vector<Position>& group);
 	unsigned int GetNumberOfBlocks() const;
 
-	BlockColor* BlocksBegin() const { return Blocks.get(); }
-	BlockColor* BlocksEnd() const { return Blocks.get() + Width * Height; }
+	BlockColor* BlocksBegin() { return Blocks.get(); }
+	BlockColor* BlocksEnd() { return Blocks.get() + Width * Height; }
+	const BlockColor* BlocksBegin() const { return Blocks.get(); }
+	const BlockColor* BlocksEnd() const { return Blocks.get() + Width * Height; }
 	bool IsEmpty() const;
 
 	void Print() const;

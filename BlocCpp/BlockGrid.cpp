@@ -91,6 +91,10 @@ unsigned int Solution::GetLength() const
 	return length;
 }
 
+BlockGrid::BlockGrid(unsigned char width, unsigned char height) : Width(width), Height(height), Blocks(std::make_unique<BlockColor[]>(width * height))
+{
+}
+
 BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
 {
 	std::ifstream file(path, std::ifstream::binary);
