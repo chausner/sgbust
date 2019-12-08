@@ -153,6 +153,16 @@ BlockGrid& BlockGrid::operator=(BlockGrid&& blockGrid) noexcept
 	return *this;
 }
 
+void BlockGrid::Save(std::ostream& stream, unsigned int smallestGroupSize) const
+{
+	stream << "BGF2";
+	stream << Width;
+	stream << Height;
+	stream << static_cast<unsigned char>(smallestGroupSize);
+	for (const BlockColor* b = BlocksBegin(); b != BlocksEnd(); b++)
+		stream << static_cast<unsigned char>(*b);
+}
+
 std::vector<std::vector<Position>> BlockGrid::GetGroups(unsigned int smallestGroupSize) const
 {
 	std::vector<std::vector<Position>> groups;

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <ostream>
 #include <vector>
 
 enum class BlockColor : unsigned char
@@ -56,6 +57,7 @@ struct BlockGrid
 	BlockGrid& operator=(const BlockGrid& blockGrid);
 	BlockGrid& operator=(BlockGrid&& blockGrid) noexcept;
 
+	void Save(std::ostream& stream, unsigned int smallestGroupSize) const;
 	std::vector<std::vector<Position>> GetGroups(unsigned int smallestGroupSize) const;
 	void RemoveGroup(const std::vector<Position>& group);
 	unsigned int GetNumberOfBlocks() const;
