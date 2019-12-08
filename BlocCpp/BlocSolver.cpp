@@ -108,7 +108,11 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scor
 		else
 			if (!dontAddToDB)
 			{
-				auto [it, inserted] = newBlockGrids[newScoring].insert(std::move(newBlockGrid));
+				std::unique_lock lock(mutex);
+				BlockGridHashSet& hashSet = newBlockGrids[newScoring];
+				lock.unlock();
+
+				auto [it, inserted] = hashSet.insert(std::move(newBlockGrid));
 				if (inserted)
 					c++;
 			}
@@ -123,7 +127,7 @@ void BlocSolver::CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool
 
 	if (!stop && score < bestScore)
 	{
-		std::lock_guard lock(mutex);
+		std::scoped_lock lock(mutex);
 
 		if (!stop && score < bestScore)
 		{
