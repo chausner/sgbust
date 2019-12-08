@@ -36,6 +36,7 @@ struct Solution
 
 	Solution Append(unsigned char step);
 	std::string AsString() const;
+	std::vector<unsigned char> AsVector() const { return std::vector(steps.get(), steps.get() + GetLength()); }
 	unsigned int GetLength() const;
 
 private:
