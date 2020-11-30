@@ -38,6 +38,9 @@
     <ClInclude Include="BlockGrid.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="parallel_hashmap\btree.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
     <ClInclude Include="parallel_hashmap\meminfo.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>

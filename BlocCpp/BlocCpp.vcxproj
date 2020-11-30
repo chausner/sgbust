@@ -155,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="BlockGrid.h" />
     <ClInclude Include="BlocSolver.h" />
+    <ClInclude Include="parallel_hashmap\btree.h" />
     <ClInclude Include="parallel_hashmap\meminfo.h" />
     <ClInclude Include="parallel_hashmap\phmap.h" />
     <ClInclude Include="parallel_hashmap\phmap_base.h" />
