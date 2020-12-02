@@ -16,7 +16,7 @@ class std::hash<BlockGrid>
 public:
 	std::size_t operator()(const BlockGrid& key) const
 	{
-		return wyhash(key.Blocks.get(), key.Width * key.Height * sizeof(BlockColor), 0);
+		return wyhash(key.Blocks.get(), key.Width * key.Height * sizeof(BlockColor), 0, _wyp);
 	}
 };
 
