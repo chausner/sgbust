@@ -9,7 +9,7 @@ struct Scoring
 
 	Scoring(const BlockGrid& blockGrid, unsigned int smallestGroupSize);
 	Scoring(int score) : Score(score) {}
-	Scoring RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize);
+	Scoring RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const;
 	bool IsPerfect() const;
 
 	bool operator<(const Scoring& other) const

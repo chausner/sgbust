@@ -8,7 +8,7 @@
 //	Score = blockGrid.GetNumberOfBlocks();
 //}
 //
-//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize)
+//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const
 //{
 //	return Score - group.size();
 //}
@@ -23,7 +23,7 @@
 //{
 //}
 //
-//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize)
+//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const
 //{
 //	return Score - group.size() * (group.size() - 1);
 //}
@@ -38,7 +38,7 @@
 //{
 //}
 //
-//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize)
+//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const
 //{
 //	return Score - ((group.size() - 2) * (group.size() - 2) + group.size());
 //}
@@ -48,6 +48,7 @@
 //	return false;
 //}
 
+//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const
 
 Scoring::Scoring(const BlockGrid& blockGrid, unsigned int smallestGroupSize)
 {
@@ -58,7 +59,7 @@ Scoring::Scoring(const BlockGrid& blockGrid, unsigned int smallestGroupSize)
 	Score = numberOfBlocks - (int)(numberOfBlocksInGroups * 0.5);
 }
 
-Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize)
+Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const
 {
 	unsigned int numberOfBlocks = newBlockGrid.GetNumberOfBlocks();
 	auto groups = newBlockGrid.GetGroups(smallestGroupSize);
@@ -83,7 +84,7 @@ bool Scoring::IsPerfect() const
 //	Score = numberOfBlocks - (int)(numberOfBlocksInGroups * 0.5) + numberOfNoneBlocks * 0.25;
 //}
 //
-//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize)
+//Scoring Scoring::RemoveGroup(const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const
 //{
 //	unsigned int numberOfBlocks = newBlockGrid.GetNumberOfBlocks();
 //	auto groups = newBlockGrid.GetGroups(smallestGroupSize);
