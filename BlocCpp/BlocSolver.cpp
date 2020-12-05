@@ -54,7 +54,7 @@ void BlocSolver::PrintStats() const
 void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 {
 	if (TrimDB)
-	    TrimDatabase();
+		TrimDatabase();
 
 	std::map<Scoring, BlockGridHashSet> newBlockGrids;
 
@@ -65,15 +65,17 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 	{
 		auto& [scoring, hashSet] = *it;
 
-		if (!stop && (!MaxDBSize || newDBSize < MaxDBSize))
-			std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const BlockGrid& blockGrid) {
-				if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
-					return;
+		std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const BlockGrid& blockGrid) {
+			if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
+				return;
 
-				newDBSize += SolveBlockGrid(blockGrid, scoring, newBlockGrids, stop, dontAddToDB);
+			newDBSize += SolveBlockGrid(blockGrid, scoring, newBlockGrids, stop, dontAddToDB);
 
-				blockGridsSolved++;
-			});
+			blockGridsSolved++;
+		});
+
+		if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
+			break;
 	}
 
 	multiplier = static_cast<double>(newDBSize) / blockGridsSolved;
