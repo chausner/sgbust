@@ -61,15 +61,22 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 	std::atomic_uint blockGridsSolved = 0;
 	std::atomic_uint newDBSize = 0;
 
+	std::vector<const BlockGrid*> hashSetItems;
+
 	for (auto it = blockGrids.begin(); it != blockGrids.end(); it = blockGrids.erase(it))
 	{
 		auto& [scoring, hashSet] = *it;
 
-		std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const BlockGrid& blockGrid) {
+		hashSetItems.clear();
+		hashSetItems.reserve(hashSet.size());
+		for (auto it = hashSet.begin(); it != hashSet.end(); it++)
+			hashSetItems.push_back(&*it);
+
+		std::for_each(std::execution::par, hashSetItems.begin(), hashSetItems.end(), [&](const BlockGrid* blockGrid) {
 			if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
 				return;
 
-			newDBSize += SolveBlockGrid(blockGrid, scoring, newBlockGrids, stop, dontAddToDB);
+			newDBSize += SolveBlockGrid(*blockGrid, scoring, newBlockGrids, stop, dontAddToDB);
 
 			blockGridsSolved++;
 		});
