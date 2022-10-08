@@ -49,7 +49,7 @@ struct BlockGrid
 	unsigned char Width;
 	unsigned char Height;
 	std::unique_ptr<BlockColor[]> Blocks;
-	Solution Solution;
+	::Solution Solution;
 
 	BlockGrid(unsigned char width, unsigned char height);
 	BlockGrid(const std::string& path, unsigned int& smallestGroupSize);
