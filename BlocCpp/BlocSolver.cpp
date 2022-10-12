@@ -46,10 +46,14 @@ void BlocSolver::PrintStats() const
 	int maxScore = blockGrids.rbegin()->first.Score;
 	long long scoreSum = std::transform_reduce(blockGrids.begin(), blockGrids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Score * b.second.size(); });
 	double avgScore = static_cast<double>(scoreSum) / dbSize;
+	std::size_t memory = std::transform_reduce(blockGrids.begin(), blockGrids.end(), std::size_t(0), std::plus<>(), [](auto& b) { 
+		return std::transform_reduce(b.second.begin(), b.second.end(), std::size_t(0), std::plus<>(), [](const CompactBlockGrid& bb) { return bb.TotalSize(); });
+	}) / 1024 / 1024;
 	std::cout << 
 		"Depth: " << std::setw(3) << depth << 
 		", grids: " << std::setw(9) << dbSize << 
-		", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore << std::endl;
+		", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore << 
+		", memory: " << memory << "MB" << std::endl;
 }
 
 

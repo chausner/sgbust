@@ -45,6 +45,11 @@ std::size_t CompactBlockGrid::DataLength() const
 	return (Width * Height * 3 + 7) / 8;
 }
 
+std::size_t CompactBlockGrid::TotalSize() const
+{
+	return sizeof(CompactBlockGrid) + DataLength() + sizeof(::Solution) + Solution.GetLength();
+}
+
 BlockGrid CompactBlockGrid::Expand() const
 {
 	BlockGrid blockGrid(Width, Height);
