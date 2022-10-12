@@ -9,13 +9,14 @@
 #include <utility>
 #include <vector>
 #include "BlocSolver.h"
+#include "CompactBlockgrid.h"
 
 void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 {
 	this->smallestGroupSize = smallestGroupSize;
 	
 	blockGrids.clear();
-	blockGrids[Scoring(blockGrid, smallestGroupSize)].insert(blockGrid);
+	blockGrids[Scoring(blockGrid, smallestGroupSize)].insert(CompactBlockGrid(blockGrid));
 
 	solution = Solution();
 	bestScore = std::numeric_limits<int>::max();
@@ -66,11 +67,11 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 	{
 		auto& [scoring, hashSet] = *it;
 
-		std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const BlockGrid& blockGrid) {
+		std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const CompactBlockGrid& blockGrid) {
 			if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
 				return;
 
-			newDBSize += SolveBlockGrid(blockGrid, scoring, newBlockGrids, stop, dontAddToDB);
+				newDBSize += SolveBlockGrid(blockGrid.Expand(), scoring, newBlockGrids, stop, dontAddToDB);
 
 			blockGridsSolved++;
 		});
@@ -115,7 +116,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scor
 				BlockGridHashSet& hashSet = newBlockGrids[newScoring];
 				lock.unlock();
 
-				auto [it, inserted] = hashSet.insert(std::move(newBlockGrid));
+				auto [it, inserted] = hashSet.insert(CompactBlockGrid(std::move(newBlockGrid)));
 				if (inserted)
 					c++;
 			}

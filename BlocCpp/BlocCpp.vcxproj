@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClCompile Include="BlockGrid.cpp" />
     <ClCompile Include="BlocSolver.cpp" />
+    <ClCompile Include="CompactBlockGrid.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scoring.cpp" />
     <ClCompile Include="utils.cpp" />
@@ -155,6 +156,7 @@
   <ItemGroup>
     <ClInclude Include="BlockGrid.h" />
     <ClInclude Include="BlocSolver.h" />
+    <ClInclude Include="CompactBlockGrid.h" />
     <ClInclude Include="parallel_hashmap\btree.h" />
     <ClInclude Include="parallel_hashmap\meminfo.h" />
     <ClInclude Include="parallel_hashmap\phmap.h" />

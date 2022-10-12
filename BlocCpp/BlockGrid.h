@@ -43,7 +43,6 @@ private:
 	std::unique_ptr<unsigned char[]> steps;
 };
 
-#pragma pack(push, 1)
 struct BlockGrid
 {
 	unsigned char Width;
@@ -74,4 +73,3 @@ struct BlockGrid
 private:
 	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, unsigned int x, unsigned int y) const;
 };
-#pragma pack(pop)
