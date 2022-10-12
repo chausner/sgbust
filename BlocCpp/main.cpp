@@ -21,6 +21,7 @@ int main()
 	solver.MaxDBSize = 10000000;
 	solver.MaxDepth = std::nullopt;
 	solver.DontAddToDBLastDepth = false;
+	solver.Quiet = false;
 
 	auto startTime = std::chrono::steady_clock::now();
 

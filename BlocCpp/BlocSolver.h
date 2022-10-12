@@ -57,6 +57,7 @@ public:
 	bool DontAddToDBLastDepth = false;
 	bool TrimDB = true;
 	double TrimmingSafetyFactor = 1.25;
+	bool Quiet = false;
 
 	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize);
 };

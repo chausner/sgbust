@@ -26,7 +26,8 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 
 	for (depth = 0; depth < MaxDepth || !MaxDepth; depth++)
 	{
-		PrintStats();
+		if (!Quiet)
+			PrintStats();
 
 		SolveDepth(stop, DontAddToDBLastDepth && MaxDepth && depth == *MaxDepth - 1);
 
@@ -136,12 +137,15 @@ void BlocSolver::CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool
 			bestScore = score;
 			solution = blockGrid.Solution;
 
-			std::cout << "Better solution found (score: " << score 
-				<< ", blocks: " << blockGrid.GetNumberOfBlocks() 
-				<< ", steps: " << solution.GetLength() << "): " << blockGrid.Solution.AsString()
-				<< std::endl;
+			if (!Quiet)
+			{
+				std::cout << "Better solution found (score: " << score
+					<< ", blocks: " << blockGrid.GetNumberOfBlocks()
+					<< ", steps: " << solution.GetLength() << "): " << blockGrid.Solution.AsString()
+					<< std::endl;
 
-			blockGrid.Print();
+				blockGrid.Print();
+			}
 
 			if (scoring.IsPerfect())
 				stop = true;
