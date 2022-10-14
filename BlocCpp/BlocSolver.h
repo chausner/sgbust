@@ -33,7 +33,7 @@ public:
 	}
 };
 
-using BlockGridHashSet = phmap::parallel_flat_hash_set<CompactBlockGrid, std::hash<CompactBlockGrid>, std::equal_to<CompactBlockGrid>, std::allocator<CompactBlockGrid>, 5, std::mutex>; // phmap::NullMutex
+using BlockGridHashSet = phmap::parallel_flat_hash_set<CompactBlockGrid, std::hash<CompactBlockGrid>, std::equal_to<CompactBlockGrid>, std::allocator<CompactBlockGrid>, 6, std::mutex>;
 
 class BlocSolver
 {
