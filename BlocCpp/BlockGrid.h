@@ -34,7 +34,7 @@ struct Solution
 	Solution& operator=(const Solution& solution);
 	Solution& operator=(Solution&& solution) noexcept = default;
 
-	Solution Append(unsigned char step);
+	Solution Append(unsigned char step) const;
 	std::string AsString() const;
 	std::vector<unsigned char> AsVector() const { return std::vector(steps.get(), steps.get() + GetLength()); }
 	unsigned int GetLength() const;

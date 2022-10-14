@@ -47,10 +47,10 @@ class BlocSolver
 	std::mutex mutex;
 
 	void SolveDepth(bool& stop, bool dontAddToDB);
-	void TrimDatabase();
 	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, Scoring scoring, std::map<Scoring, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB);
 	void CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool& stop);
 	void PrintStats() const;
+	void TrimDatabase();
 
 public:
 	std::optional<unsigned int> MaxDBSize = std::nullopt;

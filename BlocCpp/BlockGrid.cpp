@@ -33,7 +33,7 @@ Solution& Solution::operator=(const Solution& solution)
 	return *this;
 }
 
-Solution Solution::Append(unsigned char step)
+Solution Solution::Append(unsigned char step) const
 {
 	Solution result;
 

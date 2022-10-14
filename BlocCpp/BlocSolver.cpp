@@ -20,8 +20,8 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 
 	solution = Solution();
 	bestScore = std::numeric_limits<int>::max();
-
 	dbSize = 1;
+	multiplier = 0;
 
 	bool stop = false;
 
@@ -29,6 +29,9 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 	{
 		if (!Quiet)
 			PrintStats();
+
+		if (TrimDB)
+			TrimDatabase();
 
 		SolveDepth(stop, DontAddToDBLastDepth && MaxDepth && depth == *MaxDepth - 1);
 
@@ -59,9 +62,6 @@ void BlocSolver::PrintStats() const
 
 void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 {
-	if (TrimDB)
-		TrimDatabase();
-
 	std::map<Scoring, BlockGridHashSet> newBlockGrids;
 
 	std::atomic_uint blockGridsSolved = 0;
@@ -75,7 +75,7 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 			if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
 				return;
 
-				newDBSize += SolveBlockGrid(blockGrid.Expand(), scoring, newBlockGrids, stop, dontAddToDB);
+			newDBSize += SolveBlockGrid(blockGrid.Expand(), scoring, newBlockGrids, stop, dontAddToDB);
 
 			blockGridsSolved++;
 		});
