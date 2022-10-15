@@ -104,10 +104,8 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scor
 
 	for (int i = 0; i < groups.size(); i++)
 	{
-		BlockGrid newBlockGrid = blockGrid;
-
+		BlockGrid newBlockGrid(blockGrid.Width, blockGrid.Height, blockGrid.Blocks.get(), blockGrid.Solution.Append(i));
 		newBlockGrid.RemoveGroup(groups[i]);
-		newBlockGrid.Solution = newBlockGrid.Solution.Append(i);
 
 		Scoring newScoring = scoring.RemoveGroup(blockGrid, groups[i], newBlockGrid, smallestGroupSize);
 

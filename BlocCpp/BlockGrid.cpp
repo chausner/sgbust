@@ -95,6 +95,11 @@ BlockGrid::BlockGrid(unsigned char width, unsigned char height) : Width(width), 
 {
 }
 
+BlockGrid::BlockGrid(unsigned char width, unsigned char height, const BlockColor* blocks, ::Solution solution) : Width(width), Height(height), Blocks(std::make_unique_for_overwrite<BlockColor[]>(width * height)), Solution(std::move(solution))
+{
+	std::copy(blocks, blocks + Width * Height, BlocksBegin());
+}
+
 BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
 {
 	std::ifstream file(path, std::ifstream::binary);
