@@ -3,7 +3,7 @@
 
 CompactBlockGrid::CompactBlockGrid(const CompactBlockGrid& blockGrid) : Width(blockGrid.Width), Height(blockGrid.Height), Solution(blockGrid.Solution)
 {
-	Data = std::make_unique<std::byte[]>(blockGrid.DataLength());
+	Data = std::make_unique_for_overwrite<std::byte[]>(blockGrid.DataLength());
 	std::copy(blockGrid.Data.get(), blockGrid.Data.get() + blockGrid.DataLength(), Data.get());
 }
 
@@ -25,7 +25,7 @@ CompactBlockGrid& CompactBlockGrid::operator=(const CompactBlockGrid& blockGrid)
 {
 	Width = blockGrid.Width;
 	Height = blockGrid.Height;
-	Data = std::make_unique<std::byte[]>(blockGrid.DataLength());
+	Data = std::make_unique_for_overwrite<std::byte[]>(blockGrid.DataLength());
 	std::copy(blockGrid.Data.get(), blockGrid.Data.get() + blockGrid.DataLength(), Data.get());
 	Solution = blockGrid.Solution;
 	return *this;
@@ -107,21 +107,21 @@ BlockGrid CompactBlockGrid::Expand() const
 
 void CompactBlockGrid::Compact(const BlockGrid& blockGrid)
 {
-	Data = std::make_unique<std::byte[]>(DataLength());
+	Data = std::make_unique_for_overwrite<std::byte[]>(DataLength());
 
 	const BlockColor* blocks = blockGrid.BlocksBegin();
 
 	for (int i = 0; i + 7 < Width * Height; i += 8)
 	{
 		std::byte* b = &Data[i / 8 * 3];
-		b[0] |= static_cast<std::byte>(blocks[i]);
+		b[0] = static_cast<std::byte>(blocks[i]);
 		b[0] |= static_cast<std::byte>(blocks[i + 1]) << 3;
 		b[0] |= (static_cast<std::byte>(blocks[i + 2]) & std::byte{ 0b110 }) << 5;
-		b[1] |= static_cast<std::byte>(blocks[i + 2]) & std::byte{ 0b001 };
+		b[1] = static_cast<std::byte>(blocks[i + 2]) & std::byte{ 0b001 };
 		b[1] |= static_cast<std::byte>(blocks[i + 3]) << 1;
 		b[1] |= static_cast<std::byte>(blocks[i + 4]) << 4;
 		b[1] |= (static_cast<std::byte>(blocks[i + 5]) & std::byte{ 0b100 }) << 5;
-		b[2] |= static_cast<std::byte>(blocks[i + 5]) & std::byte{ 0b011 };
+		b[2] = static_cast<std::byte>(blocks[i + 5]) & std::byte{ 0b011 };
 		b[2] |= static_cast<std::byte>(blocks[i + 6]) << 2;
 		b[2] |= static_cast<std::byte>(blocks[i + 7]) << 5;
 	}
@@ -132,14 +132,14 @@ void CompactBlockGrid::Compact(const BlockGrid& blockGrid)
 		switch (i % 8)
 		{
 		case 0:
-			b[0] |= static_cast<std::byte>(blocks[i]);
+			b[0] = static_cast<std::byte>(blocks[i]);
 			break;
 		case 1:
 			b[0] |= static_cast<std::byte>(blocks[i]) << 3;
 			break;
 		case 2:
 			b[0] |= (static_cast<std::byte>(blocks[i]) & std::byte{ 0b110 }) << 5;
-			b[1] |= static_cast<std::byte>(blocks[i]) & std::byte{ 0b001 };
+			b[1] = static_cast<std::byte>(blocks[i]) & std::byte{ 0b001 };
 			break;
 		case 3:
 			b[1] |= static_cast<std::byte>(blocks[i]) << 1;
@@ -149,7 +149,7 @@ void CompactBlockGrid::Compact(const BlockGrid& blockGrid)
 			break;
 		case 5:
 			b[1] |= (static_cast<std::byte>(blocks[i]) & std::byte{ 0b100 }) << 5;
-			b[2] |= static_cast<std::byte>(blocks[i]) & std::byte{ 0b011 };
+			b[2] = static_cast<std::byte>(blocks[i]) & std::byte{ 0b011 };
 			break;
 		case 6:
 			b[2] |= static_cast<std::byte>(blocks[i]) << 2;

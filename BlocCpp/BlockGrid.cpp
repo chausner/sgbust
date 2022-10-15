@@ -14,7 +14,7 @@ Solution::Solution(const Solution& solution)
 	if (solution.steps != nullptr)
 	{
 		int length = solution.GetLength();
-		steps = std::make_unique<unsigned char[]>(length + 1);
+		steps = std::make_unique_for_overwrite<unsigned char[]>(length + 1);
 		std::copy(solution.steps.get(), solution.steps.get() + length + 1, steps.get());
 	}
 }
@@ -24,7 +24,7 @@ Solution& Solution::operator=(const Solution& solution)
 	if (solution.steps != nullptr)
 	{
 		int length = solution.GetLength();
-		steps = std::make_unique<unsigned char[]>(length + 1);
+		steps = std::make_unique_for_overwrite<unsigned char[]>(length + 1);
 		std::copy(solution.steps.get(), solution.steps.get() + length + 1, steps.get());
 	}
 	else
@@ -40,14 +40,14 @@ Solution Solution::Append(unsigned char step) const
 	if (steps != nullptr)
 	{
 		int length = GetLength();
-		result.steps = std::make_unique<unsigned char[]>(length + 2);
+		result.steps = std::make_unique_for_overwrite<unsigned char[]>(length + 2);
 		std::copy(steps.get(), steps.get() + length, result.steps.get());
 		result.steps[length] = step;
 		result.steps[length + 1] = 0xFF;
 	}
 	else
 	{		
-		result.steps = std::make_unique<unsigned char[]>(2);
+		result.steps = std::make_unique_for_overwrite<unsigned char[]>(2);
 		result.steps[0] = step;
 		result.steps[1] = 0xFF;		
 	}
@@ -111,7 +111,7 @@ BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
 
 	smallestGroupSize = file.get();
 
-	Blocks = std::make_unique<BlockColor[]>(Width * Height);
+	Blocks = std::make_unique_for_overwrite<BlockColor[]>(Width * Height);
 
 	file.read(reinterpret_cast<char*>(&Blocks[0]), Width * Height);
 }
@@ -119,7 +119,7 @@ BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
 BlockGrid::BlockGrid(const BlockGrid& blockGrid) 
 	: Width(blockGrid.Width), Height(blockGrid.Height), Solution(blockGrid.Solution)
 {
-	Blocks = std::make_unique<BlockColor[]>(Width * Height);
+	Blocks = std::make_unique_for_overwrite<BlockColor[]>(Width * Height);
 	
 	std::copy(blockGrid.BlocksBegin(), blockGrid.BlocksEnd(), BlocksBegin());
 }
@@ -132,7 +132,7 @@ BlockGrid::BlockGrid(BlockGrid&& blockGrid) noexcept
 BlockGrid& BlockGrid::operator=(const BlockGrid& blockGrid)
 {
 	if (Width * Height < blockGrid.Width * blockGrid.Height || Blocks == nullptr)
-		Blocks = std::make_unique<BlockColor[]>(blockGrid.Width * blockGrid.Height);
+		Blocks = std::make_unique_for_overwrite<BlockColor[]>(blockGrid.Width * blockGrid.Height);
 
 	Width = blockGrid.Width;
 	Height = blockGrid.Height;
@@ -275,7 +275,7 @@ void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 
 	if (newWidth != Width || newHeight != Height)
 	{
-		std::unique_ptr<BlockColor[]> newBlocks = std::make_unique<BlockColor[]>(newWidth * newHeight);
+		std::unique_ptr<BlockColor[]> newBlocks = std::make_unique_for_overwrite<BlockColor[]>(newWidth * newHeight);
 
 		if (newWidth != Width)
 			for (int y = 0; y < newHeight; y++)
