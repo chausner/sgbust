@@ -95,7 +95,8 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 
 unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scoring, std::map<Scoring, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB)
 {
-	std::vector<std::vector<Position>> groups = blockGrid.GetGroups(smallestGroupSize);
+	static thread_local std::vector<std::vector<Position>> groups;
+	blockGrid.GetGroups(groups, smallestGroupSize);
 
 	if (groups.empty())
 		CheckSolution(scoring, blockGrid, stop);		

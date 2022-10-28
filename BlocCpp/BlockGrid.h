@@ -23,6 +23,7 @@ struct Position
 	unsigned char X;
 	unsigned char Y;
 
+	Position() {}
 	Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
 };
 
@@ -59,7 +60,7 @@ struct BlockGrid
 	BlockGrid& operator=(BlockGrid&& blockGrid) noexcept;
 
 	void Save(std::ostream& stream, unsigned int smallestGroupSize) const;
-	std::vector<std::vector<Position>> GetGroups(unsigned int smallestGroupSize) const;
+	void GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const;
 	void RemoveGroup(const std::vector<Position>& group);
 	unsigned int GetNumberOfBlocks() const;
 
@@ -72,5 +73,6 @@ struct BlockGrid
 	void Print() const;
 
 private:
-	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, unsigned int x, unsigned int y) const;
+	unsigned int GetAdjacentBlocks(Position* blockList, unsigned char x, unsigned char y) const;
+	void GetAdjacentBlocksRecursive(Position*& blockList, unsigned char x, unsigned char y) const;
 };
