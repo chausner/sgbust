@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 #include "BlocSolver.h"
-#include "CompactBlockgrid.h"
+#include "CompactBlockGrid.h"
 
 void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 {
