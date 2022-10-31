@@ -2,12 +2,47 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <stdexcept>
 #include <utility>
 #include "BlockGrid.h"
 
 #define XY(x,y) ((y) * Width + (x))
+
+Solution::Solution(std::string_view string)
+{
+	if (string.empty())
+		return;
+
+	std::vector<unsigned char> steps;
+	steps.reserve(string.length());
+
+	for (auto it = string.begin(); it != string.end(); )
+	{
+		auto isAToZ = [](char c) { return c >= 'A' && c <= 'Z'; };
+
+		if (isAToZ(it[0]))
+		{
+			steps.push_back(it[0] - 65);
+			it++;
+		}
+		else if (it[0] == '(' && std::distance(it, string.end()) >= 4 && isAToZ(it[1]) && isAToZ(it[2]) && it[3] == ')')
+		{
+			unsigned int n = (it[1] - 64) * 26 + (it[2] - 65);
+			if (n > 255)
+				throw std::invalid_argument("Invalid solution string");
+			steps.push_back(n);
+			it += 4;
+		}
+		else
+			throw std::invalid_argument("Invalid solution string");
+	}
+
+	this->steps = std::make_unique_for_overwrite<unsigned char[]>(steps.size() + 1);
+	std::copy(steps.begin(), steps.end(), this->steps.get());
+	this->steps.get()[steps.size()] = 0xFF;
+}
 
 Solution::Solution(const Solution& solution)
 {

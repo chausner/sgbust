@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <ostream>
 #include <vector>
 
@@ -30,6 +31,7 @@ struct Position
 struct Solution
 {
 	Solution() = default;
+	Solution(std::string_view string);
 	Solution(const Solution& solution);
 	Solution(Solution&& solution) noexcept = default;
 	Solution& operator=(const Solution& solution);
