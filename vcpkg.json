@@ -1,0 +1,9 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+    "name": "bloc-cpp",
+    "dependencies": [
+        "cli11",
+        "parallel-hashmap"
+    ],
+    "builtin-baseline": "1f825db83b129a8a9504b141cadb2ce29f32e01f"
+}
