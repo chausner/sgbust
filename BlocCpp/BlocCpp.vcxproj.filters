@@ -38,9 +38,6 @@
     <ClInclude Include="BlockGrid.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="wyhash.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="utils.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
