@@ -18,7 +18,6 @@ struct CompactBlockGrid
 	CompactBlockGrid& operator=(CompactBlockGrid&& blockGrid) noexcept;
 
 	std::size_t DataLength() const;
-	std::size_t TotalSize() const;
 	BlockGrid Expand() const;	
 
 private:
