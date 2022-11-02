@@ -4,8 +4,8 @@
 #include <cstddef>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <optional>
+#include <shared_mutex>
 
 #include "core/CompactGrid.h"
 #include "core/Grid.h"
@@ -59,7 +59,7 @@ namespace sgbust
         std::optional<int> bestScore;
         unsigned int beamSize = 0;
         double multiplier = 0;
-        std::mutex mutex;
+        std::shared_mutex mutex;
 
         void SolveDepth(bool maxDepthReached, bool& stop);
         unsigned int SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop);

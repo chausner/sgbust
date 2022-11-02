@@ -130,6 +130,19 @@ namespace sgbust
 
         unsigned int numNewGridsInserted = 0;
 
+        auto getOrCreateHashSet = [&](const Score& score) -> GridHashSet* {
+            {
+                std::shared_lock lock(mutex);
+                auto it = newGrids.find(score);				
+                if (it != newGrids.end())
+                    return &it->second;
+            }
+            {
+                std::unique_lock lock(mutex);
+                return &newGrids[score];
+            }
+        };
+
         for (int i = 0; i < groups.size(); i++)
         {
             Grid newGrid(grid.Width, grid.Height, grid.Blocks.get(), grid.Solution.Append(i));
@@ -142,11 +155,7 @@ namespace sgbust
             else
                 if (!maxDepthReached)
                 {
-                    std::unique_lock lock(mutex);
-                    GridHashSet& hashSet = newGrids[newScore];
-                    lock.unlock();
-
-                    auto [it, inserted] = hashSet.insert(CompactGrid(std::move(newGrid)));
+                    auto [it, inserted] = getOrCreateHashSet(newScore)->insert(CompactGrid(std::move(newGrid)));
                     if (inserted)
                         numNewGridsInserted++;
                 }
