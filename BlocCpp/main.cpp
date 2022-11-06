@@ -9,6 +9,7 @@
 struct CLIOptions
 {
     std::string GridFile;
+	std::string SolutionPrefix;
 	std::optional<unsigned int> MaxDBSize = std::nullopt;
 	std::optional<unsigned int> MaxDepth = std::nullopt;
 	bool DontAddToDBLastDepth = false;
@@ -41,7 +42,7 @@ static void run(const CLIOptions &cliOptions)
 
 	auto startTime = std::chrono::steady_clock::now();
 
-	solver.Solve(blockGrid, smallestGroupSize);
+	solver.Solve(blockGrid, smallestGroupSize, Solution(cliOptions.SolutionPrefix));
 
 	auto endTime = std::chrono::steady_clock::now();
 
@@ -58,6 +59,7 @@ int main(int argc, const char* argv[])
 	CLIOptions cliOptions;
 
     app.add_option("grid-file", cliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
+	app.add_option("--prefix", cliOptions.SolutionPrefix, "Solution prefix");
 	app.add_option("-s,--max-db-size", cliOptions.MaxDBSize, "Maximum DB size");
 	app.add_option("-d,--max-depth", cliOptions.MaxDepth, "Maximum search depth");
 	app.add_flag("--dont-add-to-db-last-depth", cliOptions.DontAddToDBLastDepth, "Do not add last depth to database");

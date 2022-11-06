@@ -90,6 +90,25 @@ Solution Solution::Append(unsigned char step) const
 	return result;
 }
 
+Solution Solution::Append(const Solution& solution) const
+{
+	if (solution.IsEmpty())
+		return *this;
+	else if (IsEmpty())
+		return solution;
+	else
+	{
+		Solution result;
+		unsigned int length1 = GetLength();
+		unsigned int length2 = solution.GetLength();
+		result.steps = std::make_unique_for_overwrite<unsigned char[]>(length1 + length2 + 1);
+		std::copy(steps.get(), steps.get() + length1, result.steps.get());
+		std::copy(solution.steps.get(), solution.steps.get() + length2, result.steps.get() + length1);
+		result.steps[length1 + length2] = 0xFF;
+		return result;
+	}
+}
+
 std::string Solution::AsString() const
 {
 	if (steps == nullptr)
@@ -338,6 +357,21 @@ void BlockGrid::RemoveGroup(const std::vector<Position>& group)
 unsigned int BlockGrid::GetNumberOfBlocks() const
 {
 	return std::count_if(BlocksBegin(), BlocksEnd(), [](auto c) { return c != BlockColor::None; });
+}
+
+void BlockGrid::ApplySolution(const ::Solution& solution, unsigned int smallestGroupSize)
+{
+	unsigned int length = solution.GetLength();
+
+	std::vector<std::vector<Position>> groups;
+
+	for (unsigned int i = 0; i < length; i++)
+	{
+		GetGroups(groups, smallestGroupSize);
+		if (solution[i] >= groups.size())
+			throw std::runtime_error("Invalid solution");
+		RemoveGroup(groups[solution[i]]);
+	}
 }
 
 bool BlockGrid::IsEmpty() const

@@ -40,6 +40,7 @@ class BlocSolver
 	unsigned int smallestGroupSize = 0;
 	unsigned int depth = 0;
 	std::map<Scoring, BlockGridHashSet> blockGrids;
+	Solution solutionPrefix;
 	Solution solution;
 	int bestScore = 0;
 	unsigned int dbSize = 0;
@@ -60,5 +61,5 @@ public:
 	double TrimmingSafetyFactor = 1.25;
 	bool Quiet = false;
 
-	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize);
+	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, const Solution& solutionPrefix = {});
 };

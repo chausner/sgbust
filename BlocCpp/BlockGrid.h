@@ -38,9 +38,13 @@ struct Solution
 	Solution& operator=(Solution&& solution) noexcept = default;
 
 	Solution Append(unsigned char step) const;
+	Solution Append(const Solution& solution) const;
 	std::string AsString() const;
 	std::vector<unsigned char> AsVector() const { return std::vector(steps.get(), steps.get() + GetLength()); }
 	unsigned int GetLength() const;
+	bool IsEmpty() const { return steps == nullptr; }
+
+	unsigned char operator[](unsigned int index) const { return steps[index]; }
 
 private:
 	std::unique_ptr<unsigned char[]> steps;
@@ -65,6 +69,7 @@ struct BlockGrid
 	void GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const;
 	void RemoveGroup(const std::vector<Position>& group);
 	unsigned int GetNumberOfBlocks() const;
+	void ApplySolution(const ::Solution& solution, unsigned int smallestGroupSize);
 
 	BlockColor* BlocksBegin() { return Blocks.get(); }
 	BlockColor* BlocksEnd() { return Blocks.get() + Width * Height; }
