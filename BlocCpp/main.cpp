@@ -6,6 +6,7 @@
 #include <iostream>
 #include <optional>
 #include <random>
+#include <unordered_set>
 #include "BlockGrid.h"
 #include "BlocSolver.h"
 #include "utils.h"
@@ -114,7 +115,12 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 
 	BlockGrid blockGrid(cliOptions.GridFile, smallestGroupSize);
 
+	std::unordered_set<BlockColor> colors(blockGrid.BlocksBegin(), blockGrid.BlocksEnd());
+	colors.erase(BlockColor::None);
+	int numColors = colors.size();
+
 	std::cout << "Size: " << static_cast<int>(blockGrid.Width) << " x " << static_cast<int>(blockGrid.Height) << std::endl;
+	std::cout << "Number of colors: " << numColors << std::endl;
 	std::cout << "Smallest group size: " << smallestGroupSize << std::endl;
 	std::cout << std::endl;
 	blockGrid.Print();
