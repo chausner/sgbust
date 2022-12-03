@@ -1,7 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <memory>
+#include <random>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <ostream>
@@ -65,6 +68,9 @@ struct BlockGrid
 	BlockGrid& operator=(const BlockGrid& blockGrid);
 	BlockGrid& operator=(BlockGrid&& blockGrid) noexcept;
 
+	template <typename Generator>
+	static BlockGrid GenerateRandom(unsigned char width, unsigned char height, unsigned int numColors, Generator& generator);
+
 	void Save(std::ostream& stream, unsigned int smallestGroupSize) const;
 	void GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const;
 	void RemoveGroup(const std::vector<Position>& group);
@@ -83,3 +89,18 @@ private:
 	unsigned int GetAdjacentBlocks(Position* blockList, unsigned char x, unsigned char y) const;
 	void GetAdjacentBlocksRecursive(Position*& blockList, unsigned char x, unsigned char y) const;
 };
+
+template <typename Generator>
+BlockGrid BlockGrid::GenerateRandom(unsigned char width, unsigned char height, unsigned int numColors, Generator& generator)
+{
+	if (numColors < 1 || numColors > 7)
+		throw std::invalid_argument("numColors must be between 1 and 7");
+
+	BlockGrid grid(width, height);
+	std::uniform_int_distribution<> dist(1, numColors);
+	std::generate(grid.BlocksBegin(), grid.BlocksEnd(), [&]() {
+		return static_cast<BlockColor>(dist(generator));
+	});
+	
+	return grid;
+}
