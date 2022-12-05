@@ -4,17 +4,28 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <random>
+#include <unordered_map>
 #include <unordered_set>
 #include "BlockGrid.h"
 #include "BlocSolver.h"
 #include "utils.h"
 #include "CLI/CLI.hpp"
 
+static std::unordered_map<std::string, std::shared_ptr<Scoring>> Scorings {
+	{ "N", std::make_shared<NScoring>() },
+	{ "NNminusOne", std::make_shared<NNminusOneScoring>() },
+	{ "NminusTwoSquared", std::make_shared<NminusTwoSquaredScoring>() },
+	{ "NminusTwoSquaredPlusN", std::make_shared<NminusTwoSquaredPlusNScoring>() },
+	{ "NumBlocksNotInGroups", std::make_shared<NumBlocksNotInGroupsScoring>() },
+};
+
 struct SolveCLIOptions
 {
     std::string GridFile;
+	std::string Scoring;
 	std::string SolutionPrefix;
 	std::optional<unsigned int> MaxDBSize = std::nullopt;
 	std::optional<unsigned int> MaxDepth = std::nullopt;
@@ -65,7 +76,7 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 
 	auto startTime = std::chrono::steady_clock::now();
 
-	solver.Solve(blockGrid, smallestGroupSize, Solution(cliOptions.SolutionPrefix));
+	solver.Solve(blockGrid, smallestGroupSize, *Scorings.at(cliOptions.Scoring), Solution(cliOptions.SolutionPrefix));
 
 	auto endTime = std::chrono::steady_clock::now();
 
@@ -159,6 +170,7 @@ int main(int argc, const char* argv[])
 
 		CLI::App* solveCommand = app.add_subcommand("solve", "Solve a block grid");
 		solveCommand->add_option("grid-file", cliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
+		solveCommand->add_option("--scoring", cliOptions.Scoring, "Scoring formula to optimize on")->required()->transform(CLI::IsMember(Scorings, CLI::ignore_case));;
 		solveCommand->add_option("--prefix", cliOptions.SolutionPrefix, "Solution prefix");
 		solveCommand->add_option("-s,--max-db-size", cliOptions.MaxDBSize, "Maximum DB size");
 		solveCommand->add_option("-d,--max-depth", cliOptions.MaxDepth, "Maximum search depth");

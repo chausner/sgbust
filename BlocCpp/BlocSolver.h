@@ -38,8 +38,9 @@ using BlockGridHashSet = phmap::parallel_flat_hash_set<CompactBlockGrid, std::ha
 class BlocSolver
 {
 	unsigned int smallestGroupSize = 0;
+	const Scoring* scoring = nullptr;
 	unsigned int depth = 0;
-	std::map<Scoring, BlockGridHashSet> blockGrids;
+	std::map<Score, BlockGridHashSet> blockGrids;
 	Solution solutionPrefix;
 	Solution solution;
 	int bestScore = 0;
@@ -48,8 +49,8 @@ class BlocSolver
 	std::mutex mutex;
 
 	void SolveDepth(bool& stop, bool dontAddToDB);
-	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, Scoring scoring, std::map<Scoring, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB);
-	void CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool& stop);
+	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, Score score, std::map<Score, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB);
+	void CheckSolution(Score score, const BlockGrid& blockGrid, bool& stop);
 	void PrintStats() const;
 	void TrimDatabase();
 
@@ -61,5 +62,5 @@ public:
 	double TrimmingSafetyFactor = 1.25;
 	bool Quiet = false;
 
-	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, const Solution& solutionPrefix = {});
+	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, const Scoring& scoring, const Solution& solutionPrefix = {});
 };

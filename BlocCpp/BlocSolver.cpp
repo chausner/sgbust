@@ -12,9 +12,10 @@
 #include "CompactBlockGrid.h"
 #include "MemoryUsage.h"
 
-void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, const Solution& solutionPrefix)
+void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, const Scoring& scoring, const Solution& solutionPrefix)
 {
 	this->smallestGroupSize = smallestGroupSize;
+	this->scoring = &scoring;
 	this->solutionPrefix = solutionPrefix;
 
 	BlockGrid bg = blockGrid;
@@ -23,7 +24,7 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, con
 		bg.ApplySolution(solutionPrefix, smallestGroupSize);
 	
 	blockGrids.clear();
-	blockGrids[Scoring(bg, smallestGroupSize)].insert(CompactBlockGrid(bg));
+	blockGrids[scoring.CreateScore(bg, smallestGroupSize)].insert(CompactBlockGrid(bg));
 
 	solution = Solution();
 	bestScore = std::numeric_limits<int>::max();
@@ -52,9 +53,9 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, con
 
 void BlocSolver::PrintStats() const
 {	
-	int minScore = blockGrids.begin()->first.Score;
-	int maxScore = blockGrids.rbegin()->first.Score;
-	long long scoreSum = std::transform_reduce(blockGrids.begin(), blockGrids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Score * b.second.size(); });
+	int minScore = blockGrids.begin()->first.Value;
+	int maxScore = blockGrids.rbegin()->first.Value;
+	long long scoreSum = std::transform_reduce(blockGrids.begin(), blockGrids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Value * b.second.size(); });
 	double avgScore = static_cast<double>(scoreSum) / dbSize;
 	std::cout << 
 		"Depth: " << std::setw(3) << depth << 
@@ -70,7 +71,7 @@ void BlocSolver::PrintStats() const
 
 void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 {
-	std::map<Scoring, BlockGridHashSet> newBlockGrids;
+	std::map<Score, BlockGridHashSet> newBlockGrids;
 
 	std::atomic_uint blockGridsSolved = 0;
 	std::atomic_uint newDBSize = 0;
@@ -101,13 +102,13 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 	dbSize = newDBSize;
 }
 
-unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scoring, std::map<Scoring, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB)
+unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Score score, std::map<Score, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB)
 {
 	static thread_local std::vector<std::vector<Position>> groups;
 	blockGrid.GetGroups(groups, smallestGroupSize);
 
 	if (groups.empty())
-		CheckSolution(scoring, blockGrid, stop);		
+		CheckSolution(score, blockGrid, stop);		
 
 	int c = 0;
 
@@ -116,15 +117,15 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scor
 		BlockGrid newBlockGrid(blockGrid.Width, blockGrid.Height, blockGrid.Blocks.get(), blockGrid.Solution.Append(i));
 		newBlockGrid.RemoveGroup(groups[i]);
 
-		Scoring newScoring = scoring.RemoveGroup(blockGrid, groups[i], newBlockGrid, smallestGroupSize);
+		Score newScore = scoring->RemoveGroup(score, blockGrid, groups[i], newBlockGrid, smallestGroupSize);
 
 		if (newBlockGrid.IsEmpty())
-			CheckSolution(newScoring, newBlockGrid, stop);
+			CheckSolution(newScore, newBlockGrid, stop);
 		else
 			if (!dontAddToDB)
 			{
 				std::unique_lock lock(mutex);
-				BlockGridHashSet& hashSet = newBlockGrids[newScoring];
+				BlockGridHashSet& hashSet = newBlockGrids[newScore];
 				lock.unlock();
 
 				auto [it, inserted] = hashSet.insert(CompactBlockGrid(std::move(newBlockGrid)));
@@ -136,22 +137,20 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scor
 	return c;
 }
 
-void BlocSolver::CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool& stop)
+void BlocSolver::CheckSolution(Score score, const BlockGrid& blockGrid, bool& stop)
 {
-	int score = scoring.Score;
-
-	if (!stop && score < bestScore)
+	if (!stop && score.Value < bestScore)
 	{
 		std::scoped_lock lock(mutex);
 
-		if (!stop && score < bestScore)
+		if (!stop && score.Value < bestScore)
 		{
-			bestScore = score;
+			bestScore = score.Value;
 			solution = solutionPrefix.Append(blockGrid.Solution);
 
 			if (!Quiet)
 			{
-				std::cout << "Better solution found (score: " << score
+				std::cout << "Better solution found (score: " << score.Value
 					<< ", blocks: " << blockGrid.GetNumberOfBlocks()
 					<< ", steps: " << solution.GetLength() << "): " << solution.AsString()
 					<< std::endl;
@@ -159,7 +158,7 @@ void BlocSolver::CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool
 				blockGrid.Print();
 			}
 
-			if (scoring.IsPerfect())
+			if (scoring->IsPerfectScore(score))
 				stop = true;
 		}
 	}

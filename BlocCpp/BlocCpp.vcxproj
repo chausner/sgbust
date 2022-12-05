@@ -152,7 +152,6 @@
     <ClCompile Include="CompactBlockGrid.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemoryUsage.cpp" />
-    <ClCompile Include="Scoring.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
