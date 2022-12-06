@@ -80,13 +80,13 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 
 	for (auto it = blockGrids.begin(); it != blockGrids.end(); it = blockGrids.erase(it))
 	{
-		auto& [scoring, hashSet] = *it;
+		auto& [score, hashSet] = *it;
 
 		std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const CompactBlockGrid& blockGrid) {
 			if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
 				return;
 
-			newDBSize += SolveBlockGrid(blockGrid.Expand(), scoring, newBlockGrids, stop, dontAddToDB);
+			newDBSize += SolveBlockGrid(blockGrid.Expand(), score, newBlockGrids, stop, dontAddToDB);
 
 			blockGridsSolved++;
 		});
