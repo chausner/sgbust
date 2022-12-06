@@ -35,6 +35,12 @@ public:
 
 using BlockGridHashSet = phmap::parallel_flat_hash_set<CompactBlockGrid, std::hash<CompactBlockGrid>, std::equal_to<CompactBlockGrid>, std::allocator<CompactBlockGrid>, 6, std::mutex>;
 
+struct SolverResult
+{
+	int BestScore;
+	Solution BestSolution;
+};
+
 class BlocSolver
 {
 	unsigned int smallestGroupSize = 0;
@@ -62,5 +68,5 @@ public:
 	double TrimmingSafetyFactor = 1.25;
 	bool Quiet = false;
 
-	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, const Scoring& scoring, const Solution& solutionPrefix = {});
+	std::optional<SolverResult> Solve(const BlockGrid& blockGrid, unsigned int smallestGroupSize, const Scoring& scoring, const Solution& solutionPrefix = {});
 };

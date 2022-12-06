@@ -12,7 +12,7 @@
 #include "CompactBlockGrid.h"
 #include "MemoryUsage.h"
 
-void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, const Scoring& scoring, const Solution& solutionPrefix)
+std::optional<SolverResult> BlocSolver::Solve(const BlockGrid& blockGrid, unsigned int smallestGroupSize, const Scoring& scoring, const Solution& solutionPrefix)
 {
 	this->smallestGroupSize = smallestGroupSize;
 	this->scoring = &scoring;
@@ -48,7 +48,9 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize, con
 	}
 
 	if (bestScore != std::numeric_limits<int>::max())
-		blockGrid.Solution = std::move(solution);
+		return SolverResult { bestScore, std::move(solution) };
+	else
+		return std::nullopt;
 }
 
 void BlocSolver::PrintStats() const
