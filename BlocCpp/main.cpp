@@ -20,6 +20,8 @@ static std::unordered_map<std::string, std::shared_ptr<Scoring>> Scorings {
 	{ "NminusTwoSquared", std::make_shared<NminusTwoSquaredScoring>() },
 	{ "NminusTwoSquaredPlusN", std::make_shared<NminusTwoSquaredPlusNScoring>() },
 	{ "NumBlocksNotInGroups", std::make_shared<NumBlocksNotInGroupsScoring>() },
+	{ "PotentialGroupsScoreScoring", std::make_shared<PotentialGroupsScoreScoring>() },
+	{ "PotentialNScoring", std::make_shared<PotentialNScoring>() },
 };
 
 struct SolveCLIOptions

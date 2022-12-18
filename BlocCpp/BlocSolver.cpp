@@ -6,6 +6,7 @@
 #include <iterator>
 #include <limits>
 #include <numeric>
+#include <ranges>
 #include <utility>
 #include <vector>
 #include "BlocSolver.h"
@@ -55,8 +56,7 @@ std::optional<SolverResult> BlocSolver::Solve(const BlockGrid& blockGrid, unsign
 
 void BlocSolver::PrintStats() const
 {	
-	int minScore = blockGrids.begin()->first.Value;
-	int maxScore = blockGrids.rbegin()->first.Value;
+	auto [minScore, maxScore] = std::ranges::minmax(blockGrids | std::views::transform([](const auto& b) { return b.first.Value; }));
 	long long scoreSum = std::transform_reduce(blockGrids.begin(), blockGrids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Value * b.second.size(); });
 	double avgScore = static_cast<double>(scoreSum) / dbSize;
 	std::cout << 
@@ -121,7 +121,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Score score,
 
 		Score newScore = scoring->RemoveGroup(score, blockGrid, groups[i], newBlockGrid, smallestGroupSize);
 
-		if (newBlockGrid.IsEmpty())
+		if (newBlockGrid.IsEmpty() || std::isnan(newScore.Objective))
 			CheckSolution(newScore, newBlockGrid, stop);
 		else
 			if (!dontAddToDB)
