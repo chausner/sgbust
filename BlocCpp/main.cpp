@@ -63,7 +63,10 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 	BlockGrid blockGrid(cliOptions.GridFile, smallestGroupSize);
 
 	if (!cliOptions.Quiet)
+	{
 		blockGrid.Print();
+		std::cout << std::endl;
+	}
 
 	BlocSolver solver;
 
@@ -76,14 +79,28 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 
 	auto startTime = std::chrono::steady_clock::now();
 
-	solver.Solve(blockGrid, smallestGroupSize, *Scorings.at(cliOptions.Scoring), Solution(cliOptions.SolutionPrefix));
+	std::optional<SolverResult> solverResult = solver.Solve(blockGrid, smallestGroupSize, *Scorings.at(cliOptions.Scoring), Solution(cliOptions.SolutionPrefix));
 
 	auto endTime = std::chrono::steady_clock::now();
 
 	auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
 
 	if (!cliOptions.Quiet)
+	{
+		std::cout << std::endl;
 		std::cout << "Done! - took " << elapsedMilliseconds << "ms" << std::endl;
+		if (solverResult.has_value())
+		{
+			blockGrid.ApplySolution(solverResult->BestSolution, smallestGroupSize);
+			std::cout << "Best solution (score: " << solverResult->BestScore
+				<< ", blocks: " << blockGrid.GetNumberOfBlocks()
+				<< ", steps: " << solverResult->BestSolution.GetLength() << "): " << solverResult->BestSolution.AsString()
+				<< std::endl;			
+			blockGrid.Print();
+		}
+		else
+			std::cout << "No solution found." << std::endl;
+	}
 }
 
 static void RunGenerateCommand(const GenerateCLIOptions &cliOptions)

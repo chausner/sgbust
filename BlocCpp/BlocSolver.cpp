@@ -150,16 +150,6 @@ void BlocSolver::CheckSolution(Score score, const BlockGrid& blockGrid, bool& st
 			bestScore = score.Value;
 			solution = solutionPrefix.Append(blockGrid.Solution);
 
-			if (!Quiet)
-			{
-				std::cout << "Better solution found (score: " << score.Value
-					<< ", blocks: " << blockGrid.GetNumberOfBlocks()
-					<< ", steps: " << solution.GetLength() << "): " << solution.AsString()
-					<< std::endl;
-
-				blockGrid.Print();
-			}
-
 			if (scoring->IsPerfectScore(score))
 				stop = true;
 		}
