@@ -49,7 +49,9 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 
 	unsigned int smallestGroupSize;
 
-	BlockGrid blockGrid(cliOptions.GridFile, smallestGroupSize);
+	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);
+	BlockGrid blockGrid(file, smallestGroupSize);
+	file.close();
 
 	if (!cliOptions.Quiet)
 		blockGrid.Print();
@@ -94,6 +96,7 @@ static void RunGenerateCommand(const GenerateCLIOptions &cliOptions)
 
 	std::ofstream file(cliOptions.GridFile, std::ios_base::binary);
 	blockGrid.Save(file, cliOptions.SmallestGroupSize);
+	file.close();
 
 	if (!cliOptions.Quiet)
 	{
@@ -113,7 +116,9 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 
 	unsigned int smallestGroupSize;
 
-	BlockGrid blockGrid(cliOptions.GridFile, smallestGroupSize);
+	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);
+	BlockGrid blockGrid(file, smallestGroupSize);
+	file.close();
 
 	std::unordered_set<BlockColor> colors(blockGrid.BlocksBegin(), blockGrid.BlocksEnd());
 	colors.erase(BlockColor::None);

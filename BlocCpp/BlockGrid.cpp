@@ -1,6 +1,6 @@
 #include <algorithm>
+#include <array>
 #include <cstring>
-#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -154,25 +154,36 @@ BlockGrid::BlockGrid(unsigned char width, unsigned char height, const BlockColor
 	std::copy(blocks, blocks + Width * Height, BlocksBegin());
 }
 
-BlockGrid::BlockGrid(const std::string& path, unsigned int& smallestGroupSize)
+BlockGrid::BlockGrid(std::istream& stream, unsigned int& smallestGroupSize)
 {
-	std::ifstream file(path, std::ifstream::binary);
+	std::string header;
+	header.resize(4);
 
-	char header[4];
+	stream.read(header.data(), header.size());
 
-	file.read(&header[0], 4);
+	if (stream.fail())
+		throw std::runtime_error("Could not read stream.");
 
-	if (std::string(&header[0], 4) != "BGF2")
-		throw std::runtime_error("Invalid bloc grid file.");
+	if (header != "BGF2")
+		throw std::runtime_error("Invalid bloc grid file: header corrupted");
 
-	Width = file.get();
-	Height = file.get();
+	Width = stream.get();
+	Height = stream.get();
 
-	smallestGroupSize = file.get();
+	if ((Width == 0) != (Height == 0))
+		throw std::runtime_error("Invalid bloc grid file: width/height invalid.");
+
+	smallestGroupSize = stream.get();
+
+	if (smallestGroupSize < 1)
+		throw std::runtime_error("Invalid bloc grid file: smallest group size out-of-range.");
 
 	Blocks = std::make_unique_for_overwrite<BlockColor[]>(Width * Height);
 
-	file.read(reinterpret_cast<char*>(&Blocks[0]), Width * Height);
+	stream.read(reinterpret_cast<char*>(Blocks.get()), Width * Height);
+
+	if (stream.fail())
+		throw std::runtime_error("Could not read stream.");
 }
 
 BlockGrid::BlockGrid(const BlockGrid& blockGrid) 
@@ -220,6 +231,9 @@ void BlockGrid::Save(std::ostream& stream, unsigned int smallestGroupSize) const
 	stream << static_cast<unsigned char>(smallestGroupSize);
 	for (const BlockColor* b = BlocksBegin(); b != BlocksEnd(); b++)
 		stream << static_cast<unsigned char>(*b);
+
+	if (stream.fail())
+		throw std::runtime_error("Could not save BlockGrid to stream");
 }
 
 void BlockGrid::GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const

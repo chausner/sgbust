@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <istream>
 #include <memory>
 #include <random>
 #include <stdexcept>
@@ -62,7 +63,7 @@ struct BlockGrid
 
 	BlockGrid(unsigned char width, unsigned char height);
 	BlockGrid(unsigned char width, unsigned char height, const BlockColor* blocks, ::Solution solution);
-	BlockGrid(const std::string& path, unsigned int& smallestGroupSize);
+	BlockGrid(std::istream& stream, unsigned int& smallestGroupSize);
 	BlockGrid(const BlockGrid& blockGrid);
 	BlockGrid(BlockGrid&& blockGrid) noexcept;
 	BlockGrid& operator=(const BlockGrid& blockGrid);
