@@ -3,6 +3,9 @@
 #include <atomic>
 #include <cmath>
 #include <execution>
+#include <filesystem>
+#include <fstream>
+#include <format>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
@@ -52,6 +55,12 @@ namespace sgbust
                 TrimBeam();
 
             SolveDepth(MaxDepth && depth == *MaxDepth - 1, stop);
+
+            if (!BeamDumpPath.empty())
+            {
+                std::filesystem::path dumpPath = std::filesystem::path(BeamDumpPath) / std::format("depth{}.csv", depth);
+                DumpBeam(dumpPath.string());
+            }
 
             if (stop)
                 break;
@@ -201,6 +210,21 @@ namespace sgbust
                 grids.erase(it, grids.end());
 
                 beamSize = reducedBeamSize;
+            }
+        }
+    }
+
+    void Solver::DumpBeam(const std::string& path) const
+    {
+        std::ofstream file(path);
+
+        file << "Solution,Score\n";
+
+        for (const auto &[scoring, hashSet] : grids)
+        {
+            for (const CompactGrid& grid : hashSet)
+            {
+                file << std::format("{},{}\n", grid.Solution.AsString(), scoring.Value);
             }
         }
     }

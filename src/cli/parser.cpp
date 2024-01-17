@@ -81,6 +81,7 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     solveCommand->add_option("-d,--max-depth", solveCliOptions.MaxDepth, "Maximum search depth");
     solveCommand->add_flag("!--no-trim", solveCliOptions.TrimmingEnabled, "Disable beam trimming");
     solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor");
+    solveCommand->add_option("--save-beam", solveCliOptions.SaveBeam, "Save beam for every depth to disk");
     solveCommand->add_flag("-q,--quiet", solveCliOptions.Quiet, "Quiet mode");
     solveCommand->callback([&] {
         ValidateAndSetScoring(solveCliOptions.ScoringOptions);

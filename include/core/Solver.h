@@ -66,12 +66,14 @@ namespace sgbust
         void CheckSolution(const Grid& grid, Score score, bool& stop);
         void PrintStats() const;
         void TrimBeam();
+        void DumpBeam(const std::string& path) const;
 
     public:
         std::optional<unsigned int> MaxBeamSize = std::nullopt;
         std::optional<unsigned int> MaxDepth = std::nullopt;
         bool TrimmingEnabled = true;
         double TrimmingSafetyFactor = 1.25;
+        std::string BeamDumpPath;
         bool Quiet = false;
 
         std::optional<SolverResult> Solve(const Grid& grid, unsigned int minGroupSize, const Scoring& scoring, const Solution& solutionPrefix = {});

@@ -33,6 +33,7 @@ struct SolveCLIOptions
     std::optional<unsigned int> MaxDepth = std::nullopt;
     bool TrimmingEnabled = true;
     double TrimmingSafetyFactor = 1.25;
+    std::string SaveBeam;
     bool Quiet = false;
 };
 

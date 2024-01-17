@@ -33,6 +33,7 @@ void RunCommand(const SolveCLIOptions& cliOptions)
     solver.MaxDepth = cliOptions.MaxDepth;
     solver.TrimmingEnabled = cliOptions.TrimmingEnabled;
     solver.TrimmingSafetyFactor = cliOptions.TrimmingSafetyFactor;
+    solver.BeamDumpPath = cliOptions.SaveBeam;
     solver.Quiet = cliOptions.Quiet;
 
     auto startTime = std::chrono::steady_clock::now();
