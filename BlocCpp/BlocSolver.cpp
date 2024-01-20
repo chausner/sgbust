@@ -88,6 +88,9 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 			newDBSize += SolveBlockGrid(blockGrid.Expand(), scoring, newBlockGrids, stop, dontAddToDB);
 
 			blockGridsSolved++;
+
+			// overall, deallocation is faster if we deallocate the data inside CompactBlockGrids here already
+			const_cast<CompactBlockGrid&>(blockGrid) = CompactBlockGrid();
 		});
 
 		if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
