@@ -88,6 +88,7 @@ namespace sgbust
 
         std::atomic_uint gridsSolved = 0;
         std::atomic_uint newBeamSize = 0;
+	    std::atomic_uint totalDiscarded = 0;
 
         for (auto it = grids.begin(); it != grids.end(); it = grids.erase(it))
         {
@@ -103,8 +104,10 @@ namespace sgbust
                 if (stop || (MaxBeamSize && newBeamSize >= MaxBeamSize))
                     return;
 
-                newBeamSize += SolveGrid(grid.Expand(), score, newGrids, maxDepthReached, stop);
+                auto [added, discarded] = SolveGrid(grid.Expand(), score, newGrids, maxDepthReached, stop);
 
+                newBeamSize += added;
+			    totalDiscarded += discarded;
                 gridsSolved++;
 
                 // overall, deallocation is faster if we deallocate the data inside CompactGrids here already
@@ -120,16 +123,19 @@ namespace sgbust
         if (newBeamSize == 0)
             stop = true;
 
+        std::cout << "Discarded: " << totalDiscarded << std::endl;
+
         grids = std::move(newGrids);
         beamSize = newBeamSize;
     }
 
-    unsigned int Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop)
+    std::tuple<unsigned int, unsigned int> Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop)
     {
         static thread_local std::vector<Group> groups;
         grid.GetGroups(groups, minGroupSize);
 
         unsigned int numNewGridsInserted = 0;
+	    unsigned int numNewGridsDiscarded = 0;
 
         auto getOrCreateHashSet = [&](const Score& score) -> GridHashSet& {
             {
@@ -149,9 +155,14 @@ namespace sgbust
             Grid newGrid(grid.Width, grid.Height, grid.Blocks.get(), grid.Solution.Append(i));
             newGrid.RemoveGroup(groups[i]);
 
+            auto colorCounts = newGrid.GetColorCounts();
+
             if (NumStepsToClear.has_value() && origNumColors + depth >= *NumStepsToClear)
-                if (newGrid.GetNumberOfColors() + depth >= *NumStepsToClear)
+            {
+                unsigned int numColors = std::count_if(colorCounts.begin() + 1, colorCounts.end(), [](unsigned int count) { return count != 0; });
+                if (numColors + depth >= *NumStepsToClear)
                     continue;
+            }
 
             Score newScore = scoring->RemoveGroup(score, grid, groups[i], newGrid, minGroupSize);
 
@@ -160,13 +171,26 @@ namespace sgbust
             else
                 if (!maxDepthReached)
                 {
+                    if (NumStepsToClear.has_value())
+                    {
+                        unsigned int minNumColors = std::ranges::min(
+                            std::ranges::subrange(colorCounts.begin() + 1, colorCounts.end())
+                            | std::views::filter([](unsigned int count) { return count != 0; }));
+
+                        if (minNumColors < minGroupSize)
+                        {
+                            numNewGridsDiscarded++;
+                            continue;
+                        }
+                    }
+
                     auto [it, inserted] = getOrCreateHashSet(newScore).insert(CompactGrid(std::move(newGrid)));
                     if (inserted)
                         numNewGridsInserted++;
                 }
         }
 
-        return numNewGridsInserted;
+        return std::make_tuple(numNewGridsInserted, numNewGridsDiscarded);
     }
 
     void Solver::CheckSolution(const Grid& grid, Score score, bool& stop)

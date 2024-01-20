@@ -274,6 +274,15 @@ namespace sgbust
         return std::count_if(BlocksBegin(), BlocksEnd(), [](auto c) { return c != Block::None; });
     }
 
+    std::array<unsigned int, 8> Grid::GetColorCounts() const
+    {
+        std::array<unsigned int, 8> colorCounts{};
+        std::for_each(BlocksBegin(), BlocksEnd(), [&](Block c) {
+            colorCounts[static_cast<int>(c)]++;
+            });
+        return colorCounts;
+    }
+
     unsigned int Grid::GetNumberOfColors() const
     {
         std::array<unsigned int, 8> colorCounts{};

@@ -6,6 +6,7 @@
 #include <memory>
 #include <optional>
 #include <shared_mutex>
+#include <tuple>
 
 #include "core/CompactGrid.h"
 #include "core/Grid.h"
@@ -63,7 +64,7 @@ namespace sgbust
         std::shared_mutex mutex;
 
         void SolveDepth(bool maxDepthReached, bool& stop);
-        unsigned int SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop);
+        std::tuple<unsigned int, unsigned int> SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop);
         void CheckSolution(const Grid& grid, Score score, bool& stop);
         void PrintStats() const;
         void TrimBeam();
