@@ -53,6 +53,7 @@ namespace sgbust
         const Scoring* scoring = nullptr;
         unsigned int depth = 0;
         std::map<Score, GridHashSet> grids;
+        unsigned int origNumColors = 0;
         Solution solutionPrefix;
         Solution solution;
         std::optional<Grid> solutionGrid;
@@ -70,6 +71,7 @@ namespace sgbust
     public:
         std::optional<unsigned int> MaxBeamSize = std::nullopt;
         std::optional<unsigned int> MaxDepth = std::nullopt;
+        std::optional<unsigned int> NumStepsToClear = std::nullopt;
         bool TrimmingEnabled = true;
         double TrimmingSafetyFactor = 1.25;
         bool Quiet = false;

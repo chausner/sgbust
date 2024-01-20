@@ -32,6 +32,7 @@ namespace sgbust
         grids.clear();
         grids[initialScore].insert(CompactGrid(gridWithPrefix));
 
+        origNumColors = gridWithPrefix.GetNumberOfColors();
         solution = Solution();
         bestScore = std::nullopt;
         solutionGrid = std::nullopt;
@@ -147,6 +148,10 @@ namespace sgbust
         {
             Grid newGrid(grid.Width, grid.Height, grid.Blocks.get(), grid.Solution.Append(i));
             newGrid.RemoveGroup(groups[i]);
+
+            if (NumStepsToClear.has_value() && origNumColors + depth >= *NumStepsToClear)
+                if (newGrid.GetNumberOfColors() + depth >= *NumStepsToClear)
+                    continue;
 
             Score newScore = scoring->RemoveGroup(score, grid, groups[i], newGrid, minGroupSize);
 

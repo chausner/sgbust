@@ -274,6 +274,15 @@ namespace sgbust
         return std::count_if(BlocksBegin(), BlocksEnd(), [](auto c) { return c != Block::None; });
     }
 
+    unsigned int Grid::GetNumberOfColors() const
+    {
+        std::array<unsigned int, 8> colorCounts{};
+        std::for_each(BlocksBegin(), BlocksEnd(), [&](Block c) {
+            colorCounts[static_cast<int>(c)]++;
+            });
+        return std::count_if(colorCounts.begin() + 1, colorCounts.end(), [](unsigned int count) { return count != 0; });
+    }
+
     void Grid::ApplySolution(const sgbust::Solution& solution, unsigned int minGroupSize)
     {
         unsigned int length = solution.GetLength();

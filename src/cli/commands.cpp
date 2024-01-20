@@ -31,6 +31,7 @@ void RunCommand(const SolveCLIOptions& cliOptions)
 
     solver.MaxBeamSize = cliOptions.MaxBeamSize;
     solver.MaxDepth = cliOptions.MaxDepth;
+    solver.NumStepsToClear = cliOptions.NumStepsToClear;
     solver.TrimmingEnabled = cliOptions.TrimmingEnabled;
     solver.TrimmingSafetyFactor = cliOptions.TrimmingSafetyFactor;
     solver.Quiet = cliOptions.Quiet;

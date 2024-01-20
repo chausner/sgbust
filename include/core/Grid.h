@@ -64,6 +64,7 @@ namespace sgbust
         bool HasGroups(unsigned int minGroupSize) const;
         void RemoveGroup(const Group& group);
         unsigned int GetNumberOfBlocks() const;
+        unsigned int GetNumberOfColors() const;
         void ApplySolution(const sgbust::Solution& solution, unsigned int minGroupSize);
 
         Block* BlocksBegin() { return Blocks.get(); }
