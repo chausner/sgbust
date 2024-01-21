@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.12)
 project(BlocCpp)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
 
 set(SOURCE_FILES
     BlocCpp/BlockGrid.cpp
@@ -18,8 +17,10 @@ add_executable(BlocCpp ${SOURCE_FILES})
 
 target_include_directories(BlocCpp PRIVATE BlocCpp)
 
-find_package(TBB REQUIRED)
-target_link_libraries(BlocCpp PRIVATE TBB::tbb)
+if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    find_package(TBB REQUIRED)
+    target_link_libraries(BlocCpp PRIVATE TBB::tbb)
+endif()
 
 find_package(CLI11 CONFIG REQUIRED)
 target_link_libraries(BlocCpp PRIVATE CLI11::CLI11)
