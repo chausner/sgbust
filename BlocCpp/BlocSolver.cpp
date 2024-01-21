@@ -77,27 +77,26 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 	std::atomic_uint blockGridsSolved = 0;
 	std::atomic_uint newDBSize = 0;
 
-	std::vector<const CompactBlockGrid*> hashSetItems;
-
 	for (auto it = blockGrids.begin(); it != blockGrids.end(); it = blockGrids.erase(it))
 	{
 		auto& [scoring, hashSet] = *it;
 
-		hashSetItems.clear();
-		hashSetItems.reserve(hashSet.size());
-		for (auto it = hashSet.begin(); it != hashSet.end(); it++)
-			hashSetItems.push_back(&*it);
-
-		std::for_each(std::execution::par, hashSetItems.begin(), hashSetItems.end(), [&](const CompactBlockGrid* blockGrid) {
+		// std::for_each is a little bit faster here than hashSet.for_each but only MSVC supports parallel execution for it,
+		// therefore we fall back to hashSet.for_each for other compilers
+#ifdef _MSC_VER
+		std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const CompactBlockGrid& blockGrid) {
+#else
+		hashSet.for_each(std::execution::par, [&](const CompactBlockGrid& blockGrid) {
+#endif
 			if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
 				return;
 
-			newDBSize += SolveBlockGrid(blockGrid->Expand(), scoring, newBlockGrids, stop, dontAddToDB);
+			newDBSize += SolveBlockGrid(blockGrid.Expand(), scoring, newBlockGrids, stop, dontAddToDB);
 
 			blockGridsSolved++;
 
 			// overall, deallocation is faster if we deallocate the data inside CompactBlockGrids here already
-			*const_cast<CompactBlockGrid*>(blockGrid) = CompactBlockGrid();
+			const_cast<CompactBlockGrid&>(blockGrid) = CompactBlockGrid();
 		});
 
 		if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
