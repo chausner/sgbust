@@ -81,7 +81,13 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 	{
 		auto& [scoring, hashSet] = *it;
 
+		// std::for_each is a little bit faster here than hashSet.for_each but only MSVC supports parallel execution for it,
+		// therefore we fall back to hashSet.for_each for other compilers
+#ifdef _MSC_VER
 		std::for_each(std::execution::par, hashSet.begin(), hashSet.end(), [&](const CompactBlockGrid& blockGrid) {
+#else
+		hashSet.for_each(std::execution::par, [&](const CompactBlockGrid& blockGrid) {
+#endif
 			if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
 				return;
 
