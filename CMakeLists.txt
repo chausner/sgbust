@@ -25,6 +25,9 @@ endif()
 find_package(CLI11 CONFIG REQUIRED)
 target_link_libraries(BlocCpp PRIVATE CLI11::CLI11)
 
+find_package(mimalloc CONFIG REQUIRED)
+target_link_libraries(BlocCpp PRIVATE mimalloc)
+
 find_path(PARALLEL_HASHMAP_INCLUDE_DIRS "parallel_hashmap/phmap.h")
 target_include_directories(BlocCpp PRIVATE ${PARALLEL_HASHMAP_INCLUDE_DIRS})
 

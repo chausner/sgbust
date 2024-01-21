@@ -9,6 +9,7 @@
 #include "BlockGrid.h"
 #include "CompactBlockGrid.h"
 #include "Scoring.h"
+#include "mimalloc.h"
 #include "wyhash.h"
 
 template <>
@@ -33,7 +34,7 @@ public:
 	}
 };
 
-using BlockGridHashSet = phmap::parallel_flat_hash_set<CompactBlockGrid, std::hash<CompactBlockGrid>, std::equal_to<CompactBlockGrid>, std::allocator<CompactBlockGrid>, 6, std::mutex>;
+using BlockGridHashSet = phmap::parallel_flat_hash_set<CompactBlockGrid, std::hash<CompactBlockGrid>, std::equal_to<CompactBlockGrid>, mi_stl_allocator<CompactBlockGrid>, 6, std::mutex>;
 
 struct SolverResult
 {

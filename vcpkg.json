@@ -3,8 +3,9 @@
     "name": "bloc-cpp",
     "dependencies": [
         "cli11",
+        "mimalloc",
         "parallel-hashmap",
         "wyhash"
     ],
-    "builtin-baseline": "1f825db83b129a8a9504b141cadb2ce29f32e01f"
+    "builtin-baseline": "a1a1cbc975abf909a6c8985a6a2b8fe20bbd9bd6"
 }
