@@ -11,6 +11,7 @@
 #include "BlocSolver.h"
 #include "utils.h"
 #include "CLI/CLI.hpp"
+#include "mimalloc-new-delete.h"
 
 struct SolveCLIOptions
 {
