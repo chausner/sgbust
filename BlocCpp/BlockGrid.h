@@ -1,8 +1,13 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
+#include <istream>
 #include <memory>
+#include <random>
+#include <stdexcept>
 #include <string>
+#include <string_view>
 #include <ostream>
 #include <vector>
 
@@ -23,27 +28,32 @@ struct Position
 	unsigned char X;
 	unsigned char Y;
 
+	Position() {}
 	Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
 };
 
 struct Solution
 {
 	Solution() = default;
+	Solution(std::string_view string);
 	Solution(const Solution& solution);
 	Solution(Solution&& solution) noexcept = default;
 	Solution& operator=(const Solution& solution);
 	Solution& operator=(Solution&& solution) noexcept = default;
 
-	Solution Append(unsigned char step);
+	Solution Append(unsigned char step) const;
+	Solution Append(const Solution& solution) const;
 	std::string AsString() const;
 	std::vector<unsigned char> AsVector() const { return std::vector(steps.get(), steps.get() + GetLength()); }
 	unsigned int GetLength() const;
+	bool IsEmpty() const { return steps == nullptr; }
+
+	unsigned char operator[](unsigned int index) const { return steps[index]; }
 
 private:
 	std::unique_ptr<unsigned char[]> steps;
 };
 
-#pragma pack(push, 1)
 struct BlockGrid
 {
 	unsigned char Width;
@@ -52,16 +62,21 @@ struct BlockGrid
 	::Solution Solution;
 
 	BlockGrid(unsigned char width, unsigned char height);
-	BlockGrid(const std::string& path, unsigned int& smallestGroupSize);
+	BlockGrid(unsigned char width, unsigned char height, const BlockColor* blocks, ::Solution solution);
+	BlockGrid(std::istream& stream, unsigned int& smallestGroupSize);
 	BlockGrid(const BlockGrid& blockGrid);
 	BlockGrid(BlockGrid&& blockGrid) noexcept;
 	BlockGrid& operator=(const BlockGrid& blockGrid);
 	BlockGrid& operator=(BlockGrid&& blockGrid) noexcept;
 
+	template <typename Generator>
+	static BlockGrid GenerateRandom(unsigned char width, unsigned char height, unsigned int numColors, Generator& generator);
+
 	void Save(std::ostream& stream, unsigned int smallestGroupSize) const;
-	std::vector<std::vector<Position>> GetGroups(unsigned int smallestGroupSize) const;
+	void GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const;
 	void RemoveGroup(const std::vector<Position>& group);
 	unsigned int GetNumberOfBlocks() const;
+	void ApplySolution(const ::Solution& solution, unsigned int smallestGroupSize);
 
 	BlockColor* BlocksBegin() { return Blocks.get(); }
 	BlockColor* BlocksEnd() { return Blocks.get() + Width * Height; }
@@ -72,6 +87,21 @@ struct BlockGrid
 	void Print() const;
 
 private:
-	void GetAdjacentBlocksRecursive(std::vector<Position>& blockList, bool* flags, unsigned int x, unsigned int y) const;
+	unsigned int GetAdjacentBlocks(Position* blockList, unsigned char x, unsigned char y) const;
+	void GetAdjacentBlocksRecursive(Position*& blockList, unsigned char x, unsigned char y) const;
 };
-#pragma pack(pop)
+
+template <typename Generator>
+BlockGrid BlockGrid::GenerateRandom(unsigned char width, unsigned char height, unsigned int numColors, Generator& generator)
+{
+	if (numColors < 1 || numColors > 7)
+		throw std::invalid_argument("numColors must be between 1 and 7");
+
+	BlockGrid grid(width, height);
+	std::uniform_int_distribution<> dist(1, numColors);
+	std::generate(grid.BlocksBegin(), grid.BlocksEnd(), [&]() {
+		return static_cast<BlockColor>(dist(generator));
+	});
+	
+	return grid;
+}

@@ -9,24 +9,36 @@
 #include <utility>
 #include <vector>
 #include "BlocSolver.h"
+#include "CompactBlockGrid.h"
+#include "MemoryUsage.h"
 
-void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
+std::optional<SolverResult> BlocSolver::Solve(const BlockGrid& blockGrid, unsigned int smallestGroupSize, const Solution& solutionPrefix)
 {
 	this->smallestGroupSize = smallestGroupSize;
+	this->solutionPrefix = solutionPrefix;
+
+	BlockGrid bg = blockGrid;
+
+	if (!solutionPrefix.IsEmpty())
+		bg.ApplySolution(solutionPrefix, smallestGroupSize);
 	
 	blockGrids.clear();
-	blockGrids[Scoring(blockGrid, smallestGroupSize)].insert(blockGrid);
+	blockGrids[Scoring(bg, smallestGroupSize)].insert(CompactBlockGrid(bg));
 
 	solution = Solution();
 	bestScore = std::numeric_limits<int>::max();
-
 	dbSize = 1;
+	multiplier = 0;
 
 	bool stop = false;
 
 	for (depth = 0; depth < MaxDepth || !MaxDepth; depth++)
 	{
-		PrintStats();
+		if (!Quiet)
+			PrintStats();
+
+		if (TrimDB)
+			TrimDatabase();
 
 		SolveDepth(stop, DontAddToDBLastDepth && MaxDepth && depth == *MaxDepth - 1);
 
@@ -35,7 +47,9 @@ void BlocSolver::Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize)
 	}
 
 	if (bestScore != std::numeric_limits<int>::max())
-		blockGrid.Solution = std::move(solution);
+		return SolverResult { bestScore, std::move(solution) };
+	else
+		return std::nullopt;
 }
 
 void BlocSolver::PrintStats() const
@@ -47,21 +61,23 @@ void BlocSolver::PrintStats() const
 	std::cout << 
 		"Depth: " << std::setw(3) << depth << 
 		", grids: " << std::setw(9) << dbSize << 
-		", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore << std::endl;
-}
+		", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore;
 
+	std::optional<std::size_t> memoryUsage = GetCurrentMemoryUsage();
+	if (memoryUsage.has_value())
+		std::cout << ", memory: " << (*memoryUsage / 1024 / 1024) << "MB";
+		
+	std::cout << std::endl;
+}
 
 void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 {
-	if (TrimDB)
-		TrimDatabase();
-
 	std::map<Scoring, BlockGridHashSet> newBlockGrids;
 
 	std::atomic_uint blockGridsSolved = 0;
 	std::atomic_uint newDBSize = 0;
 
-	std::vector<const BlockGrid*> hashSetItems;
+	std::vector<const CompactBlockGrid*> hashSetItems;
 
 	for (auto it = blockGrids.begin(); it != blockGrids.end(); it = blockGrids.erase(it))
 	{
@@ -72,13 +88,16 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 		for (auto it = hashSet.begin(); it != hashSet.end(); it++)
 			hashSetItems.push_back(&*it);
 
-		std::for_each(std::execution::par, hashSetItems.begin(), hashSetItems.end(), [&](const BlockGrid* blockGrid) {
+		std::for_each(std::execution::par, hashSetItems.begin(), hashSetItems.end(), [&](const CompactBlockGrid* blockGrid) {
 			if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
 				return;
 
-			newDBSize += SolveBlockGrid(*blockGrid, scoring, newBlockGrids, stop, dontAddToDB);
+			newDBSize += SolveBlockGrid(blockGrid->Expand(), scoring, newBlockGrids, stop, dontAddToDB);
 
 			blockGridsSolved++;
+
+			// overall, deallocation is faster if we deallocate the data inside CompactBlockGrids here already
+			*const_cast<CompactBlockGrid*>(blockGrid) = CompactBlockGrid();
 		});
 
 		if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
@@ -96,7 +115,8 @@ void BlocSolver::SolveDepth(bool& stop, bool dontAddToDB)
 
 unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scoring, std::map<Scoring, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB)
 {
-	std::vector<std::vector<Position>> groups = blockGrid.GetGroups(smallestGroupSize);
+	static thread_local std::vector<std::vector<Position>> groups;
+	blockGrid.GetGroups(groups, smallestGroupSize);
 
 	if (groups.empty())
 		CheckSolution(scoring, blockGrid, stop);		
@@ -105,10 +125,8 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scor
 
 	for (int i = 0; i < groups.size(); i++)
 	{
-		BlockGrid newBlockGrid = blockGrid;
-
+		BlockGrid newBlockGrid(blockGrid.Width, blockGrid.Height, blockGrid.Blocks.get(), blockGrid.Solution.Append(i));
 		newBlockGrid.RemoveGroup(groups[i]);
-		newBlockGrid.Solution = newBlockGrid.Solution.Append(i);
 
 		Scoring newScoring = scoring.RemoveGroup(blockGrid, groups[i], newBlockGrid, smallestGroupSize);
 
@@ -121,7 +139,7 @@ unsigned int BlocSolver::SolveBlockGrid(const BlockGrid& blockGrid, Scoring scor
 				BlockGridHashSet& hashSet = newBlockGrids[newScoring];
 				lock.unlock();
 
-				auto [it, inserted] = hashSet.insert(std::move(newBlockGrid));
+				auto [it, inserted] = hashSet.insert(CompactBlockGrid(std::move(newBlockGrid)));
 				if (inserted)
 					c++;
 			}
@@ -141,14 +159,17 @@ void BlocSolver::CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool
 		if (!stop && score < bestScore)
 		{
 			bestScore = score;
-			solution = blockGrid.Solution;
+			solution = solutionPrefix.Append(blockGrid.Solution);
 
-			std::cout << "Better solution found (score: " << score 
-				<< ", blocks: " << blockGrid.GetNumberOfBlocks() 
-				<< ", steps: " << solution.GetLength() << "): " << blockGrid.Solution.AsString()
-				<< std::endl;
+			if (!Quiet)
+			{
+				std::cout << "Better solution found (score: " << score
+					<< ", blocks: " << blockGrid.GetNumberOfBlocks()
+					<< ", steps: " << solution.GetLength() << "): " << solution.AsString()
+					<< std::endl;
 
-			blockGrid.Print();
+				blockGrid.Print();
+			}
 
 			if (scoring.IsPerfect())
 				stop = true;

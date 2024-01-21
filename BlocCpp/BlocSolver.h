@@ -7,38 +7,46 @@
 #include <optional>
 #include "parallel_hashmap/phmap.h"
 #include "BlockGrid.h"
+#include "CompactBlockGrid.h"
 #include "Scoring.h"
 #include "wyhash.h"
 
 template <>
-class std::hash<BlockGrid>
+class std::hash<CompactBlockGrid>
 {
 public:
-	std::size_t operator()(const BlockGrid& key) const
+	std::size_t operator()(const CompactBlockGrid& key) const
 	{
-		return wyhash(key.Blocks.get(), key.Width * key.Height * sizeof(BlockColor), 0, _wyp);
+		return wyhash(key.Data.get(), key.DataLength(), 0, _wyp);
 	}
 };
 
 template <>
-class std::equal_to<BlockGrid>
+class std::equal_to<CompactBlockGrid>
 {
 public:
-	constexpr bool operator()(const BlockGrid& lhs, const BlockGrid& rhs) const
+	constexpr bool operator()(const CompactBlockGrid& lhs, const CompactBlockGrid& rhs) const
 	{
 		return lhs.Width == rhs.Width &&
 			lhs.Height == rhs.Height &&
-			std::equal(lhs.BlocksBegin(), lhs.BlocksEnd(), rhs.BlocksBegin());
+			std::equal(lhs.Data.get(), lhs.Data.get() + lhs.DataLength(), rhs.Data.get());
 	}
 };
 
-using BlockGridHashSet = phmap::parallel_flat_hash_set<BlockGrid, std::hash<BlockGrid>, std::equal_to<BlockGrid>, std::allocator<BlockGrid>, 5, std::mutex>; // phmap::NullMutex
+using BlockGridHashSet = phmap::parallel_flat_hash_set<CompactBlockGrid, std::hash<CompactBlockGrid>, std::equal_to<CompactBlockGrid>, std::allocator<CompactBlockGrid>, 6, std::mutex>;
+
+struct SolverResult
+{
+	int BestScore;
+	Solution BestSolution;
+};
 
 class BlocSolver
 {
 	unsigned int smallestGroupSize = 0;
 	unsigned int depth = 0;
 	std::map<Scoring, BlockGridHashSet> blockGrids;
+	Solution solutionPrefix;
 	Solution solution;
 	int bestScore = 0;
 	unsigned int dbSize = 0;
@@ -46,10 +54,10 @@ class BlocSolver
 	std::mutex mutex;
 
 	void SolveDepth(bool& stop, bool dontAddToDB);
-	void TrimDatabase();
 	unsigned int SolveBlockGrid(const BlockGrid& blockGrid, Scoring scoring, std::map<Scoring, BlockGridHashSet>& newBlockGrids, bool& stop, bool dontAddToDB);
 	void CheckSolution(Scoring scoring, const BlockGrid& blockGrid, bool& stop);
 	void PrintStats() const;
+	void TrimDatabase();
 
 public:
 	std::optional<unsigned int> MaxDBSize = std::nullopt;
@@ -57,6 +65,7 @@ public:
 	bool DontAddToDBLastDepth = false;
 	bool TrimDB = true;
 	double TrimmingSafetyFactor = 1.25;
+	bool Quiet = false;
 
-	void Solve(BlockGrid& blockGrid, unsigned int smallestGroupSize);
+	std::optional<SolverResult> Solve(const BlockGrid& blockGrid, unsigned int smallestGroupSize, const Solution& solutionPrefix = {});
 };

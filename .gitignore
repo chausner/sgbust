@@ -1,8 +1,11 @@
 ﻿/.vs
+/.vscode/*.json
+!/.vscode/tasks.json
 /BlocCpp/Debug
 /BlocCpp/Release
 /BlocCpp/x64
 /Debug
 /Release
+/vcpkg_installed
 /x64
 *.vcxproj.user
