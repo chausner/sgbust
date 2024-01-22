@@ -94,8 +94,7 @@ struct BlockGrid
 	void Print() const;
 
 private:
-	unsigned int GetAdjacentBlocks(Position* blockList, unsigned char x, unsigned char y);
-	void GetAdjacentBlocksRecursive(Position*& blockList, unsigned char x, unsigned char y);
+	static void GetAdjacentBlocksRecursive(BlocksSpan blocks, std::vector<Position>& blockList, unsigned char x, unsigned char y);
 };
 
 template <typename Generator>

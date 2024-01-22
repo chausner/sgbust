@@ -8,6 +8,11 @@
 #include <utility>
 #include "BlockGrid.h"
 
+namespace
+{
+	static constexpr char BlockVisited = 0b10000000;
+}
+
 Solution::Solution(std::string_view string)
 {
 	if (string.empty())
@@ -236,61 +241,50 @@ void BlockGrid::Save(std::ostream& stream, unsigned int smallestGroupSize) const
 
 void BlockGrid::GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const
 {
-	auto blocks = BlocksView();
+	auto blocks = const_cast<BlockGrid*>(this)->BlocksView();
 
 	groups.clear();
 	groups.reserve(24);
 
 	static thread_local std::vector<Position> adjacentBlocks;
-	adjacentBlocks.resize(Width * Height);
+	adjacentBlocks.reserve(Width * Height);
 
 	for (unsigned char y = 0; y < Height; y++)
 		for (unsigned char x = 0; x < Width; x++)
-			if (static_cast<unsigned char>(blocks(x, y)) < 128 && blocks(x, y) != BlockColor::None)
+			if ((static_cast<char>(blocks(x, y)) & BlockVisited) == 0 && blocks(x, y) != BlockColor::None)
 			{
 				if (smallestGroupSize > 1)
 					if (x != Width - 1 && y != Height - 1 && blocks(x, y) != blocks(x + 1, y) && blocks(x, y) != blocks(x, y + 1))
 						continue;
 
-				unsigned int numAdjacentBlocks = const_cast<BlockGrid*>(this)->GetAdjacentBlocks(adjacentBlocks.data(), x, y);
+				GetAdjacentBlocksRecursive(blocks, adjacentBlocks, x, y);
 
-				if (numAdjacentBlocks >= smallestGroupSize)
-					groups.emplace_back(adjacentBlocks.begin(), adjacentBlocks.begin() + numAdjacentBlocks);
+				if (adjacentBlocks.size() >= smallestGroupSize)
+					groups.emplace_back(adjacentBlocks);
+
+				adjacentBlocks.clear();
 			}
 
-	for (int i = 0; i < Width * Height; i++)
-		if (static_cast<unsigned char>(Blocks[i]) >= 128)
-			Blocks[i] = static_cast<BlockColor>(~static_cast<unsigned char>(Blocks[i]));
+	for (auto it = const_cast<BlockGrid*>(this)->BlocksBegin(), end = const_cast<BlockGrid*>(this)->BlocksEnd(); it != end; it++)
+		reinterpret_cast<char&>(*it) &= ~BlockVisited;
 }
 
-unsigned int BlockGrid::GetAdjacentBlocks(Position* blockList, unsigned char x, unsigned char y)
+void BlockGrid::GetAdjacentBlocksRecursive(BlocksSpan blocks, std::vector<Position>& blockList, unsigned char x, unsigned char y)
 {
-	Position* p = blockList;
-	GetAdjacentBlocksRecursive(p, x, y);
-
-	size_t numAdjacentBlocks = p - blockList;
-	return numAdjacentBlocks;
-}
-
-void BlockGrid::GetAdjacentBlocksRecursive(Position*& blockList, unsigned char x, unsigned char y)
-{
-	auto blocks = BlocksView();
-
-	*blockList = Position(x, y);
-	blockList++;
+	blockList.emplace_back(x, y);
 
 	BlockColor color = blocks(x, y);
 
-	blocks(x, y) = static_cast<BlockColor>(~static_cast<unsigned char>(blocks(x, y)));
+	reinterpret_cast<char&>(blocks(x, y)) |= BlockVisited;
 
 	if (x > 0 && blocks(x - 1, y) == color)
-		GetAdjacentBlocksRecursive(blockList, x - 1, y);
+		GetAdjacentBlocksRecursive(blocks, blockList, x - 1, y);
 	if (y > 0 && blocks(x, y - 1) == color)
-		GetAdjacentBlocksRecursive(blockList, x, y - 1);
-	if (x < Width - 1 && blocks(x + 1, y) == color)
-		GetAdjacentBlocksRecursive(blockList, x + 1, y);
-	if (y < Height - 1 && blocks(x, y + 1) == color)
-		GetAdjacentBlocksRecursive(blockList, x, y + 1);
+		GetAdjacentBlocksRecursive(blocks, blockList, x, y - 1);
+	if (x < blocks.extent(0) - 1 && blocks(x + 1, y) == color)
+		GetAdjacentBlocksRecursive(blocks, blockList, x + 1, y);
+	if (y < blocks.extent(1) - 1 && blocks(x, y + 1) == color)		
+		GetAdjacentBlocksRecursive(blocks, blockList, x, y + 1);
 }
 
 void BlockGrid::RemoveGroup(const std::vector<Position>& group)
