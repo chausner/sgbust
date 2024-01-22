@@ -3,6 +3,7 @@
     "name": "bloc-cpp",
     "dependencies": [
         "cli11",
+        "mdspan",
         "mimalloc",
         "parallel-hashmap",
         "wyhash"
