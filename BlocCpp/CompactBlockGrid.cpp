@@ -1,6 +1,10 @@
 #include "BlockGrid.h"
 #include "CompactBlockGrid.h"
 
+CompactBlockGrid::CompactBlockGrid() : Width(0), Height(0)
+{
+}
+
 CompactBlockGrid::CompactBlockGrid(const CompactBlockGrid& blockGrid) : Width(blockGrid.Width), Height(blockGrid.Height), Solution(blockGrid.Solution)
 {
 	Data = std::make_unique_for_overwrite<std::byte[]>(blockGrid.DataLength());

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <istream>
 #include <memory>
 #include <random>
 #include <stdexcept>
@@ -9,6 +10,7 @@
 #include <string_view>
 #include <ostream>
 #include <vector>
+#include "experimental/mdspan"
 
 enum class BlockColor : unsigned char
 {
@@ -55,6 +57,10 @@ private:
 
 struct BlockGrid
 {
+	using Extents = std::experimental::extents<unsigned char, std::experimental::dynamic_extent, std::experimental::dynamic_extent>;
+	using BlocksSpan = std::experimental::mdspan<BlockColor, Extents, std::experimental::layout_left>;
+	using ConstBlocksSpan = std::experimental::mdspan<const BlockColor, Extents, std::experimental::layout_left>;
+
 	unsigned char Width;
 	unsigned char Height;
 	std::unique_ptr<BlockColor[]> Blocks;
@@ -62,7 +68,7 @@ struct BlockGrid
 
 	BlockGrid(unsigned char width, unsigned char height);
 	BlockGrid(unsigned char width, unsigned char height, const BlockColor* blocks, ::Solution solution);
-	BlockGrid(const std::string& path, unsigned int& smallestGroupSize);
+	BlockGrid(std::istream& stream, unsigned int& smallestGroupSize);
 	BlockGrid(const BlockGrid& blockGrid);
 	BlockGrid(BlockGrid&& blockGrid) noexcept;
 	BlockGrid& operator=(const BlockGrid& blockGrid);
@@ -83,12 +89,13 @@ struct BlockGrid
 	const BlockColor* BlocksBegin() const { return Blocks.get(); }
 	const BlockColor* BlocksEnd() const { return Blocks.get() + Width * Height; }
 	bool IsEmpty() const;
+	BlocksSpan BlocksView() { return BlocksSpan(Blocks.get(), Width, Height); }
+	ConstBlocksSpan BlocksView() const { return ConstBlocksSpan(Blocks.get(), Width, Height); }
 
 	void Print() const;
 
 private:
-	unsigned int GetAdjacentBlocks(Position* blockList, unsigned char x, unsigned char y) const;
-	void GetAdjacentBlocksRecursive(Position*& blockList, unsigned char x, unsigned char y) const;
+	static void GetAdjacentBlocksRecursive(BlocksSpan blocks, std::vector<Position>& blockList, unsigned char x, unsigned char y);
 };
 
 template <typename Generator>

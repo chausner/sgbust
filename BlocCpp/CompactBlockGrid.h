@@ -10,6 +10,7 @@ struct CompactBlockGrid
 	std::unique_ptr<std::byte[]> Data;
 	::Solution Solution;
 
+	CompactBlockGrid();
 	CompactBlockGrid(const CompactBlockGrid& blockGrid);
 	CompactBlockGrid(CompactBlockGrid&& blockGrid) noexcept;
 	CompactBlockGrid(const BlockGrid& blockGrid);

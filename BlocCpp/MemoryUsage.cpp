@@ -24,7 +24,7 @@ std::optional<size_t> GetCurrentMemoryUsage()
     std::ifstream file("/proc/self/statm");
     size_t size, resident, share;
     file >> size >> resident >> share;
-    if (!file)
+    if (file.fail())
         return std::nullopt;
 
     long pageSize = sysconf(_SC_PAGESIZE);
