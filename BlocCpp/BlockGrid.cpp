@@ -249,6 +249,40 @@ void BlockGrid::GetGroups(std::vector<std::vector<Position>>& groups, unsigned i
 			Blocks[i] = static_cast<BlockColor>(~static_cast<unsigned char>(Blocks[i]));
 }
 
+bool BlockGrid::HasGroups(unsigned int smallestGroupSize) const
+{
+	if (smallestGroupSize <= 1)
+		return !IsEmpty();
+
+	static thread_local std::vector<Position> adjacentBlocks;
+	adjacentBlocks.resize(Width * Height);
+
+	bool hasGroups = false;
+
+	for (unsigned char y = 0; y < Height; y++)
+		for (unsigned char x = 0; x < Width; x++)
+			if (static_cast<unsigned char>(Blocks[XY(x, y)]) < 128 && Blocks[XY(x, y)] != BlockColor::None)
+			{
+				if (x != Width - 1 && y != Height - 1 && Blocks[XY(x, y)] != Blocks[XY(x + 1, y)] && Blocks[XY(x, y)] != Blocks[XY(x, y + 1)])
+					continue;
+
+				unsigned int numAdjacentBlocks = GetAdjacentBlocks(adjacentBlocks.data(), x, y);
+
+				if (numAdjacentBlocks >= smallestGroupSize)
+				{
+					hasGroups = true;
+					goto exit;
+				}
+			}
+
+exit:
+	for (int i = 0; i < Width * Height; i++)
+		if (static_cast<unsigned char>(Blocks[i]) >= 128)
+			Blocks[i] = static_cast<BlockColor>(~static_cast<unsigned char>(Blocks[i]));
+
+	return hasGroups;
+}
+
 unsigned int BlockGrid::GetAdjacentBlocks(Position* blockList, unsigned char x, unsigned char y) const
 {
 	Position* p = blockList;

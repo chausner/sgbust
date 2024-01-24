@@ -152,6 +152,7 @@
     <ClCompile Include="CompactBlockGrid.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemoryUsage.cpp" />
+    <ClCompile Include="Polynom.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +160,7 @@
     <ClInclude Include="BlocSolver.h" />
     <ClInclude Include="CompactBlockGrid.h" />
     <ClInclude Include="MemoryUsage.h" />
+    <ClCompile Include="Polynom.h" />
     <ClInclude Include="Scoring.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

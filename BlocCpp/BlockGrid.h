@@ -73,6 +73,7 @@ struct BlockGrid
 
 	void Save(std::ostream& stream, unsigned int smallestGroupSize) const;
 	void GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const;
+	bool HasGroups(unsigned int smallestGroupSize) const;
 	void RemoveGroup(const std::vector<Position>& group);
 	unsigned int GetNumberOfBlocks() const;
 	void ApplySolution(const ::Solution& solution, unsigned int smallestGroupSize);

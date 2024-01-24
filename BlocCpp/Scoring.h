@@ -23,71 +23,54 @@ struct Score
 class Scoring
 {
 public:
+	virtual ~Scoring() = default;
+
 	virtual Score CreateScore(const BlockGrid& blockGrid, unsigned int smallestGroupSize) const = 0;
 	virtual Score RemoveGroup(const Score& oldScore, const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const = 0;
 	virtual bool IsPerfectScore(const Score& score) const = 0;
 };
 
-class SimpleScoring : public Scoring
+using GroupSizeFunc = std::function<int(unsigned int groupSize)>;
+using LeftoverPenaltyFunc = std::function<int(unsigned int numBlocksRemaining)>;
+
+class GreedyScoring : public Scoring
 {
-	std::function<int (unsigned int groupSize)> baseScoring;
+	GroupSizeFunc groupScore;
+	int clearanceBonus;
+	LeftoverPenaltyFunc leftoverPenalty;
 
 public:
-	SimpleScoring(std::function<int (unsigned int groupSize)> baseScoring) : baseScoring(std::move(baseScoring)) {}
+	GreedyScoring(GroupSizeFunc groupScore, int clearanceBonus = 0, LeftoverPenaltyFunc leftoverPenalty = nullptr)
+	    : groupScore(std::move(groupScore)), clearanceBonus(clearanceBonus), leftoverPenalty(std::move(leftoverPenalty)) {}
 
 	Score CreateScore(const BlockGrid& blockGrid, unsigned int smallestGroupSize) const override
 	{
-		return Score(0);
+		int score = 0;
+
+		if (clearanceBonus != 0 && blockGrid.IsEmpty())
+			score -= clearanceBonus;
+		if (leftoverPenalty != nullptr && !blockGrid.HasGroups(smallestGroupSize))
+			score += leftoverPenalty(blockGrid.GetNumberOfBlocks());
+
+		return Score(score);
 	}
 
 	Score RemoveGroup(const Score& oldScore, const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const override
 	{
-		return Score(oldScore.Value - baseScoring(group.size()));
+		int newScore = oldScore.Value - groupScore(group.size());
+
+		if (clearanceBonus != 0 && newBlockGrid.IsEmpty())
+			newScore -= clearanceBonus;
+		if (leftoverPenalty != nullptr && !newBlockGrid.HasGroups(smallestGroupSize))
+			newScore += leftoverPenalty(newBlockGrid.GetNumberOfBlocks());
+
+		return Score(newScore);
 	}
 
 	bool IsPerfectScore(const Score& score) const override
 	{
 		return false;
 	}
-};
-
-class NScoring : public Scoring
-{
-public:
-	Score CreateScore(const BlockGrid& blockGrid, unsigned int smallestGroupSize) const override
-	{
-		return Score(blockGrid.GetNumberOfBlocks());
-	}
-
-	Score RemoveGroup(const Score& oldScore, const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const override
-	{
-		return Score(oldScore.Value - group.size());
-	}
-
-	bool IsPerfectScore(const Score& score) const override
-	{
-		return score.Value == 0;
-	}
-};
-
-class NNminusOneScoring : public SimpleScoring
-{
-public:
-	NNminusOneScoring() : SimpleScoring([](unsigned int groupSize) { return groupSize * (groupSize - 1); }) {}
-};
-
-class NminusTwoSquaredScoring : public SimpleScoring
-{
-public:
-	NminusTwoSquaredScoring() : SimpleScoring([](unsigned int groupSize) { return groupSize > 2 ? (groupSize - 2) * (groupSize - 2) : 0; }) {}
-};
-
-class NminusTwoSquaredPlusNScoring : public SimpleScoring
-{
-	static constexpr auto scoreFunc = [](unsigned int groupSize) { return groupSize > 2 ? (groupSize - 2) * (groupSize - 2) + groupSize : 0; };
-
-public:
-	NminusTwoSquaredPlusNScoring() : SimpleScoring(scoreFunc) {}
 };
 
 class NumBlocksNotInGroupsScoring : public Scoring
@@ -105,100 +88,60 @@ public:
 
 	Score RemoveGroup(const Score& oldScore, const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const override
 	{
-		std::vector<std::vector<Position>> groups;
+		return CreateScore(newBlockGrid, smallestGroupSize);
+	}
+
+	bool IsPerfectScore(const Score& score) const override
+	{
+		return false;
+	}
+};
+
+class PotentialScoring : public Scoring
+{
+	GroupSizeFunc groupScore;
+	int clearanceBonus;
+	LeftoverPenaltyFunc leftoverPenalty;
+
+	const float constant = std::atof(std::getenv("constant"));
+
+public:
+	PotentialScoring(GroupSizeFunc groupScore, int clearanceBonus = 0, LeftoverPenaltyFunc leftoverPenalty = nullptr)
+	    : groupScore(std::move(groupScore)), clearanceBonus(clearanceBonus), leftoverPenalty(std::move(leftoverPenalty)) {}
+
+	Score CreateScore(const BlockGrid& blockGrid, unsigned int smallestGroupSize) const override
+	{
+		static thread_local std::vector<std::vector<Position>> groups;
+		blockGrid.GetGroups(groups, smallestGroupSize);
+
+		int score = 0;
+
+		if (clearanceBonus != 0 && blockGrid.IsEmpty())
+			score -= clearanceBonus;
+		if (leftoverPenalty != nullptr && groups.empty())
+			score += leftoverPenalty(blockGrid.GetNumberOfBlocks());
+
+		int potentialGroupsScore = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [this](const auto& group) { return groupScore(group.size()); });
+		return Score(score, -potentialGroupsScore);
+	}
+
+	Score RemoveGroup(const Score& oldScore, const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const override
+	{
+		static thread_local std::vector<std::vector<Position>> groups;
 		newBlockGrid.GetGroups(groups, smallestGroupSize);
 
-		int numBlocksInGroups = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [](const auto& group) { return group.size(); });
-		int numBlocksNotInGroups = newBlockGrid.GetNumberOfBlocks() - numBlocksInGroups;
-		return Score(numBlocksNotInGroups);
-	}
+		int newScore = oldScore.Value - groupScore(group.size());
 
-	bool IsPerfectScore(const Score& score) const override
-	{
-		return false;
-	}
-};
+		if (clearanceBonus != 0 && newBlockGrid.IsEmpty())
+			newScore -= clearanceBonus;
+		if (leftoverPenalty != nullptr && groups.empty())
+			newScore += leftoverPenalty(newBlockGrid.GetNumberOfBlocks());
 
-class PotentialGroupsScoreScoring : public Scoring
-{
-public:
-	Score CreateScore(const BlockGrid& blockGrid, unsigned int smallestGroupSize) const override
-	{
-		static thread_local std::vector<std::vector<Position>> groups;
-		blockGrid.GetGroups(groups, smallestGroupSize);
+		int potentialGroupsScore = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [this](const auto& group) { return groupScore(group.size()); });
 
-		auto score = [](int groupSize) { return (groupSize - 2) * (groupSize - 2) + groupSize; };
+		// TODO: should clearanceBonus and leftoverPenalty be included in newObjective or not?
 
-		int potentialGroupsScore = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [score](const auto& group) { return score(group.size()); });
-		return Score(0, -potentialGroupsScore);
-	}
-
-	Score RemoveGroup(const Score& oldScore, const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const override
-	{
-		auto score = [](int groupSize) { return (groupSize - 2) * (groupSize - 2) + groupSize; };
-
-		int newScore = oldScore.Value - score(group.size());
-		float newObjective = newScore * 0.99f + CreateScore(newBlockGrid, smallestGroupSize).Objective;
-
-		return Score(newScore, newObjective);
-	}
-
-	bool IsPerfectScore(const Score& score) const override
-	{
-		return false;
-	}
-};
-
-class PotentialNScoring : public Scoring
-{
-public:
-	Score CreateScore(const BlockGrid& blockGrid, unsigned int smallestGroupSize) const override
-	{
-		static thread_local std::vector<std::vector<Position>> groups;
-		blockGrid.GetGroups(groups, smallestGroupSize);
-
-		auto score = [](int groupSize) { return groupSize; };
-
-		int potentialGroupsScore = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [score](const auto& group) { return score(group.size()); });
-		return Score(0, -potentialGroupsScore);
-	}
-
-	Score RemoveGroup(const Score& oldScore, const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const override
-	{
-		auto score = [](int groupSize) { return groupSize; };
-
-		int newScore = oldScore.Value - score(group.size());
-		float newObjective = newScore * 0.99f + CreateScore(newBlockGrid, smallestGroupSize).Objective;
-
-		return Score(newScore, newObjective);
-	}
-
-	bool IsPerfectScore(const Score& score) const override
-	{
-		return false;
-	}
-};
-
-class PotentialScoreMetaScoring : public Scoring
-{
-	std::function<int (unsigned int groupSize)> baseScoring;
-
-public:
-	PotentialScoreMetaScoring(std::function<int (unsigned int groupSize)> baseScoring) : baseScoring(std::move(baseScoring)) {}
-
-	Score CreateScore(const BlockGrid& blockGrid, unsigned int smallestGroupSize) const override
-	{
-		static thread_local std::vector<std::vector<Position>> groups;
-		blockGrid.GetGroups(groups, smallestGroupSize);
-
-		int potentialGroupsScore = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [this](const auto& group) { return baseScoring(group.size()); });
-		return Score(0, -potentialGroupsScore);
-	}
-
-	Score RemoveGroup(const Score& oldScore, const BlockGrid& oldBlockGrid, const std::vector<Position>& group, const BlockGrid& newBlockGrid, unsigned int smallestGroupSize) const override
-	{
-		int newScore = oldScore.Value - baseScoring(group.size());
-		float newObjective = newScore + CreateScore(newBlockGrid, smallestGroupSize).Objective;
+		float newObjective = newScore * 0.99f + -potentialGroupsScore + constant;
 
 		return Score(newScore, newObjective);
 	}

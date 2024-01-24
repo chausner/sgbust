@@ -7,27 +7,35 @@
 #include <memory>
 #include <optional>
 #include <random>
+#include <utility>
 #include <unordered_map>
 #include <unordered_set>
 #include "BlockGrid.h"
 #include "BlocSolver.h"
+#include "Polynom.h"
 #include "utils.h"
 #include "CLI/CLI.hpp"
 
-static std::unordered_map<std::string, std::shared_ptr<Scoring>> Scorings {
-	{ "N", std::make_shared<NScoring>() },
-	{ "NNminusOne", std::make_shared<NNminusOneScoring>() },
-	{ "NminusTwoSquared", std::make_shared<NminusTwoSquaredScoring>() },
-	{ "NminusTwoSquaredPlusN", std::make_shared<NminusTwoSquaredPlusNScoring>() },
-	{ "NumBlocksNotInGroups", std::make_shared<NumBlocksNotInGroupsScoring>() },
-	{ "PotentialGroupsScoreScoring", std::make_shared<PotentialGroupsScoreScoring>() },
-	{ "PotentialNScoring", std::make_shared<PotentialNScoring>() },
+enum class ScoringType
+{
+	Greedy,
+	Potential,
+	NumBlocksNotInGroups
+};
+
+static const std::unordered_map<std::string, ScoringType> ScoringTypeStrings{
+	{ "greedy", ScoringType::Greedy },
+	{ "potential", ScoringType::Potential },
+	{ "num-blocks-not-in-groups", ScoringType::NumBlocksNotInGroups }
 };
 
 struct SolveCLIOptions
 {
     std::string GridFile;
-	std::string Scoring;
+	ScoringType ScoringType = ScoringType::Greedy;
+	std::optional<Polynom> ScoringGroupScore;
+	std::optional<int> ScoringClearanceBonus;
+	std::optional<Polynom> ScoringLeftoverPenalty;
 	std::string SolutionPrefix;
 	std::optional<unsigned int> MaxDBSize = std::nullopt;
 	std::optional<unsigned int> MaxDepth = std::nullopt;
@@ -81,7 +89,50 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 
 	auto startTime = std::chrono::steady_clock::now();
 
-	std::optional<SolverResult> solverResult = solver.Solve(blockGrid, smallestGroupSize, *Scorings.at(cliOptions.Scoring), Solution(cliOptions.SolutionPrefix));
+	LeftoverPenaltyFunc leftoverPenalty;
+	if (cliOptions.ScoringLeftoverPenalty.has_value())
+		leftoverPenalty = std::bind_front(&Polynom::Evaluate, cliOptions.ScoringLeftoverPenalty);
+	else
+		leftoverPenalty = nullptr;
+
+	std::unique_ptr<Scoring> scoring;
+
+	switch (cliOptions.ScoringType)
+	{
+	case ScoringType::Greedy:
+		if (!cliOptions.ScoringGroupScore.has_value())
+			throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'greedy'", CLI::ExitCodes::ExcludesError);
+		scoring = std::make_unique<GreedyScoring>(
+			std::bind_front(&Polynom::Evaluate, *cliOptions.ScoringGroupScore),
+			cliOptions.ScoringClearanceBonus.value_or(0),
+			std::move(leftoverPenalty)
+		);
+		break;
+	case ScoringType::Potential:
+		if (!cliOptions.ScoringGroupScore.has_value())
+			throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'potential", CLI::ExitCodes::ExcludesError);
+		/*if (cliOptions.ScoringClearanceBonus.has_value())
+			throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
+		if (cliOptions.ScoringLeftoverPenalty.has_value())
+			throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);*/
+		scoring = std::make_unique<PotentialScoring>(
+			std::bind_front(&Polynom::Evaluate, *cliOptions.ScoringGroupScore),
+			cliOptions.ScoringClearanceBonus.value_or(0),
+			std::move(leftoverPenalty)
+		);
+		break;
+	case ScoringType::NumBlocksNotInGroups:
+		if (cliOptions.ScoringGroupScore.has_value())
+			throw CLI::ExcludesError("--scoring-group-score cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
+		if (cliOptions.ScoringClearanceBonus.has_value())
+			throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
+		if (cliOptions.ScoringLeftoverPenalty.has_value())
+			throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
+		scoring = std::make_unique<NumBlocksNotInGroupsScoring>();
+		break;
+	}
+
+	std::optional<SolverResult> solverResult = solver.Solve(blockGrid, smallestGroupSize, *scoring, Solution(cliOptions.SolutionPrefix));
 
 	auto endTime = std::chrono::steady_clock::now();
 
@@ -189,7 +240,10 @@ int main(int argc, const char* argv[])
 
 		CLI::App* solveCommand = app.add_subcommand("solve", "Solve a block grid");
 		solveCommand->add_option("grid-file", cliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
-		solveCommand->add_option("--scoring", cliOptions.Scoring, "Scoring formula to optimize on")->required()->transform(CLI::IsMember(Scorings, CLI::ignore_case));;
+		solveCommand->add_option("--scoring", cliOptions.ScoringType, "Type of scoring")->transform(CLI::CheckedTransformer(ScoringTypeStrings, CLI::ignore_case));
+		solveCommand->add_option("--scoring-group-score", cliOptions.ScoringGroupScore, "Group score, as a function of the group size")->required();
+		solveCommand->add_option("--scoring-clearance-bonus", cliOptions.ScoringClearanceBonus, "Bonus for clearing a grid");
+		solveCommand->add_option("--scoring-leftover-penalty", cliOptions.ScoringLeftoverPenalty, "Penalty when a grid is not cleared, as a function of the number of blocks left");		
 		solveCommand->add_option("--prefix", cliOptions.SolutionPrefix, "Solution prefix");
 		solveCommand->add_option("-s,--max-db-size", cliOptions.MaxDBSize, "Maximum DB size");
 		solveCommand->add_option("-d,--max-depth", cliOptions.MaxDepth, "Maximum search depth");
