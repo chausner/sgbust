@@ -61,6 +61,7 @@ void BlocSolver::PrintStats() const
 	std::cout << 
 		"Depth: " << std::setw(3) << depth << 
 		", grids: " << std::setw(9) << dbSize << 
+		", hash sets: " << std::setw(4) << blockGrids.size() <<
 		", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore;
 
 	std::optional<std::size_t> memoryUsage = GetCurrentMemoryUsage();
