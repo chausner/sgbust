@@ -112,8 +112,8 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 		);
 		break;
 	case ScoringType::Potential:
-		if (!cliOptions.ScoringGroupScore.has_value())
-			throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'potential", CLI::ExitCodes::ExcludesError);
+		if (cliOptions.ScoringGroupScore.has_value())
+			throw CLI::ExcludesError("--scoring-group-score cannot be specified for scoring type 'potential", CLI::ExitCodes::ExcludesError);
 		/*if (cliOptions.ScoringClearanceBonus.has_value())
 			throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
 		if (cliOptions.ScoringLeftoverPenalty.has_value())
@@ -247,7 +247,7 @@ int main(int argc, const char* argv[])
 		CLI::App* solveCommand = app.add_subcommand("solve", "Solve a block grid");
 		solveCommand->add_option("grid-file", cliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
 		solveCommand->add_option("--scoring", cliOptions.ScoringType, "Type of scoring")->transform(CLI::CheckedTransformer(ScoringTypeStrings, CLI::ignore_case));
-		solveCommand->add_option("--scoring-group-score", cliOptions.ScoringGroupScore, "Group score, as a function of the group size")->required();
+		solveCommand->add_option("--scoring-group-score", cliOptions.ScoringGroupScore, "Group score, as a function of the group size");
 		solveCommand->add_option("--scoring-clearance-bonus", cliOptions.ScoringClearanceBonus, "Bonus for clearing a grid");
 		solveCommand->add_option("--scoring-leftover-penalty", cliOptions.ScoringLeftoverPenalty, "Penalty when a grid is not cleared, as a function of the number of blocks left");		
 		solveCommand->add_option("--prefix", cliOptions.SolutionPrefix, "Solution prefix");
