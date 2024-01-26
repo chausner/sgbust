@@ -57,7 +57,7 @@ private:
 
 struct BlockGrid
 {
-	using Extents = std::experimental::extents<unsigned char, std::experimental::dynamic_extent, std::experimental::dynamic_extent>;
+	using Extents = std::experimental::extents<unsigned int, std::experimental::dynamic_extent, std::experimental::dynamic_extent>;
 	using BlocksSpan = std::experimental::mdspan<BlockColor, Extents, std::experimental::layout_left>;
 	using ConstBlocksSpan = std::experimental::mdspan<const BlockColor, Extents, std::experimental::layout_left>;
 
