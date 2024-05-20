@@ -7,8 +7,8 @@
 #include <optional>
 #include <random>
 #include <unordered_set>
-#include "BlockGrid.h"
-#include "BlocSolver.h"
+#include "bloc/Grid.h"
+#include "bloc/Solver.h"
 #include "utils.h"
 #include "CLI/CLI.hpp"
 #include "mimalloc-new-delete.h"
@@ -51,13 +51,13 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 	unsigned int smallestGroupSize;
 
 	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);
-	BlockGrid blockGrid(file, smallestGroupSize);
+	bloc::Grid grid(file, smallestGroupSize);
 	file.close();
 
 	if (!cliOptions.Quiet)
-		blockGrid.Print();
+		grid.Print();
 
-	BlocSolver solver;
+	bloc::Solver solver;
 
 	solver.MaxDBSize = cliOptions.MaxDBSize;
 	solver.MaxDepth = cliOptions.MaxDepth;
@@ -68,7 +68,7 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 
 	auto startTime = std::chrono::steady_clock::now();
 
-	solver.Solve(blockGrid, smallestGroupSize, Solution(cliOptions.SolutionPrefix));
+	solver.Solve(grid, smallestGroupSize, bloc::Solution(cliOptions.SolutionPrefix));
 
 	auto endTime = std::chrono::steady_clock::now();
 
@@ -93,10 +93,10 @@ static void RunGenerateCommand(const GenerateCLIOptions &cliOptions)
 	else
 		mt.seed(*cliOptions.Seed);
 
-	BlockGrid blockGrid = BlockGrid::GenerateRandom(cliOptions.Width, cliOptions.Height, cliOptions.NumColors, mt);
+	bloc::Grid grid = bloc::Grid::GenerateRandom(cliOptions.Width, cliOptions.Height, cliOptions.NumColors, mt);
 
 	std::ofstream file(cliOptions.GridFile, std::ios_base::binary);
-	blockGrid.Save(file, cliOptions.SmallestGroupSize);
+	grid.Save(file, cliOptions.SmallestGroupSize);
 	file.close();
 
 	if (!cliOptions.Quiet)
@@ -105,7 +105,7 @@ static void RunGenerateCommand(const GenerateCLIOptions &cliOptions)
 		EnableVTMode();
 #endif
 
-		blockGrid.Print();
+		grid.Print();
 	}
 }
 
@@ -118,33 +118,33 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 	unsigned int smallestGroupSize;
 
 	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);
-	BlockGrid blockGrid(file, smallestGroupSize);
+	bloc::Grid grid(file, smallestGroupSize);
 	file.close();
 
-	std::unordered_set<BlockColor> colors(blockGrid.BlocksBegin(), blockGrid.BlocksEnd());
-	colors.erase(BlockColor::None);
+	std::unordered_set<bloc::Block> colors(grid.BlocksBegin(), grid.BlocksEnd());
+	colors.erase(bloc::Block::None);
 	int numColors = colors.size();
 
-	std::cout << "Size: " << static_cast<int>(blockGrid.Width) << " x " << static_cast<int>(blockGrid.Height) << std::endl;
+	std::cout << "Size: " << static_cast<int>(grid.Width) << " x " << static_cast<int>(grid.Height) << std::endl;
 	std::cout << "Number of colors: " << numColors << std::endl;
 	std::cout << "Smallest group size: " << smallestGroupSize << std::endl;
 	std::cout << std::endl;
-	blockGrid.Print();
+	grid.Print();
 
 	if (!cliOptions.Solution.empty())
 	{
 		auto pluralS = [](int x) { return x == 1 ? "" : "s"; };
 
-		Solution solution(cliOptions.Solution);
+		bloc::Solution solution(cliOptions.Solution);
 		std::cout << std::endl;
 		std::cout << "Solution: " << solution.AsString() << " (" << solution.GetLength() << " step" << pluralS(solution.GetLength()) << ")" << std::endl;
 
-		BlockGrid bg = blockGrid;
+		bloc::Grid bg = grid;
 
 		for (unsigned int i = 0; i < solution.GetLength(); i++)
 		{
 			unsigned char step = solution[i];
-			std::vector<std::vector<Position>> groups;
+			std::vector<std::vector<bloc::Position>> groups;
 			bg.GetGroups(groups, smallestGroupSize);
 			if (step >= groups.size())
 				throw std::invalid_argument("Solution string is not valid for this block grid");

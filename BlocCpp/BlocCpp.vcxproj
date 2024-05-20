@@ -151,20 +151,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BlockGrid.cpp" />
-    <ClCompile Include="BlocSolver.cpp" />
-    <ClCompile Include="CompactBlockGrid.cpp" />
+    <ClCompile Include="bloc\Grid.cpp" />
+    <ClCompile Include="bloc\Solver.cpp" />
+    <ClCompile Include="bloc\CompactGrid.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MemoryUsage.cpp" />
-    <ClCompile Include="Scoring.cpp" />
+    <ClCompile Include="bloc\MemoryUsage.cpp" />
+    <ClCompile Include="bloc\Scoring.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BlockGrid.h" />
-    <ClInclude Include="BlocSolver.h" />
-    <ClInclude Include="CompactBlockGrid.h" />
-    <ClInclude Include="MemoryUsage.h" />
-    <ClInclude Include="Scoring.h" />
+    <ClInclude Include="bloc\Grid.h" />
+    <ClInclude Include="bloc\Solver.h" />
+    <ClInclude Include="bloc\CompactGrid.h" />
+    <ClInclude Include="bloc\MemoryUsage.h" />
+    <ClInclude Include="bloc\Scoring.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
