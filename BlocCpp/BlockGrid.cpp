@@ -428,6 +428,8 @@ void BlockGrid::Print() const
 			case BlockColor::Cyan:
 				colorCode = "\x1B[46m";
 				break;
+			default:
+				throw std::out_of_range("Unexpected block color value");
 			}
 
 			std::cout << colorCode << "  ";
