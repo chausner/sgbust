@@ -18,42 +18,42 @@
     <ClCompile Include="main.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="bloc\Grid.cpp">
+    <ClCompile Include="sgbust\Grid.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="bloc\Solver.cpp">
+    <ClCompile Include="sgbust\Solver.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="utils.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="bloc\Scoring.cpp">
+    <ClCompile Include="sgbust\Scoring.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="bloc\CompactGrid.cpp">
+    <ClCompile Include="sgbust\CompactGrid.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="bloc\MemoryUsage.cpp">
+    <ClCompile Include="sgbust\MemoryUsage.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bloc\Solver.h">
+    <ClInclude Include="sgbust\Solver.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="bloc\Grid.h">
+    <ClInclude Include="sgbust\Grid.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="bloc\Scoring.h">
+    <ClInclude Include="sgbust\Scoring.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="bloc\CompactGrid.h">
+    <ClInclude Include="sgbust\CompactGrid.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="bloc\MemoryUsage.h">
+    <ClInclude Include="sgbust\MemoryUsage.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

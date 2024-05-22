@@ -12,7 +12,7 @@
 #include <vector>
 #include "experimental/mdspan"
 
-namespace bloc
+namespace sgbust
 {
 	enum class Block : unsigned char
 	{
@@ -66,10 +66,10 @@ namespace bloc
 		unsigned char Width;
 		unsigned char Height;
 		std::unique_ptr<Block[]> Blocks;
-		bloc::Solution Solution;
+		sgbust::Solution Solution;
 
 		Grid(unsigned char width, unsigned char height);
-		Grid(unsigned char width, unsigned char height, const Block* blocks, bloc::Solution solution);
+		Grid(unsigned char width, unsigned char height, const Block* blocks, sgbust::Solution solution);
 		Grid(std::istream& stream, unsigned int& smallestGroupSize);
 		Grid(const Grid& grid);
 		Grid(Grid&& grid) noexcept;
@@ -83,7 +83,7 @@ namespace bloc
 		void GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const;
 		void RemoveGroup(const std::vector<Position>& group);
 		unsigned int GetNumberOfBlocks() const;
-		void ApplySolution(const bloc::Solution& solution, unsigned int smallestGroupSize);
+		void ApplySolution(const sgbust::Solution& solution, unsigned int smallestGroupSize);
 
 		Block* BlocksBegin() { return Blocks.get(); }
 		Block* BlocksEnd() { return Blocks.get() + Width * Height; }

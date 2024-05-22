@@ -2,7 +2,7 @@
 
 #include "Grid.h"
 
-namespace bloc
+namespace sgbust
 {
 #pragma pack(push, 1)
 	struct CompactGrid
@@ -10,7 +10,7 @@ namespace bloc
 		unsigned char Width;
 		unsigned char Height;
 		std::unique_ptr<std::byte[]> Data;
-		bloc::Solution Solution;
+		sgbust::Solution Solution;
 
 		CompactGrid();
 		CompactGrid(const CompactGrid& grid);

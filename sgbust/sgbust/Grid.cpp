@@ -13,7 +13,7 @@ namespace
 	static constexpr char BlockVisited = 0b10000000;
 }
 
-namespace bloc
+namespace sgbust
 {
 	Solution::Solution(std::string_view string)
 	{
@@ -154,7 +154,7 @@ namespace bloc
 	{
 	}
 
-	Grid::Grid(unsigned char width, unsigned char height, const Block* blocks, bloc::Solution solution)
+	Grid::Grid(unsigned char width, unsigned char height, const Block* blocks, sgbust::Solution solution)
 		: Width(width), Height(height), Blocks(std::make_unique_for_overwrite<Block[]>(width* height)), Solution(std::move(solution))
 	{
 		std::copy(blocks, blocks + Width * Height, BlocksBegin());
@@ -375,7 +375,7 @@ namespace bloc
 		return std::count_if(BlocksBegin(), BlocksEnd(), [](auto c) { return c != Block::None; });
 	}
 
-	void Grid::ApplySolution(const bloc::Solution& solution, unsigned int smallestGroupSize)
+	void Grid::ApplySolution(const sgbust::Solution& solution, unsigned int smallestGroupSize)
 	{
 		unsigned int length = solution.GetLength();
 

@@ -1,9 +1,9 @@
 ﻿/.vs
 /.vscode/*.json
 !/.vscode/tasks.json
-/BlocCpp/Debug
-/BlocCpp/Release
-/BlocCpp/x64
+/sgbust/Debug
+/sgbust/Release
+/sgbust/x64
 /Debug
 /Release
 /vcpkg_installed

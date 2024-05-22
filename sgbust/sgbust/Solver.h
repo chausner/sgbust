@@ -13,20 +13,20 @@
 #include "wyhash.h"
 
 template <>
-class std::hash<bloc::CompactGrid>
+class std::hash<sgbust::CompactGrid>
 {
 public:
-	std::size_t operator()(const bloc::CompactGrid& key) const
+	std::size_t operator()(const sgbust::CompactGrid& key) const
 	{
 		return wyhash(key.Data.get(), key.DataLength(), 0, _wyp);
 	}
 };
 
 template <>
-class std::equal_to<bloc::CompactGrid>
+class std::equal_to<sgbust::CompactGrid>
 {
 public:
-	constexpr bool operator()(const bloc::CompactGrid& lhs, const bloc::CompactGrid& rhs) const
+	constexpr bool operator()(const sgbust::CompactGrid& lhs, const sgbust::CompactGrid& rhs) const
 	{
 		return lhs.Width == rhs.Width &&
 			lhs.Height == rhs.Height &&
@@ -34,7 +34,7 @@ public:
 	}
 };
 
-namespace bloc
+namespace sgbust
 {
 	using GridHashSet = phmap::parallel_flat_hash_set<CompactGrid, std::hash<CompactGrid>, std::equal_to<CompactGrid>, mi_stl_allocator<CompactGrid>, 6, std::mutex>;
 

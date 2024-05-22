@@ -7,8 +7,8 @@
 #include <optional>
 #include <random>
 #include <unordered_set>
-#include "bloc/Grid.h"
-#include "bloc/Solver.h"
+#include "sgbust/Grid.h"
+#include "sgbust/Solver.h"
 #include "utils.h"
 #include "CLI/CLI.hpp"
 #include "mimalloc-new-delete.h"
@@ -51,13 +51,13 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 	unsigned int smallestGroupSize;
 
 	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);
-	bloc::Grid grid(file, smallestGroupSize);
+	sgbust::Grid grid(file, smallestGroupSize);
 	file.close();
 
 	if (!cliOptions.Quiet)
 		grid.Print();
 
-	bloc::Solver solver;
+	sgbust::Solver solver;
 
 	solver.MaxDBSize = cliOptions.MaxDBSize;
 	solver.MaxDepth = cliOptions.MaxDepth;
@@ -68,7 +68,7 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 
 	auto startTime = std::chrono::steady_clock::now();
 
-	solver.Solve(grid, smallestGroupSize, bloc::Solution(cliOptions.SolutionPrefix));
+	solver.Solve(grid, smallestGroupSize, sgbust::Solution(cliOptions.SolutionPrefix));
 
 	auto endTime = std::chrono::steady_clock::now();
 
@@ -93,7 +93,7 @@ static void RunGenerateCommand(const GenerateCLIOptions &cliOptions)
 	else
 		mt.seed(*cliOptions.Seed);
 
-	bloc::Grid grid = bloc::Grid::GenerateRandom(cliOptions.Width, cliOptions.Height, cliOptions.NumColors, mt);
+	sgbust::Grid grid = sgbust::Grid::GenerateRandom(cliOptions.Width, cliOptions.Height, cliOptions.NumColors, mt);
 
 	std::ofstream file(cliOptions.GridFile, std::ios_base::binary);
 	grid.Save(file, cliOptions.SmallestGroupSize);
@@ -118,11 +118,11 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 	unsigned int smallestGroupSize;
 
 	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);
-	bloc::Grid grid(file, smallestGroupSize);
+	sgbust::Grid grid(file, smallestGroupSize);
 	file.close();
 
-	std::unordered_set<bloc::Block> colors(grid.BlocksBegin(), grid.BlocksEnd());
-	colors.erase(bloc::Block::None);
+	std::unordered_set<sgbust::Block> colors(grid.BlocksBegin(), grid.BlocksEnd());
+	colors.erase(sgbust::Block::None);
 	int numColors = colors.size();
 
 	std::cout << "Size: " << static_cast<int>(grid.Width) << " x " << static_cast<int>(grid.Height) << std::endl;
@@ -135,16 +135,16 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 	{
 		auto pluralS = [](int x) { return x == 1 ? "" : "s"; };
 
-		bloc::Solution solution(cliOptions.Solution);
+		sgbust::Solution solution(cliOptions.Solution);
 		std::cout << std::endl;
 		std::cout << "Solution: " << solution.AsString() << " (" << solution.GetLength() << " step" << pluralS(solution.GetLength()) << ")" << std::endl;
 
-		bloc::Grid bg = grid;
+		sgbust::Grid bg = grid;
 
 		for (unsigned int i = 0; i < solution.GetLength(); i++)
 		{
 			unsigned char step = solution[i];
-			std::vector<std::vector<bloc::Position>> groups;
+			std::vector<std::vector<sgbust::Position>> groups;
 			bg.GetGroups(groups, smallestGroupSize);
 			if (step >= groups.size())
 				throw std::invalid_argument("Solution string is not valid for this block grid");
@@ -159,7 +159,7 @@ int main(int argc, const char* argv[])
 {
 	try
 	{
-		CLI::App app("SameGame solver", "BlocCpp");
+		CLI::App app("SameGame solver", "sgbust");
 
 		SolveCLIOptions cliOptions;
 

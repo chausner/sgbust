@@ -12,7 +12,7 @@
 #include "CompactGrid.h"
 #include "MemoryUsage.h"
 
-namespace bloc
+namespace sgbust
 {
 	std::optional<SolverResult> Solver::Solve(const Grid& grid, unsigned int smallestGroupSize, const Solution& solutionPrefix)
 	{

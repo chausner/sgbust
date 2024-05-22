@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <optional>
 
-namespace bloc
+namespace sgbust
 {
 	std::optional<size_t> GetCurrentMemoryUsage();
 }

@@ -6,7 +6,7 @@
 #include <Windows.h>
 #include <psapi.h>
 
-namespace bloc
+namespace sgbust
 {
     std::optional<size_t> GetCurrentMemoryUsage()
     {
@@ -22,7 +22,7 @@ namespace bloc
 #include <fstream>
 #include <unistd.h>
 
-namespace bloc
+namespace sgbust
 {
     std::optional<size_t> GetCurrentMemoryUsage()
     {
@@ -42,7 +42,7 @@ namespace bloc
 
 #else
 
-namespace bloc
+namespace sgbust
 {
     std::optional<size_t> GetCurrentMemoryUsage()
     {

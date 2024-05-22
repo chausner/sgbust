@@ -1,7 +1,7 @@
 #include "Grid.h"
 #include "CompactGrid.h"
 
-namespace bloc
+namespace sgbust
 {
 	CompactGrid::CompactGrid() : Width(0), Height(0)
 	{

@@ -3,7 +3,7 @@
 #include <vector>
 #include "Grid.h"
 
-namespace bloc
+namespace sgbust
 {
 	struct Scoring
 	{

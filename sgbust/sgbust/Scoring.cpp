@@ -3,7 +3,7 @@
 #include "Solver.h"
 #include "Scoring.h"
 
-namespace bloc
+namespace sgbust
 {
 	//Scoring::Scoring(const Grid& grid, unsigned int smallestGroupSize)
 	//{
