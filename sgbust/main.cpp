@@ -147,7 +147,7 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 			std::vector<std::vector<sgbust::Position>> groups;
 			bg.GetGroups(groups, smallestGroupSize);
 			if (step >= groups.size())
-				throw std::invalid_argument("Solution string is not valid for this block grid");
+				throw std::invalid_argument("Solution string is not valid for this grid");
 			bg.RemoveGroup(groups[step]);
 			std::cout << (i + 1) << ". " << groups[step].size() << " block" << pluralS(groups[step].size()) << std::endl;
 			bg.Print();
@@ -163,7 +163,7 @@ int main(int argc, const char* argv[])
 
 		SolveCLIOptions cliOptions;
 
-		CLI::App* solveCommand = app.add_subcommand("solve", "Solve a block grid");
+		CLI::App* solveCommand = app.add_subcommand("solve", "Solve a grid");
 		solveCommand->add_option("grid-file", cliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
 		solveCommand->add_option("--prefix", cliOptions.SolutionPrefix, "Solution prefix");
 		solveCommand->add_option("-s,--max-db-size", cliOptions.MaxDBSize, "Maximum DB size");
@@ -176,7 +176,7 @@ int main(int argc, const char* argv[])
 
 		GenerateCLIOptions generateCliOptions;
 
-		CLI::App* generateCommand = app.add_subcommand("generate", "Generate a random block grid and save it to a file");
+		CLI::App* generateCommand = app.add_subcommand("generate", "Generate a random grid and save it to a file");
 		generateCommand->add_option("grid-file", generateCliOptions.GridFile, "Destination path for Bloc Grid File (.bgf)")->required();
 		generateCommand->add_option("--seed", generateCliOptions.Seed, "Seed to use for randomization");
 		generateCommand->add_option("--width", generateCliOptions.Width, "Number of columns in the grid")->check(CLI::Range(1, 255))->required();
@@ -188,7 +188,7 @@ int main(int argc, const char* argv[])
 
 		ShowCLIOptions showCliOptions;
 
-		CLI::App* showCommand = app.add_subcommand("show", "Show a block grid");
+		CLI::App* showCommand = app.add_subcommand("show", "Show a grid");
 		showCommand->add_option("grid-file", showCliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
 		showCommand->add_option("--solution", showCliOptions.Solution, "Solution steps to show");
 		showCommand->callback([&]() { RunShowCommand(showCliOptions); });

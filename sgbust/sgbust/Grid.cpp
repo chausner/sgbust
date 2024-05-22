@@ -171,18 +171,18 @@ namespace sgbust
 			throw std::runtime_error("Could not read stream.");
 
 		if (header != "BGF2")
-			throw std::runtime_error("Invalid bloc grid file: header corrupted");
+			throw std::runtime_error("Invalid Bloc Grid File: header corrupted");
 
 		Width = stream.get();
 		Height = stream.get();
 
 		if ((Width == 0) != (Height == 0))
-			throw std::runtime_error("Invalid bloc grid file: width/height invalid.");
+			throw std::runtime_error("Invalid Bloc Grid File: width/height invalid.");
 
 		smallestGroupSize = stream.get();
 
 		if (smallestGroupSize < 1)
-			throw std::runtime_error("Invalid bloc grid file: smallest group size out-of-range.");
+			throw std::runtime_error("Invalid Bloc Grid File: smallest group size out-of-range.");
 
 		Blocks = std::make_unique_for_overwrite<Block[]>(Width * Height);
 
