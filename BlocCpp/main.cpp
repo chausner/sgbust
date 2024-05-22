@@ -6,6 +6,7 @@
 #include <iostream>
 #include <optional>
 #include <random>
+#include <thread>
 #include <unordered_set>
 #include "BlockGrid.h"
 #include "BlocSolver.h"
@@ -40,6 +41,17 @@ struct ShowCLIOptions
 {
 	std::string GridFile;
 	std::string Solution;
+};
+
+struct BenchmarkCLIOptions
+{
+	std::optional<unsigned long long> Seed;
+	unsigned char Width;
+	unsigned char Height;
+	unsigned int NumColors;
+	unsigned int SmallestGroupSize;
+	std::optional<unsigned int> NumGrids = std::nullopt;
+	std::optional<unsigned int> MaxDBSize = std::nullopt;
 };
 
 static void RunSolveCommand(const SolveCLIOptions &cliOptions)
@@ -155,6 +167,85 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 	}
 }
 
+static void RunBenchmarkCommand(const BenchmarkCLIOptions& cliOptions)
+{
+#ifdef _WIN32
+	EnableVTMode();
+#endif
+
+	std::mt19937_64 mt;
+
+	if (!cliOptions.Seed.has_value())
+	{
+		std::random_device rand;
+		std::array<std::seed_seq::result_type, decltype(mt)::state_size> seedData;
+		std::generate(seedData.begin(), seedData.end(), std::ref(rand));
+		std::seed_seq seed(seedData.begin(), seedData.end());
+		mt.seed(seed);
+	}
+	else
+		mt.seed(*cliOptions.Seed);
+
+	BlocSolver solver;
+
+	solver.MaxDBSize = cliOptions.MaxDBSize;
+	solver.Quiet = true;
+
+	std::cout << "Press Ctrl+C to cancel." << std::endl;
+
+	unsigned int gridsSolved = 0;
+	auto startTime = std::chrono::steady_clock::now();
+	std::optional<std::chrono::steady_clock::time_point> lastStatsPrinted;
+	constexpr std::chrono::duration<double> RefreshInterval = std::chrono::seconds(1);
+
+	auto printStats = [&]() {
+		if (lastStatsPrinted.has_value())
+			std::cout << "\x1B[2F"; // move cursor to the beginning of the line 2 lines up
+
+		auto elapsed = std::chrono::steady_clock::now() - startTime;
+		double elapsedSeconds = std::chrono::duration_cast<std::chrono::duration<double>>(elapsed).count();
+		double gridsPerSecond;
+		double secondsPerGrid;
+		if (gridsSolved > 0 && elapsedSeconds > 0)
+		{
+			gridsPerSecond = gridsSolved / elapsedSeconds;
+			secondsPerGrid = elapsedSeconds / gridsSolved;
+		}
+		else
+		{
+			gridsPerSecond = 0.0;
+			secondsPerGrid = 0.0;
+		}
+
+		std::cout << "Elapsed: " << elapsedSeconds << " seconds\x1B[K\n";
+		std::cout << "Grids solved: " << gridsSolved << "\x1B[K\n";	
+		std::cout << "Speed: " << gridsPerSecond << " grids/second (" << secondsPerGrid << " seconds/grid)\x1B[K" << std::flush;
+		};
+
+	std::jthread thread([&] {
+		while (!cliOptions.NumGrids.has_value() || gridsSolved < *cliOptions.NumGrids)
+		{
+			BlockGrid blockGrid = BlockGrid::GenerateRandom(cliOptions.Width, cliOptions.Height, cliOptions.NumColors, mt);
+
+			auto result = solver.Solve(blockGrid, cliOptions.SmallestGroupSize);
+
+			gridsSolved++;
+
+			auto now = std::chrono::steady_clock::now();
+			if (!lastStatsPrinted.has_value() || now - *lastStatsPrinted >= RefreshInterval)
+			{
+				printStats();
+				lastStatsPrinted = now;
+			}			
+		}
+		});
+
+	thread.join();
+
+	printStats();
+	std::cout << std::endl;
+}
+
 int main(int argc, const char* argv[])
 {
 	try
@@ -192,6 +283,18 @@ int main(int argc, const char* argv[])
 		showCommand->add_option("grid-file", showCliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
 		showCommand->add_option("--solution", showCliOptions.Solution, "Solution steps to show");
 		showCommand->callback([&]() { RunShowCommand(showCliOptions); });
+
+		BenchmarkCLIOptions benchmarkCliOptions;
+
+		CLI::App* benchmarkCommand = app.add_subcommand("benchmark", "Run benchmarks");
+		benchmarkCommand->add_option("--seed", benchmarkCliOptions.Seed, "Seed to use for randomization");
+		benchmarkCommand->add_option("--width", benchmarkCliOptions.Width, "Number of columns in the grid")->check(CLI::Range(1, 255))->required();
+		benchmarkCommand->add_option("--height", benchmarkCliOptions.Height, "Number of rows in the grid")->check(CLI::Range(1, 255))->required();
+		benchmarkCommand->add_option("--num-colors", benchmarkCliOptions.NumColors, "Number of colors in the grid")->check(CLI::Range(1, 7))->required();
+		benchmarkCommand->add_option("--smallest-group-size", benchmarkCliOptions.SmallestGroupSize, "Smallest group size")->check(CLI::Range(1, 255 * 255))->required();
+		benchmarkCommand->add_option("--num-grids", benchmarkCliOptions.NumGrids, "Number of grids to generate and solve");
+		benchmarkCommand->add_option("--max-db-size", benchmarkCliOptions.MaxDBSize, "Maximum DB size");
+		benchmarkCommand->callback([&]() { RunBenchmarkCommand(benchmarkCliOptions); });
 
 		app.require_subcommand(1);
 
