@@ -32,7 +32,7 @@ struct GenerateCLIOptions
 	unsigned char Width;
 	unsigned char Height;
 	unsigned int NumColors;
-	unsigned int SmallestGroupSize;
+	unsigned int MinGroupSize;
 	bool Quiet = false;
 };
 
@@ -48,10 +48,10 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 	EnableVTMode();
 #endif
 
-	unsigned int smallestGroupSize;
+	unsigned int minGroupSize;
 
 	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);
-	sgbust::Grid grid(file, smallestGroupSize);
+	sgbust::Grid grid(file, minGroupSize);
 	file.close();
 
 	if (!cliOptions.Quiet)
@@ -68,7 +68,7 @@ static void RunSolveCommand(const SolveCLIOptions &cliOptions)
 
 	auto startTime = std::chrono::steady_clock::now();
 
-	solver.Solve(grid, smallestGroupSize, sgbust::Solution(cliOptions.SolutionPrefix));
+	solver.Solve(grid, minGroupSize, sgbust::Solution(cliOptions.SolutionPrefix));
 
 	auto endTime = std::chrono::steady_clock::now();
 
@@ -96,7 +96,7 @@ static void RunGenerateCommand(const GenerateCLIOptions &cliOptions)
 	sgbust::Grid grid = sgbust::Grid::GenerateRandom(cliOptions.Width, cliOptions.Height, cliOptions.NumColors, mt);
 
 	std::ofstream file(cliOptions.GridFile, std::ios_base::binary);
-	grid.Save(file, cliOptions.SmallestGroupSize);
+	grid.Save(file, cliOptions.MinGroupSize);
 	file.close();
 
 	if (!cliOptions.Quiet)
@@ -115,10 +115,10 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 	EnableVTMode();
 #endif
 
-	unsigned int smallestGroupSize;
+	unsigned int minGroupSize;
 
 	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);
-	sgbust::Grid grid(file, smallestGroupSize);
+	sgbust::Grid grid(file, minGroupSize);
 	file.close();
 
 	std::unordered_set<sgbust::Block> colors(grid.BlocksBegin(), grid.BlocksEnd());
@@ -127,7 +127,7 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 
 	std::cout << "Size: " << static_cast<int>(grid.Width) << " x " << static_cast<int>(grid.Height) << std::endl;
 	std::cout << "Number of colors: " << numColors << std::endl;
-	std::cout << "Smallest group size: " << smallestGroupSize << std::endl;
+	std::cout << "Minimal group size: " << minGroupSize << std::endl;
 	std::cout << std::endl;
 	grid.Print();
 
@@ -145,7 +145,7 @@ static void RunShowCommand(const ShowCLIOptions &cliOptions)
 		{
 			unsigned char step = solution[i];
 			std::vector<std::vector<sgbust::Position>> groups;
-			bg.GetGroups(groups, smallestGroupSize);
+			bg.GetGroups(groups, minGroupSize);
 			if (step >= groups.size())
 				throw std::invalid_argument("Solution string is not valid for this grid");
 			bg.RemoveGroup(groups[step]);
@@ -182,7 +182,7 @@ int main(int argc, const char* argv[])
 		generateCommand->add_option("--width", generateCliOptions.Width, "Number of columns in the grid")->check(CLI::Range(1, 255))->required();
 		generateCommand->add_option("--height", generateCliOptions.Height, "Number of rows in the grid")->check(CLI::Range(1, 255))->required();
 		generateCommand->add_option("--num-colors", generateCliOptions.NumColors, "Number of colors in the grid")->check(CLI::Range(1, 7))->required();
-		generateCommand->add_option("--smallest-group-size", generateCliOptions.SmallestGroupSize, "Smallest group size")->check(CLI::Range(1, 255 * 255))->required();
+		generateCommand->add_option("--min-group-size", generateCliOptions.MinGroupSize, "Minimal group size")->check(CLI::Range(1, 255 * 255))->required();
 		generateCommand->add_flag("-q,--quiet", generateCliOptions.Quiet, "Quiet mode");
 		generateCommand->callback([&]() { RunGenerateCommand(generateCliOptions); });
 

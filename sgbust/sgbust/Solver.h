@@ -46,7 +46,7 @@ namespace sgbust
 
 	class Solver
 	{
-		unsigned int smallestGroupSize = 0;
+		unsigned int minGroupSize = 0;
 		unsigned int depth = 0;
 		std::map<Scoring, GridHashSet> grids;
 		Solution solutionPrefix;
@@ -70,6 +70,6 @@ namespace sgbust
 		double TrimmingSafetyFactor = 1.25;
 		bool Quiet = false;
 
-		std::optional<SolverResult> Solve(const Grid& grid, unsigned int smallestGroupSize, const Solution& solutionPrefix = {});
+		std::optional<SolverResult> Solve(const Grid& grid, unsigned int minGroupSize, const Solution& solutionPrefix = {});
 	};
 }

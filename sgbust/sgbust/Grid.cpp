@@ -160,7 +160,7 @@ namespace sgbust
 		std::copy(blocks, blocks + Width * Height, BlocksBegin());
 	}
 
-	Grid::Grid(std::istream& stream, unsigned int& smallestGroupSize)
+	Grid::Grid(std::istream& stream, unsigned int& minGroupSize)
 	{
 		std::string header;
 		header.resize(4);
@@ -179,10 +179,10 @@ namespace sgbust
 		if ((Width == 0) != (Height == 0))
 			throw std::runtime_error("Invalid Bloc Grid File: width/height invalid.");
 
-		smallestGroupSize = stream.get();
+		minGroupSize = stream.get();
 
-		if (smallestGroupSize < 1)
-			throw std::runtime_error("Invalid Bloc Grid File: smallest group size out-of-range.");
+		if (minGroupSize < 1)
+			throw std::runtime_error("Invalid Bloc Grid File: minimal group size out-of-range.");
 
 		Blocks = std::make_unique_for_overwrite<Block[]>(Width * Height);
 
@@ -229,12 +229,12 @@ namespace sgbust
 		return *this;
 	}
 
-	void Grid::Save(std::ostream& stream, unsigned int smallestGroupSize) const
+	void Grid::Save(std::ostream& stream, unsigned int minGroupSize) const
 	{
 		stream << "BGF2";
 		stream << Width;
 		stream << Height;
-		stream << static_cast<unsigned char>(smallestGroupSize);
+		stream << static_cast<unsigned char>(minGroupSize);
 		for (const Block* b = BlocksBegin(); b != BlocksEnd(); b++)
 			stream << static_cast<unsigned char>(*b);
 
@@ -242,7 +242,7 @@ namespace sgbust
 			throw std::runtime_error("Could not save Grid to stream");
 	}
 
-	void Grid::GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const
+	void Grid::GetGroups(std::vector<std::vector<Position>>& groups, unsigned int minGroupSize) const
 	{
 		auto blocks = const_cast<Grid*>(this)->BlocksView();
 
@@ -256,13 +256,13 @@ namespace sgbust
 			for (unsigned char x = 0; x < Width; x++)
 				if ((static_cast<char>(blocks(x, y)) & BlockVisited) == 0 && blocks(x, y) != Block::None)
 				{
-					if (smallestGroupSize > 1)
+					if (minGroupSize > 1)
 						if (x != Width - 1 && y != Height - 1 && blocks(x, y) != blocks(x + 1, y) && blocks(x, y) != blocks(x, y + 1))
 							continue;
 
 					GetAdjacentBlocksRecursive(blocks, adjacentBlocks, x, y);
 
-					if (adjacentBlocks.size() >= smallestGroupSize)
+					if (adjacentBlocks.size() >= minGroupSize)
 						groups.emplace_back(adjacentBlocks);
 
 					adjacentBlocks.clear();
@@ -375,7 +375,7 @@ namespace sgbust
 		return std::count_if(BlocksBegin(), BlocksEnd(), [](auto c) { return c != Block::None; });
 	}
 
-	void Grid::ApplySolution(const sgbust::Solution& solution, unsigned int smallestGroupSize)
+	void Grid::ApplySolution(const sgbust::Solution& solution, unsigned int minGroupSize)
 	{
 		unsigned int length = solution.GetLength();
 
@@ -383,7 +383,7 @@ namespace sgbust
 
 		for (unsigned int i = 0; i < length; i++)
 		{
-			GetGroups(groups, smallestGroupSize);
+			GetGroups(groups, minGroupSize);
 			if (solution[i] >= groups.size())
 				throw std::runtime_error("Invalid solution");
 			RemoveGroup(groups[solution[i]]);

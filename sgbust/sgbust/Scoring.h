@@ -9,9 +9,9 @@ namespace sgbust
 	{
 		int Score;
 
-		Scoring(const Grid& grid, unsigned int smallestGroupSize);
+		Scoring(const Grid& grid, unsigned int minGroupSize);
 		Scoring(int score) : Score(score) {}
-		Scoring RemoveGroup(const Grid& oldGrid, const std::vector<Position>& group, const Grid& newGrid, unsigned int smallestGroupSize) const;
+		Scoring RemoveGroup(const Grid& oldGrid, const std::vector<Position>& group, const Grid& newGrid, unsigned int minGroupSize) const;
 		bool IsPerfect() const;
 
 		bool operator<(const Scoring& other) const

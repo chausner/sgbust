@@ -70,7 +70,7 @@ namespace sgbust
 
 		Grid(unsigned char width, unsigned char height);
 		Grid(unsigned char width, unsigned char height, const Block* blocks, sgbust::Solution solution);
-		Grid(std::istream& stream, unsigned int& smallestGroupSize);
+		Grid(std::istream& stream, unsigned int& minGroupSize);
 		Grid(const Grid& grid);
 		Grid(Grid&& grid) noexcept;
 		Grid& operator=(const Grid& grid);
@@ -79,11 +79,11 @@ namespace sgbust
 		template <typename Generator>
 		static Grid GenerateRandom(unsigned char width, unsigned char height, unsigned int numColors, Generator& generator);
 
-		void Save(std::ostream& stream, unsigned int smallestGroupSize) const;
-		void GetGroups(std::vector<std::vector<Position>>& groups, unsigned int smallestGroupSize) const;
+		void Save(std::ostream& stream, unsigned int minGroupSize) const;
+		void GetGroups(std::vector<std::vector<Position>>& groups, unsigned int minGroupSize) const;
 		void RemoveGroup(const std::vector<Position>& group);
 		unsigned int GetNumberOfBlocks() const;
-		void ApplySolution(const sgbust::Solution& solution, unsigned int smallestGroupSize);
+		void ApplySolution(const sgbust::Solution& solution, unsigned int minGroupSize);
 
 		Block* BlocksBegin() { return Blocks.get(); }
 		Block* BlocksEnd() { return Blocks.get() + Width * Height; }

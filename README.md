@@ -30,7 +30,7 @@ Use the `generate` command to generate a random grid using the specified width, 
 and save it to the specified path as a BGF file:
 
 ```
-.\sgbust generate sample.bgf --width 15 --height 15 --num-colors 4 --smallest-group-size 2
+.\sgbust generate sample.bgf --width 15 --height 15 --num-colors 4 --min-group-size 2
 ```
 
 You may optionally pass a custom randomization seed using `--seed` to generate grids deterministically.

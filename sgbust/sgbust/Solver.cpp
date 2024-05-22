@@ -14,18 +14,18 @@
 
 namespace sgbust
 {
-	std::optional<SolverResult> Solver::Solve(const Grid& grid, unsigned int smallestGroupSize, const Solution& solutionPrefix)
+	std::optional<SolverResult> Solver::Solve(const Grid& grid, unsigned int minGroupSize, const Solution& solutionPrefix)
 	{
-		this->smallestGroupSize = smallestGroupSize;
+		this->minGroupSize = minGroupSize;
 		this->solutionPrefix = solutionPrefix;
 
 		Grid bg = grid;
 
 		if (!solutionPrefix.IsEmpty())
-			bg.ApplySolution(solutionPrefix, smallestGroupSize);
+			bg.ApplySolution(solutionPrefix, minGroupSize);
 
 		grids.clear();
-		grids[Scoring(bg, smallestGroupSize)].insert(CompactGrid(bg));
+		grids[Scoring(bg, minGroupSize)].insert(CompactGrid(bg));
 
 		solution = Solution();
 		bestScore = std::numeric_limits<int>::max();
@@ -118,7 +118,7 @@ namespace sgbust
 	unsigned int Solver::SolveGrid(const Grid & grid, Scoring scoring, std::map<Scoring, GridHashSet>&newGrids, bool& stop, bool dontAddToDB)
 	{
 		static thread_local std::vector<std::vector<Position>> groups;
-		grid.GetGroups(groups, smallestGroupSize);
+		grid.GetGroups(groups, minGroupSize);
 
 		if (groups.empty())
 			CheckSolution(scoring, grid, stop);
@@ -130,7 +130,7 @@ namespace sgbust
 			Grid newGrid(grid.Width, grid.Height, grid.Blocks.get(), grid.Solution.Append(i));
 			newGrid.RemoveGroup(groups[i]);
 
-			Scoring newScoring = scoring.RemoveGroup(grid, groups[i], newGrid, smallestGroupSize);
+			Scoring newScoring = scoring.RemoveGroup(grid, groups[i], newGrid, minGroupSize);
 
 			if (newGrid.IsEmpty())
 				CheckSolution(newScoring, newGrid, stop);
