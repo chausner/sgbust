@@ -4,7 +4,6 @@
 #include <array>
 #include <chrono>
 #include <fstream>
-#include <functional>
 #include <iostream>
 #include <optional>
 #include <random>

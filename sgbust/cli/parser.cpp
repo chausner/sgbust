@@ -1,5 +1,7 @@
 #include "parser.h"
 
+#include "CLI/CLI.hpp"
+
 std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
 {
 	CLI::App app;

@@ -8,7 +8,7 @@
 
 namespace sgbust
 {
-    std::optional<size_t> GetCurrentMemoryUsage()
+    std::optional<std::size_t> GetCurrentMemoryUsage()
     {
         PROCESS_MEMORY_COUNTERS counters;
         if (GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters)) == 0)
@@ -24,10 +24,10 @@ namespace sgbust
 
 namespace sgbust
 {
-    std::optional<size_t> GetCurrentMemoryUsage()
+    std::optional<std::size_t> GetCurrentMemoryUsage()
     {
         std::ifstream file("/proc/self/statm");
-        size_t size, resident, share;
+        std::size_t size, resident, share;
         file >> size >> resident >> share;
         if (file.fail())
             return std::nullopt;
@@ -44,7 +44,7 @@ namespace sgbust
 
 namespace sgbust
 {
-    std::optional<size_t> GetCurrentMemoryUsage()
+    std::optional<std::size_t> GetCurrentMemoryUsage()
     {
         return std::nulloptr;
     }

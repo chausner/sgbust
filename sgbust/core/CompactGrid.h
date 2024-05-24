@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+
 #include "Grid.h"
 
 namespace sgbust

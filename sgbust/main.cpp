@@ -1,5 +1,7 @@
 #include <exception>
+#include <iostream>
 #include <variant>
+
 #include "cli/parser.h"
 #include "cli/commands.h"
 #include "mimalloc-new-delete.h"

@@ -1,8 +1,6 @@
 #include "Grid.h"
 
 #include <algorithm>
-#include <array>
-#include <cstring>
 #include <iostream>
 #include <iterator>
 #include <limits>

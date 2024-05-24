@@ -3,8 +3,6 @@
 #include <functional>
 #include <numeric>
 
-#include "Solver.h"
-
 namespace sgbust
 {
 	//Scoring::Scoring(const Grid& grid, unsigned int minGroupSize)

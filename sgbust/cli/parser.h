@@ -4,8 +4,6 @@
 #include <string>
 #include <variant>
 
-#include "CLI/CLI.hpp"
-
 struct SolveCLIOptions
 {
 	std::string GridFile;
