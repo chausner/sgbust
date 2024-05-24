@@ -18,42 +18,54 @@
     <ClCompile Include="main.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="sgbust\Grid.cpp">
+    <ClCompile Include="core\Grid.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="sgbust\Solver.cpp">
+    <ClCompile Include="core\Solver.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="utils.cpp">
+    <ClCompile Include="cli\utils.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="sgbust\Scoring.cpp">
+    <ClCompile Include="core\Scoring.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="sgbust\CompactGrid.cpp">
+    <ClCompile Include="core\CompactGrid.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="sgbust\MemoryUsage.cpp">
+    <ClCompile Include="core\MemoryUsage.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="cli\parser.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="cli\commands.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sgbust\Solver.h">
+    <ClInclude Include="core\Solver.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="sgbust\Grid.h">
+    <ClInclude Include="core\Grid.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
+    <ClInclude Include="cli\utils.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="sgbust\Scoring.h">
+    <ClInclude Include="core\Scoring.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="sgbust\CompactGrid.h">
+    <ClInclude Include="core\CompactGrid.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="sgbust\MemoryUsage.h">
+    <ClInclude Include="core\MemoryUsage.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="cli\parser.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="cli\commands.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

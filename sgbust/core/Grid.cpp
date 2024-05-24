@@ -1,3 +1,5 @@
+#include "Grid.h"
+
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -6,7 +8,6 @@
 #include <limits>
 #include <stdexcept>
 #include <utility>
-#include "Grid.h"
 
 namespace
 {

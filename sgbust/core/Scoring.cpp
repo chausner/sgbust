@@ -1,7 +1,9 @@
+#include "Scoring.h"
+
 #include <functional>
 #include <numeric>
+
 #include "Solver.h"
-#include "Scoring.h"
 
 namespace sgbust
 {

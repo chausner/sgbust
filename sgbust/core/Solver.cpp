@@ -1,3 +1,5 @@
+#include "Solver.h"
+
 #include <atomic>
 #include <cmath>
 #include <execution>
@@ -8,7 +10,7 @@
 #include <numeric>
 #include <utility>
 #include <vector>
-#include "Solver.h"
+
 #include "CompactGrid.h"
 #include "MemoryUsage.h"
 

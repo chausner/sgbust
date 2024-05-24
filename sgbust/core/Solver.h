@@ -5,11 +5,12 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include "parallel_hashmap/phmap.h"
-#include "Grid.h"
+
 #include "CompactGrid.h"
-#include "Scoring.h"
+#include "Grid.h"
 #include "mimalloc.h"
+#include "parallel_hashmap/phmap.h"
+#include "Scoring.h"
 #include "wyhash.h"
 
 template <>

@@ -151,21 +151,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="sgbust\Grid.cpp" />
-    <ClCompile Include="sgbust\Solver.cpp" />
-    <ClCompile Include="sgbust\CompactGrid.cpp" />
+    <ClCompile Include="cli\parser.cpp" />
+    <ClCompile Include="cli\commands.cpp" />
+    <ClCompile Include="core\Grid.cpp" />
+    <ClCompile Include="core\Solver.cpp" />
+    <ClCompile Include="core\CompactGrid.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="sgbust\MemoryUsage.cpp" />
-    <ClCompile Include="sgbust\Scoring.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="core\MemoryUsage.cpp" />
+    <ClCompile Include="core\Scoring.cpp" />
+    <ClCompile Include="cli\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sgbust\Grid.h" />
-    <ClInclude Include="sgbust\Solver.h" />
-    <ClInclude Include="sgbust\CompactGrid.h" />
-    <ClInclude Include="sgbust\MemoryUsage.h" />
-    <ClInclude Include="sgbust\Scoring.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="cli\parser.h" />
+    <ClInclude Include="cli\commands.h" />
+    <ClInclude Include="core\Grid.h" />
+    <ClInclude Include="core\Solver.h" />
+    <ClInclude Include="core\CompactGrid.h" />
+    <ClInclude Include="core\MemoryUsage.h" />
+    <ClInclude Include="core\Scoring.h" />
+    <ClInclude Include="cli\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
