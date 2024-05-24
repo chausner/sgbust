@@ -108,7 +108,7 @@ namespace sgbust
 
 		Grid grid(width, height);
 		std::uniform_int_distribution<> dist(1, numColors);
-		std::generate(grid.BlocksBegin(), grid.BlocksEnd(), [&]() {
+		std::generate(grid.BlocksBegin(), grid.BlocksEnd(), [&] {
 			return static_cast<Block>(dist(generator));
 			});
 

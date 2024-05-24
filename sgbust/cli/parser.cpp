@@ -20,7 +20,7 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
 	solveCommand->add_flag("!--no-trim", solveCliOptions.TrimDB, "Disable DB trimming");
 	solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor");
 	solveCommand->add_flag("-q,--quiet", solveCliOptions.Quiet, "Quiet mode");
-	solveCommand->callback([&]() { cliOptions = solveCliOptions; });
+	solveCommand->callback([&] { cliOptions = solveCliOptions; });
 
 	GenerateCLIOptions generateCliOptions;
 
@@ -32,14 +32,14 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
 	generateCommand->add_option("--num-colors", generateCliOptions.NumColors, "Number of colors in the grid")->check(CLI::Range(1, 7))->required();
 	generateCommand->add_option("--min-group-size", generateCliOptions.MinGroupSize, "Minimal group size")->check(CLI::Range(1, 255 * 255))->required();
 	generateCommand->add_flag("-q,--quiet", generateCliOptions.Quiet, "Quiet mode");
-	generateCommand->callback([&]() { cliOptions = generateCliOptions; });
+	generateCommand->callback([&] { cliOptions = generateCliOptions; });
 
 	ShowCLIOptions showCliOptions;
 
 	CLI::App* showCommand = app.add_subcommand("show", "Show a grid");
 	showCommand->add_option("grid-file", showCliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
 	showCommand->add_option("--solution", showCliOptions.Solution, "Solution steps to show");
-	showCommand->callback([&]() { cliOptions = showCliOptions; });
+	showCommand->callback([&] { cliOptions = showCliOptions; });
 
 	app.require_subcommand(1);
 
