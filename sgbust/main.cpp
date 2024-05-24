@@ -4,12 +4,17 @@
 
 #include "cli/parser.h"
 #include "cli/commands.h"
+#include "cli/utils.h"
 #include "mimalloc-new-delete.h"
 
 int main(int argc, const char* argv[])
 {
 	try
 	{
+#ifdef _WIN32
+		EnableVTMode();
+#endif
+
 		std::variant<CLIOptions, int> parsedArgs = ParseArgs(argc, argv);
 
 		if (std::holds_alternative<int>(parsedArgs))

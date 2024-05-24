@@ -12,14 +12,9 @@
 #include "../core/Grid.h"
 #include "../core/Solver.h"
 #include "parser.h"
-#include "utils.h"
 
 void RunCommand(const SolveCLIOptions& cliOptions)
 {
-#ifdef _WIN32
-	EnableVTMode();
-#endif
-
 	unsigned int minGroupSize;
 
 	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);
@@ -72,21 +67,11 @@ void RunCommand(const GenerateCLIOptions& cliOptions)
 	file.close();
 
 	if (!cliOptions.Quiet)
-	{
-#ifdef _WIN32
-		EnableVTMode();
-#endif
-
 		grid.Print();
-	}
 }
 
 void RunCommand(const ShowCLIOptions& cliOptions)
 {
-#ifdef _WIN32
-	EnableVTMode();
-#endif
-
 	unsigned int minGroupSize;
 
 	std::ifstream file(cliOptions.GridFile, std::ios_base::binary);

@@ -12,9 +12,12 @@ bool EnableVTMode()
 	if (!GetConsoleMode(stdOut, &mode))
 		return false;
 
-	mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-	if (!SetConsoleMode(stdOut, mode))
-		return false;
+	if ((mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0)
+	{
+		mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+		if (!SetConsoleMode(stdOut, mode))
+			return false;
+	}
 
 	return true;
 }
