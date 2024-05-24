@@ -46,7 +46,7 @@ namespace sgbust
 {
     std::optional<std::size_t> GetCurrentMemoryUsage()
     {
-        return std::nulloptr;
+        return std::nullopt;
     }
 }
 
