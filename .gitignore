@@ -8,4 +8,5 @@
 /Release
 /vcpkg_installed
 /x64
+/build
 *.vcxproj.user
