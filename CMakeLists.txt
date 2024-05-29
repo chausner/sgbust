@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 project(sgbust)
 
-set(CMAKE_CXX_STANDARD 20)
-
 add_executable(sgbust
     src/cli/commands.cpp
     src/cli/parser.cpp
@@ -15,6 +13,8 @@ add_executable(sgbust
     src/core/Solver.cpp
     src/main.cpp
 )
+
+target_compile_features(sgbust PRIVATE cxx_std_20)
 
 target_include_directories(sgbust PRIVATE include)
 
