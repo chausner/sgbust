@@ -1,12 +1,4 @@
 ﻿/.vs
-/.vscode/*.json
-!/.vscode/tasks.json
-/sgbust/Debug
-/sgbust/Release
-/sgbust/x64
-/Debug
-/Release
-/vcpkg_installed
-/x64
+/.vscode
 /build
-*.vcxproj.user
+/out

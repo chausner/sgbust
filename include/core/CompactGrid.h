@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <memory>
 
-#include "Grid.h"
+#include "core/Grid.h"
 
 namespace sgbust
 {

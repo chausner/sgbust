@@ -1,5 +1,5 @@
 # sgbust
-SameGame solver in C++
+Optimized multi-threaded SameGame solver in C++
 
 [![license](https://img.shields.io/github/license/chausner/sgbust.svg)](https://github.com/chausner/sgbust/blob/master/LICENSE)
 
@@ -14,12 +14,11 @@ sgbust is a command-line tool that uses [beam search](https://en.wikipedia.org/w
 ## Building
 
 To build sgbust, a C++20-compliant compiler is required.
-sgbust is currently tested with MSVC only.
-gcc should also be able to build the application but due to limitations in its parallel STL implementation,
-created binaries will run single-threaded and the search will be very slow.
-As of writing, Clang is not supported since it does not implement parallel STL algorithms.
+sgbust is tested with recent versions of MSVC, gcc and Clang.
+As of writing, Clang is only supported when libstdc++ is used as STL implementation
+since libc++ currently does not implement Parallel STL algorithms that sgbust relies on for multi-threading.
 
-sgbust uses [vcpkg](https://github.com/microsoft/vcpkg) for dependency management.
+[vcpkg](https://github.com/microsoft/vcpkg) is recommended for installing third-party library dependencies.
 Follow the [quick start guide](https://github.com/microsoft/vcpkg#quick-start-windows) to setup vcpkg before building sgbust.
 
 ## Usage
@@ -78,3 +77,6 @@ Use the `show` command to display the grid saved in the specified BGF file:
 
 If a solution string is passed using the optional `--solution` parameter,
 each step in the solution is printed out with the resulting intermediate state of the grid.
+
+## How does it work?
+

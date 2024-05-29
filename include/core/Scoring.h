@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "Grid.h"
+#include "core/Grid.h"
 
 namespace sgbust
 {

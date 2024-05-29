@@ -1,4 +1,4 @@
-#include "Solver.h"
+#include "core/Solver.h"
 
 #include <atomic>
 #include <cmath>
@@ -11,8 +11,8 @@
 #include <utility>
 #include <vector>
 
-#include "CompactGrid.h"
-#include "MemoryUsage.h"
+#include "core/CompactGrid.h"
+#include "core/MemoryUsage.h"
 
 namespace sgbust
 {

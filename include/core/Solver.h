@@ -7,11 +7,11 @@
 #include <mutex>
 #include <optional>
 
-#include "CompactGrid.h"
-#include "Grid.h"
+#include "core/CompactGrid.h"
+#include "core/Grid.h"
+#include "core/Scoring.h"
 #include "mimalloc.h"
 #include "parallel_hashmap/phmap.h"
-#include "Scoring.h"
 #include "wyhash.h"
 
 template <>

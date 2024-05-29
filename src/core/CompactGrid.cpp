@@ -1,6 +1,6 @@
-#include "CompactGrid.h"
+#include "core/CompactGrid.h"
 
-#include "Grid.h"
+#include "core/Grid.h"
 
 namespace sgbust
 {

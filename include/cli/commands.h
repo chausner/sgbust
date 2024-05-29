@@ -1,6 +1,6 @@
 #pragma once
 
-#include "parser.h"
+#include "cli/parser.h"
 
 void RunCommand(const SolveCLIOptions& cliOptions);
 void RunCommand(const GenerateCLIOptions& cliOptions);

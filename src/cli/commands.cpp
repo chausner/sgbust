@@ -1,4 +1,4 @@
-#include "commands.h"
+#include "cli/commands.h"
 
 #include <algorithm>
 #include <array>
@@ -9,9 +9,9 @@
 #include <random>
 #include <unordered_set>
 
-#include "../core/Grid.h"
-#include "../core/Solver.h"
-#include "parser.h"
+#include "cli/parser.h"
+#include "core/Grid.h"
+#include "core/Solver.h"
 
 void RunCommand(const SolveCLIOptions& cliOptions)
 {
