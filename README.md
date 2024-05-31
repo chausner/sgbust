@@ -21,6 +21,8 @@ since libc++ currently does not implement Parallel STL algorithms that sgbust re
 [vcpkg](https://github.com/microsoft/vcpkg) is recommended for installing third-party library dependencies.
 Follow the [quick start guide](https://github.com/microsoft/vcpkg#quick-start-windows) to setup vcpkg before building sgbust.
 
+You may either build via CMake (supported on all platforms) or MSBuild (Windows-only).
+
 ## Usage
 
 ### Generate grids

@@ -1,4 +1,11 @@
-﻿/.vs
+﻿*.user
+/.vs
 /.vscode
 /build
+/CMakeSettings.json
+/Debug
 /out
+/Release
+/sgbust
+/vcpkg_installed
+/x64
