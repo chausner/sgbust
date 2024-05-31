@@ -9,7 +9,7 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
 	app.name("sgbust");
 	app.description("SameGame solver");
 
-	CLIOptions cliOptions;
+	std::optional<CLIOptions> cliOptions;
 
 	SolveCLIOptions solveCliOptions;
 
@@ -43,9 +43,10 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
 	showCommand->add_option("--solution", showCliOptions.Solution, "Solution steps to show");
 	showCommand->callback([&] { cliOptions = showCliOptions; });
 
-	app.require_subcommand(1);
-
 	CLI11_PARSE(app, argc, argv);
 
-	return cliOptions;
+	if (!cliOptions.has_value())
+		return app.exit(CLI::CallForHelp());
+
+	return *cliOptions;
 }
