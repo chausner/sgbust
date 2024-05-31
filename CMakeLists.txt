@@ -16,6 +16,10 @@ add_executable(sgbust
 
 target_compile_features(sgbust PRIVATE cxx_std_20)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(sgbust PRIVATE "/Zc:__cplusplus")
+endif()
+
 target_include_directories(sgbust PRIVATE include)
 
 if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
