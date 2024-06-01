@@ -4,21 +4,21 @@
 
 bool EnableVTMode()
 {
-	HANDLE stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	if (stdOut == INVALID_HANDLE_VALUE)
-		return false;
+    HANDLE stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (stdOut == INVALID_HANDLE_VALUE)
+        return false;
 
-	DWORD mode = 0;
-	if (!GetConsoleMode(stdOut, &mode))
-		return false;
+    DWORD mode = 0;
+    if (!GetConsoleMode(stdOut, &mode))
+        return false;
 
-	if ((mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0)
-	{
-		mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-		if (!SetConsoleMode(stdOut, mode))
-			return false;
-	}
+    if ((mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0)
+    {
+        mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        if (!SetConsoleMode(stdOut, mode))
+            return false;
+    }
 
-	return true;
+    return true;
 }
 #endif

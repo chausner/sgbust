@@ -9,31 +9,31 @@
 
 int main(int argc, const char* argv[])
 {
-	try
-	{
+    try
+    {
 #ifdef _WIN32
-		EnableVTMode();
+        EnableVTMode();
 #endif
 
-		std::variant<CLIOptions, int> parsedArgs = ParseArgs(argc, argv);
+        std::variant<CLIOptions, int> parsedArgs = ParseArgs(argc, argv);
 
-		if (std::holds_alternative<int>(parsedArgs))
-			return std::get<int>(parsedArgs);
-		
-		CLIOptions cliOptions = std::get<CLIOptions>(parsedArgs);
+        if (std::holds_alternative<int>(parsedArgs))
+            return std::get<int>(parsedArgs);
+        
+        CLIOptions cliOptions = std::get<CLIOptions>(parsedArgs);
 
-		std::visit([](auto&& arg) { RunCommand(arg); }, cliOptions);
+        std::visit([](auto&& arg) { RunCommand(arg); }, cliOptions);
 
-		return 0;
-	}
-	catch (const std::exception& ex)
-	{
-		std::cerr << "Exception: " << ex.what() << std::endl;
-		return 1;
-	}
-	catch (...)
-	{
-		std::cerr << "An unknown exception occurred";
-		return 1;
-	}
+        return 0;
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << "Exception: " << ex.what() << std::endl;
+        return 1;
+    }
+    catch (...)
+    {
+        std::cerr << "An unknown exception occurred";
+        return 1;
+    }
 }
