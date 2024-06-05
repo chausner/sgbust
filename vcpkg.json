@@ -1,11 +1,15 @@
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
-    "name": "bloc-cpp",
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name": "sgbust",
     "dependencies": [
         "cli11",
         "mdspan",
         "mimalloc",
         "parallel-hashmap",
+        {
+            "name": "tbb",
+            "platform": "!windows"
+        },
         "wyhash"
     ],
     "builtin-baseline": "a1a1cbc975abf909a6c8985a6a2b8fe20bbd9bd6"
