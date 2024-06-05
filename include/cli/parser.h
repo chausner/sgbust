@@ -18,7 +18,7 @@ enum class ScoringType
 struct SolveCLIOptions
 {
     std::string GridFile;
-    ScoringType ScoringType = ScoringType::Greedy;
+    ::ScoringType ScoringType = ScoringType::Greedy;
     std::optional<sgbust::Polynom> ScoringGroupScore;
     std::optional<int> ScoringClearanceBonus;
     std::optional<sgbust::Polynom> ScoringLeftoverPenalty;
