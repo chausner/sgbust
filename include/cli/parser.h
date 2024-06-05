@@ -1,10 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <variant>
 
 #include "core/Polynom.h"
+#include "core/Scoring.h"
 
 enum class ScoringType
 {
@@ -20,6 +22,7 @@ struct SolveCLIOptions
     std::optional<sgbust::Polynom> ScoringGroupScore;
     std::optional<int> ScoringClearanceBonus;
     std::optional<sgbust::Polynom> ScoringLeftoverPenalty;
+    std::unique_ptr<sgbust::Scoring> Scoring;
     std::string SolutionPrefix;
     std::optional<unsigned int> MaxDBSize = std::nullopt;
     std::optional<unsigned int> MaxDepth = std::nullopt;

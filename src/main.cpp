@@ -1,5 +1,6 @@
 #include <exception>
 #include <iostream>
+#include <utility>
 #include <variant>
 
 #include "cli/parser.h"
@@ -20,7 +21,7 @@ int main(int argc, const char* argv[])
         if (std::holds_alternative<int>(parsedArgs))
             return std::get<int>(parsedArgs);
         
-        CLIOptions cliOptions = std::get<CLIOptions>(parsedArgs);
+        CLIOptions cliOptions = std::get<CLIOptions>(std::move(parsedArgs));
 
         std::visit([](auto&& arg) { RunCommand(arg); }, cliOptions);
 

@@ -5,7 +5,6 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
-#include <memory>
 #include <optional>
 #include <random>
 #include <unordered_set>
@@ -37,50 +36,7 @@ void RunCommand(const SolveCLIOptions& cliOptions)
 
     auto startTime = std::chrono::steady_clock::now();
 
-    sgbust::LeftoverPenaltyFunc leftoverPenalty;
-    if (cliOptions.ScoringLeftoverPenalty.has_value())
-        leftoverPenalty = std::bind_front(&sgbust::Polynom::Evaluate, cliOptions.ScoringLeftoverPenalty);
-    else
-        leftoverPenalty = nullptr;
-
-    std::unique_ptr<sgbust::Scoring> scoring;
-
-    switch (cliOptions.ScoringType)
-    {
-    case ScoringType::Greedy:
-        if (!cliOptions.ScoringGroupScore.has_value())
-            throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'greedy'", CLI::ExitCodes::ExcludesError);
-        scoring = std::make_unique<sgbust::GreedyScoring>(
-            std::bind_front(&sgbust::Polynom::Evaluate, *cliOptions.ScoringGroupScore),
-            cliOptions.ScoringClearanceBonus.value_or(0),
-            std::move(leftoverPenalty)
-        );
-        break;
-    case ScoringType::Potential:
-        if (cliOptions.ScoringGroupScore.has_value())
-            throw CLI::ExcludesError("--scoring-group-score cannot be specified for scoring type 'potential", CLI::ExitCodes::ExcludesError);
-        /*if (cliOptions.ScoringClearanceBonus.has_value())
-            throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
-        if (cliOptions.ScoringLeftoverPenalty.has_value())
-            throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);*/
-        scoring = std::make_unique<sgbust::PotentialScoring>(
-            std::bind_front(&sgbust::Polynom::Evaluate, *cliOptions.ScoringGroupScore),
-            cliOptions.ScoringClearanceBonus.value_or(0),
-            std::move(leftoverPenalty)
-        );
-        break;
-    case ScoringType::NumBlocksNotInGroups:
-        if (cliOptions.ScoringGroupScore.has_value())
-            throw CLI::ExcludesError("--scoring-group-score cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
-        if (cliOptions.ScoringClearanceBonus.has_value())
-            throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
-        if (cliOptions.ScoringLeftoverPenalty.has_value())
-            throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
-        scoring = std::make_unique<sgbust::NumBlocksNotInGroupsScoring>();
-        break;
-    }
-
-    std::optional<sgbust::SolverResult> solverResult = solver.Solve(grid, minGroupSize, *scoring, sgbust::Solution(cliOptions.SolutionPrefix));
+    std::optional<sgbust::SolverResult> solverResult = solver.Solve(grid, minGroupSize, *cliOptions.Scoring, sgbust::Solution(cliOptions.SolutionPrefix));
 
     auto endTime = std::chrono::steady_clock::now();
 

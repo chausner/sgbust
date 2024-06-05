@@ -1,5 +1,6 @@
 #include "cli/parser.h"
 
+#include <functional>
 #include <unordered_map>
 
 #include "CLI/CLI.hpp"
@@ -34,7 +35,50 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     solveCommand->add_flag("!--no-trim", solveCliOptions.TrimDB, "Disable DB trimming");
     solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor");
     solveCommand->add_flag("-q,--quiet", solveCliOptions.Quiet, "Quiet mode");
-    solveCommand->callback([&] { cliOptions = solveCliOptions; });
+    solveCommand->callback([&] {
+        sgbust::LeftoverPenaltyFunc leftoverPenalty;
+        if (solveCliOptions.ScoringLeftoverPenalty.has_value())
+            leftoverPenalty = std::bind_front(&sgbust::Polynom::Evaluate, *solveCliOptions.ScoringLeftoverPenalty);
+        else
+            leftoverPenalty = nullptr;
+
+        switch (solveCliOptions.ScoringType)
+        {
+        case ScoringType::Greedy:
+            if (!solveCliOptions.ScoringGroupScore.has_value())
+                throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'greedy'", CLI::ExitCodes::ExcludesError);
+            solveCliOptions.Scoring = std::make_unique<sgbust::GreedyScoring>(
+                std::bind_front(&sgbust::Polynom::Evaluate, *solveCliOptions.ScoringGroupScore),
+                solveCliOptions.ScoringClearanceBonus.value_or(0),
+                std::move(leftoverPenalty)
+            );
+            break;
+        case ScoringType::Potential:
+            if (solveCliOptions.ScoringGroupScore.has_value())
+                throw CLI::ExcludesError("--scoring-group-score cannot be specified for scoring type 'potential", CLI::ExitCodes::ExcludesError);
+            /*if (solveCliOptions.ScoringClearanceBonus.has_value())
+                throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
+            if (solveCliOptions.ScoringLeftoverPenalty.has_value())
+                throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);*/
+            solveCliOptions.Scoring = std::make_unique<sgbust::PotentialScoring>(
+                std::bind_front(&sgbust::Polynom::Evaluate, *solveCliOptions.ScoringGroupScore),
+                solveCliOptions.ScoringClearanceBonus.value_or(0),
+                std::move(leftoverPenalty)
+            );
+            break;
+        case ScoringType::NumBlocksNotInGroups:
+            if (solveCliOptions.ScoringGroupScore.has_value())
+                throw CLI::ExcludesError("--scoring-group-score cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
+            if (solveCliOptions.ScoringClearanceBonus.has_value())
+                throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
+            if (solveCliOptions.ScoringLeftoverPenalty.has_value())
+                throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
+            solveCliOptions.Scoring = std::make_unique<sgbust::NumBlocksNotInGroupsScoring>();
+            break;
+        }
+
+        cliOptions = std::move(solveCliOptions);
+        });
 
     GenerateCLIOptions generateCliOptions;
 
@@ -46,19 +90,19 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     generateCommand->add_option("--num-colors", generateCliOptions.NumColors, "Number of colors in the grid")->check(CLI::Range(1, 7))->required();
     generateCommand->add_option("--min-group-size", generateCliOptions.MinGroupSize, "Minimal group size")->check(CLI::Range(1, 255 * 255))->required();
     generateCommand->add_flag("-q,--quiet", generateCliOptions.Quiet, "Quiet mode");
-    generateCommand->callback([&] { cliOptions = generateCliOptions; });
+    generateCommand->callback([&] { cliOptions = std::move(generateCliOptions); });
 
     ShowCLIOptions showCliOptions;
 
     CLI::App* showCommand = app.add_subcommand("show", "Show a grid");
     showCommand->add_option("grid-file", showCliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
     showCommand->add_option("--solution", showCliOptions.Solution, "Solution steps to show");
-    showCommand->callback([&] { cliOptions = showCliOptions; });
+    showCommand->callback([&] { cliOptions = std::move(showCliOptions); });
 
     CLI11_PARSE(app, argc, argv);
 
     if (!cliOptions.has_value())
         return app.exit(CLI::CallForHelp());
 
-    return *cliOptions;
+    return std::move(*cliOptions);
 }
