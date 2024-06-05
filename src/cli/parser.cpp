@@ -4,6 +4,9 @@
 #include <unordered_map>
 
 #include "CLI/CLI.hpp"
+#include "core/scorings/GreedyScoring.h"
+#include "core/scorings/NumBlocksNotInGroupsScoring.h"
+#include "core/scorings/PotentialScoring.h"
 
 static const std::unordered_map<std::string, ScoringType> ScoringTypeStrings{
     { "greedy", ScoringType::Greedy },

@@ -9,7 +9,9 @@ add_executable(sgbust
     src/core/Grid.cpp
     src/core/MemoryUsage.cpp
     src/core/Polynom.cpp
-    src/core/Scoring.cpp
+    src/core/scorings/GreedyScoring.cpp
+    src/core/scorings/NumBlocksNotInGroupsScoring.cpp
+    src/core/scorings/PotentialScoring.cpp
     src/core/Solution.cpp
     src/core/Solver.cpp
     src/main.cpp
