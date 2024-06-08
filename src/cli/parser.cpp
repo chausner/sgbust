@@ -102,6 +102,18 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     showCommand->add_option("--solution", showCliOptions.Solution, "Solution steps to show");
     showCommand->callback([&] { cliOptions = std::move(showCliOptions); });
 
+    BenchmarkCLIOptions benchmarkCliOptions;
+
+    CLI::App* benchmarkCommand = app.add_subcommand("benchmark", "Run benchmarks");
+    benchmarkCommand->add_option("--seed", benchmarkCliOptions.Seed, "Seed to use for randomization");
+    benchmarkCommand->add_option("--width", benchmarkCliOptions.Width, "Number of columns in the grid")->check(CLI::Range(1, 255))->required();
+    benchmarkCommand->add_option("--height", benchmarkCliOptions.Height, "Number of rows in the grid")->check(CLI::Range(1, 255))->required();
+    benchmarkCommand->add_option("--num-colors", benchmarkCliOptions.NumColors, "Number of colors in the grid")->check(CLI::Range(1, 7))->required();
+    benchmarkCommand->add_option("--min-group-size", benchmarkCliOptions.MinGroupSize, "Minimal group size")->check(CLI::Range(1, 255 * 255))->required();
+    benchmarkCommand->add_option("--num-grids", benchmarkCliOptions.NumGrids, "Number of grids to generate and solve");
+    benchmarkCommand->add_option("--max-db-size", benchmarkCliOptions.MaxDBSize, "Maximum DB size");
+    benchmarkCommand->callback([&]() { cliOptions = std::move(benchmarkCliOptions); });
+
     CLI11_PARSE(app, argc, argv);
 
     if (!cliOptions.has_value())

@@ -7,12 +7,14 @@
 #include <iostream>
 #include <optional>
 #include <random>
+#include <thread>
 #include <unordered_set>
 
 #include "CLI/CLI.hpp"
 #include "cli/parser.h"
 #include "core/Grid.h"
 #include "core/Solver.h"
+#include "core/scorings/PotentialScoring.h"
 
 void RunCommand(const SolveCLIOptions& cliOptions)
 {
@@ -128,4 +130,85 @@ void RunCommand(const ShowCLIOptions& cliOptions)
             bg.Print();
         }
     }
+}
+
+void RunCommand(const BenchmarkCLIOptions& cliOptions)
+{
+    std::mt19937_64 mt;
+
+    if (!cliOptions.Seed.has_value())
+    {
+        std::random_device rand;
+        std::array<std::seed_seq::result_type, decltype(mt)::state_size> seedData;
+        std::generate(seedData.begin(), seedData.end(), std::ref(rand));
+        std::seed_seq seed(seedData.begin(), seedData.end());
+        mt.seed(seed);
+    }
+    else
+        mt.seed(*cliOptions.Seed);
+
+    sgbust::Solver solver;
+
+    solver.MaxDBSize = cliOptions.MaxDBSize;
+    solver.Quiet = true;
+
+    std::cout << "Press Ctrl+C to cancel." << std::endl;
+
+    unsigned int gridsSolved = 0;
+    auto startTime = std::chrono::steady_clock::now();
+    std::optional<std::chrono::steady_clock::time_point> lastStatsPrinted;
+    constexpr std::chrono::duration<double> RefreshInterval = std::chrono::seconds(1);
+
+    auto printStats = [&]() {
+        if (lastStatsPrinted.has_value())
+            std::cout << "\x1B[2F"; // move cursor to the beginning of the line 2 lines up
+
+        auto elapsed = std::chrono::steady_clock::now() - startTime;
+        double elapsedSeconds = std::chrono::duration_cast<std::chrono::duration<double>>(elapsed).count();
+        double gridsPerSecond;
+        double secondsPerGrid;
+        if (gridsSolved > 0 && elapsedSeconds > 0)
+        {
+            gridsPerSecond = gridsSolved / elapsedSeconds;
+            secondsPerGrid = elapsedSeconds / gridsSolved;
+        }
+        else
+        {
+            gridsPerSecond = 0.0;
+            secondsPerGrid = 0.0;
+        }
+
+        std::cout << "Elapsed: " << elapsedSeconds << " seconds\x1B[K\n";
+        std::cout << "Grids solved: " << gridsSolved << "\x1B[K\n";
+        std::cout << "Speed: " << gridsPerSecond << " grids/second (" << secondsPerGrid << " seconds/grid)\x1B[K" << std::flush;
+        };
+
+    sgbust::PotentialScoring scoring(
+        [](int groupSize) { return groupSize * (groupSize - 1); },
+        1000,
+        [](int numBlocksRemaining) { return numBlocksRemaining; }
+    );
+
+    std::jthread thread([&] {
+        while (!cliOptions.NumGrids.has_value() || gridsSolved < *cliOptions.NumGrids)
+        {
+            sgbust::Grid blockGrid = sgbust::Grid::GenerateRandom(cliOptions.Width, cliOptions.Height, cliOptions.NumColors, mt);
+
+            auto result = solver.Solve(blockGrid, cliOptions.MinGroupSize, scoring);
+
+            gridsSolved++;
+
+            auto now = std::chrono::steady_clock::now();
+            if (!lastStatsPrinted.has_value() || now - *lastStatsPrinted >= RefreshInterval)
+            {
+                printStats();
+                lastStatsPrinted = now;
+            }            
+        }
+        });
+
+    thread.join();
+
+    printStats();
+    std::cout << std::endl;
 }

@@ -49,10 +49,22 @@ struct ShowCLIOptions
     std::string Solution;
 };
 
+struct BenchmarkCLIOptions
+{
+    std::optional<unsigned long long> Seed;
+    unsigned char Width;
+    unsigned char Height;
+    unsigned int NumColors;
+    unsigned int MinGroupSize;
+    std::optional<unsigned int> NumGrids = std::nullopt;
+    std::optional<unsigned int> MaxDBSize = std::nullopt;
+};
+
 using CLIOptions = std::variant<
     SolveCLIOptions,
     GenerateCLIOptions,
-    ShowCLIOptions
+    ShowCLIOptions,
+    BenchmarkCLIOptions
 >;
 
 std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[]);
