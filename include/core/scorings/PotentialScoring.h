@@ -10,8 +10,6 @@ namespace sgbust
         int clearanceBonus;
         LeftoverPenaltyFunc leftoverPenalty;
 
-        const float constant = 0.0f;
-
     public:
         PotentialScoring(GroupSizeFunc groupScore, int clearanceBonus = 0, LeftoverPenaltyFunc leftoverPenalty = nullptr);
         Score CreateScore(const Grid& grid, unsigned int minGroupSize) const override;
