@@ -15,14 +15,19 @@ enum class ScoringType
     NumBlocksNotInGroups
 };
 
-struct SolveCLIOptions
+struct ScoringOptions
 {
-    std::string GridFile;
     ::ScoringType ScoringType = ScoringType::Greedy;
     std::optional<sgbust::Polynom> ScoringGroupScore;
     std::optional<int> ScoringClearanceBonus;
     std::optional<sgbust::Polynom> ScoringLeftoverPenalty;
     std::unique_ptr<sgbust::Scoring> Scoring;
+};
+
+struct SolveCLIOptions
+{
+    std::string GridFile;
+    ::ScoringOptions ScoringOptions;
     std::string SolutionPrefix;
     std::optional<unsigned int> MaxDBSize = std::nullopt;
     std::optional<unsigned int> MaxDepth = std::nullopt;
@@ -57,6 +62,7 @@ struct BenchmarkCLIOptions
     unsigned int NumColors;
     unsigned int MinGroupSize;
     std::optional<unsigned int> NumGrids = std::nullopt;
+    ::ScoringOptions ScoringOptions;
     std::optional<unsigned int> MaxDBSize = std::nullopt;
 };
 

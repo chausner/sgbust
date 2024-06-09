@@ -14,6 +14,58 @@ static const std::unordered_map<std::string, ScoringType> ScoringTypeStrings{
     { "num-blocks-not-in-groups", ScoringType::NumBlocksNotInGroups }
 };
 
+static void AddScoringOptions(CLI::App* command, ScoringOptions& scoringOptions)
+{
+    command->add_option("--scoring", scoringOptions.ScoringType, "Type of scoring")->transform(CLI::CheckedTransformer(ScoringTypeStrings, CLI::ignore_case));
+    command->add_option("--scoring-group-score", scoringOptions.ScoringGroupScore, "Group score, as a function of the group size");
+    command->add_option("--scoring-clearance-bonus", scoringOptions.ScoringClearanceBonus, "Bonus for clearing a grid");
+    command->add_option("--scoring-leftover-penalty", scoringOptions.ScoringLeftoverPenalty, "Penalty when a grid is not cleared, as a function of the number of blocks left");
+}
+
+static void ValidateAndSetScoring(ScoringOptions& scoringOptions)
+{
+    sgbust::LeftoverPenaltyFunc leftoverPenalty;
+    if (scoringOptions.ScoringLeftoverPenalty.has_value())
+        leftoverPenalty = std::bind_front(&sgbust::Polynom::Evaluate, *scoringOptions.ScoringLeftoverPenalty);
+    else
+        leftoverPenalty = nullptr;
+
+    switch (scoringOptions.ScoringType)
+    {
+    case ScoringType::Greedy:
+        if (!scoringOptions.ScoringGroupScore.has_value())
+            throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'greedy'", CLI::ExitCodes::ExcludesError);
+        scoringOptions.Scoring = std::make_unique<sgbust::GreedyScoring>(
+            std::bind_front(&sgbust::Polynom::Evaluate, *scoringOptions.ScoringGroupScore),
+            scoringOptions.ScoringClearanceBonus.value_or(0),
+            std::move(leftoverPenalty)
+        );
+        break;
+    case ScoringType::Potential:
+        if (!scoringOptions.ScoringGroupScore.has_value())
+            throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
+        /*if (scoringOptions.ScoringClearanceBonus.has_value())
+            throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
+        if (scoringOptions.ScoringLeftoverPenalty.has_value())
+            throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);*/
+        scoringOptions.Scoring = std::make_unique<sgbust::PotentialScoring>(
+            std::bind_front(&sgbust::Polynom::Evaluate, *scoringOptions.ScoringGroupScore),
+            scoringOptions.ScoringClearanceBonus.value_or(0),
+            std::move(leftoverPenalty)
+        );
+        break;
+    case ScoringType::NumBlocksNotInGroups:
+        if (scoringOptions.ScoringGroupScore.has_value())
+            throw CLI::ExcludesError("--scoring-group-score cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
+        if (scoringOptions.ScoringClearanceBonus.has_value())
+            throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
+        if (scoringOptions.ScoringLeftoverPenalty.has_value())
+            throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
+        scoringOptions.Scoring = std::make_unique<sgbust::NumBlocksNotInGroupsScoring>();
+        break;
+    }
+}
+
 std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
 {
     CLI::App app;
@@ -27,10 +79,7 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
 
     CLI::App* solveCommand = app.add_subcommand("solve", "Solve a grid");
     solveCommand->add_option("grid-file", solveCliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
-    solveCommand->add_option("--scoring", solveCliOptions.ScoringType, "Type of scoring")->transform(CLI::CheckedTransformer(ScoringTypeStrings, CLI::ignore_case));
-    solveCommand->add_option("--scoring-group-score", solveCliOptions.ScoringGroupScore, "Group score, as a function of the group size");
-    solveCommand->add_option("--scoring-clearance-bonus", solveCliOptions.ScoringClearanceBonus, "Bonus for clearing a grid");
-    solveCommand->add_option("--scoring-leftover-penalty", solveCliOptions.ScoringLeftoverPenalty, "Penalty when a grid is not cleared, as a function of the number of blocks left");
+    AddScoringOptions(solveCommand, solveCliOptions.ScoringOptions);
     solveCommand->add_option("--prefix", solveCliOptions.SolutionPrefix, "Solution prefix");
     solveCommand->add_option("-s,--max-db-size", solveCliOptions.MaxDBSize, "Maximum DB size");
     solveCommand->add_option("-d,--max-depth", solveCliOptions.MaxDepth, "Maximum search depth");
@@ -39,46 +88,7 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor");
     solveCommand->add_flag("-q,--quiet", solveCliOptions.Quiet, "Quiet mode");
     solveCommand->callback([&] {
-        sgbust::LeftoverPenaltyFunc leftoverPenalty;
-        if (solveCliOptions.ScoringLeftoverPenalty.has_value())
-            leftoverPenalty = std::bind_front(&sgbust::Polynom::Evaluate, *solveCliOptions.ScoringLeftoverPenalty);
-        else
-            leftoverPenalty = nullptr;
-
-        switch (solveCliOptions.ScoringType)
-        {
-        case ScoringType::Greedy:
-            if (!solveCliOptions.ScoringGroupScore.has_value())
-                throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'greedy'", CLI::ExitCodes::ExcludesError);
-            solveCliOptions.Scoring = std::make_unique<sgbust::GreedyScoring>(
-                std::bind_front(&sgbust::Polynom::Evaluate, *solveCliOptions.ScoringGroupScore),
-                solveCliOptions.ScoringClearanceBonus.value_or(0),
-                std::move(leftoverPenalty)
-            );
-            break;
-        case ScoringType::Potential:
-            if (solveCliOptions.ScoringGroupScore.has_value())
-                throw CLI::ExcludesError("--scoring-group-score cannot be specified for scoring type 'potential", CLI::ExitCodes::ExcludesError);
-            /*if (solveCliOptions.ScoringClearanceBonus.has_value())
-                throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
-            if (solveCliOptions.ScoringLeftoverPenalty.has_value())
-                throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);*/
-            solveCliOptions.Scoring = std::make_unique<sgbust::PotentialScoring>(
-                std::bind_front(&sgbust::Polynom::Evaluate, *solveCliOptions.ScoringGroupScore),
-                solveCliOptions.ScoringClearanceBonus.value_or(0),
-                std::move(leftoverPenalty)
-            );
-            break;
-        case ScoringType::NumBlocksNotInGroups:
-            if (solveCliOptions.ScoringGroupScore.has_value())
-                throw CLI::ExcludesError("--scoring-group-score cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
-            if (solveCliOptions.ScoringClearanceBonus.has_value())
-                throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
-            if (solveCliOptions.ScoringLeftoverPenalty.has_value())
-                throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'num-blocks-not-in-groups'", CLI::ExitCodes::ExcludesError);
-            solveCliOptions.Scoring = std::make_unique<sgbust::NumBlocksNotInGroupsScoring>();
-            break;
-        }
+        ValidateAndSetScoring(solveCliOptions.ScoringOptions);
 
         cliOptions = std::move(solveCliOptions);
         });
@@ -111,8 +121,13 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     benchmarkCommand->add_option("--num-colors", benchmarkCliOptions.NumColors, "Number of colors in the grid")->check(CLI::Range(1, 7))->required();
     benchmarkCommand->add_option("--min-group-size", benchmarkCliOptions.MinGroupSize, "Minimal group size")->check(CLI::Range(1, 255 * 255))->required();
     benchmarkCommand->add_option("--num-grids", benchmarkCliOptions.NumGrids, "Number of grids to generate and solve");
+    AddScoringOptions(benchmarkCommand, benchmarkCliOptions.ScoringOptions);
     benchmarkCommand->add_option("--max-db-size", benchmarkCliOptions.MaxDBSize, "Maximum DB size");
-    benchmarkCommand->callback([&]() { cliOptions = std::move(benchmarkCliOptions); });
+    benchmarkCommand->callback([&]() { 
+        ValidateAndSetScoring(benchmarkCliOptions.ScoringOptions);
+        
+        cliOptions = std::move(benchmarkCliOptions);
+        });
 
     CLI11_PARSE(app, argc, argv);
 
