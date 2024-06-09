@@ -33,6 +33,7 @@ namespace sgbust
 
         solution = Solution();
         bestScore = std::numeric_limits<int>::max();
+        solutionGrid = std::nullopt;
         dbSize = 1;
         multiplier = 0;
 
@@ -53,7 +54,7 @@ namespace sgbust
         }
 
         if (bestScore != std::numeric_limits<int>::max())
-            return SolverResult{ bestScore, std::move(solution) };
+            return SolverResult{ bestScore, std::move(solution), std::move(*solutionGrid) };
         else
             return std::nullopt;
     }
@@ -163,6 +164,8 @@ namespace sgbust
             {
                 bestScore = score.Value;
                 solution = solutionPrefix.Append(grid.Solution);
+                solutionGrid = grid;
+                solutionGrid->Solution = solution;
 
                 if (scoring->IsPerfectScore(score))
                     stop = true;

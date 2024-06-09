@@ -44,6 +44,7 @@ namespace sgbust
     {
         int BestScore;
         Solution BestSolution;
+        Grid SolutionGrid;
     };
 
     class Solver
@@ -54,6 +55,7 @@ namespace sgbust
         std::map<Score, GridHashSet> grids;
         Solution solutionPrefix;
         Solution solution;
+        std::optional<Grid> solutionGrid;
         int bestScore = 0;
         unsigned int dbSize = 0;
         double multiplier = 0;
