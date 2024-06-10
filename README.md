@@ -10,6 +10,7 @@ sgbust is a command-line tool that uses [beam search](https://en.wikipedia.org/w
 * Generate random grids
 * Find good solutions for grids
 * Print grids and visualize each step of a solution
+* Benchmarking and solver statistics
 
 ## Building
 
@@ -80,5 +81,17 @@ Use the `show` command to display the grid saved in the specified BGF file:
 If a solution string is passed using the optional `--solution` parameter,
 each step in the solution is printed out with the resulting intermediate state of the grid.
 
-## How does it work?
+## Run benchmarks
 
+Use the `benchmark` command to generate an arbitrary number of random grids and solve them using specified parameters.
+Not only can the command be used to benchmark the performance of the solver itself,
+it also outputs statistics such as percentage of grids that could be fully cleared,
+the average score and the average number of remaining blocks.
+
+Most of the parameters accepted by the `generate` and `solve` commands are supported, e.g.:
+
+```
+.\sgbust benchmark --width 15 --height 15 --num-colors 4 --min-group-size 2 --scoring-group-score n^2-n --max-db-size 10000 --num-grids 1000
+```
+
+This will generate 1000 grids with the specified dimensions and parameters and solve them.
