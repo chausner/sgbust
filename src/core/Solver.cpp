@@ -187,7 +187,7 @@ namespace sgbust
                 for (; ; it++)
                 {
                     accumulatedSize += it->second.size();
-                    if (accumulatedSize > reducedDBSize)
+                    if (accumulatedSize >= reducedDBSize)
                         break;
                 }
 
@@ -198,6 +198,8 @@ namespace sgbust
 
                 it++;
                 grids.erase(it, grids.end());
+
+                dbSize = reducedDBSize;
             }
         }
     }
