@@ -7,7 +7,7 @@ namespace sgbust
 {
     Score NumBlocksNotInGroupsScoring::CreateScore(const Grid& grid, unsigned int minGroupSize) const
     {
-        static thread_local std::vector<std::vector<Position>> groups;
+        static thread_local std::vector<Group> groups;
         grid.GetGroups(groups, minGroupSize);
 
         int numBlocksInGroups = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [](const auto& group) { return group.size(); });
@@ -19,7 +19,7 @@ namespace sgbust
             return Score(numBlocksNotInGroups, std::numeric_limits<float>::quiet_NaN());
     }
 
-    Score NumBlocksNotInGroupsScoring::RemoveGroup(const Score& oldScore, const Grid& oldGrid, const std::vector<Position>& group, const Grid& newGrid, unsigned int minGroupSize) const
+    Score NumBlocksNotInGroupsScoring::RemoveGroup(const Score& oldScore, const Grid& oldGrid, const Group& group, const Grid& newGrid, unsigned int minGroupSize) const
     {
         return CreateScore(newGrid, minGroupSize);
     }

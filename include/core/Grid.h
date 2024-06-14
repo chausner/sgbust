@@ -35,6 +35,8 @@ namespace sgbust
         Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
     };
 
+    using Group = std::vector<Position>;
+
     struct Grid
     {
         using Extents = std::experimental::extents<unsigned int, std::experimental::dynamic_extent, std::experimental::dynamic_extent>;
@@ -58,9 +60,9 @@ namespace sgbust
         static Grid GenerateRandom(unsigned char width, unsigned char height, unsigned int numColors, Generator& generator);
 
         void Save(std::ostream& stream, unsigned int minGroupSize) const;
-        void GetGroups(std::vector<std::vector<Position>>& groups, unsigned int minGroupSize) const;
+        void GetGroups(std::vector<Group>& groups, unsigned int minGroupSize) const;
         bool HasGroups(unsigned int minGroupSize) const;
-        void RemoveGroup(const std::vector<Position>& group);
+        void RemoveGroup(const Group& group);
         unsigned int GetNumberOfBlocks() const;
         void ApplySolution(const sgbust::Solution& solution, unsigned int minGroupSize);
 

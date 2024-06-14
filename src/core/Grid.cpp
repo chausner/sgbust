@@ -106,7 +106,7 @@ namespace sgbust
             throw std::runtime_error("Could not save Grid to stream");
     }
 
-    void Grid::GetGroups(std::vector<std::vector<Position>>& groups, unsigned int minGroupSize) const
+    void Grid::GetGroups(std::vector<Group>& groups, unsigned int minGroupSize) const
     {
         auto blocks = const_cast<Grid*>(this)->BlocksView();
 
@@ -189,7 +189,7 @@ namespace sgbust
             GetAdjacentBlocksRecursive(blocks, blockList, x, y + 1);
     }
 
-    void Grid::RemoveGroup(const std::vector<Position>& group)
+    void Grid::RemoveGroup(const Group& group)
     {
         auto blocks = BlocksView();
 
@@ -278,7 +278,7 @@ namespace sgbust
     {
         unsigned int length = solution.GetLength();
 
-        std::vector<std::vector<Position>> groups;
+        std::vector<Group> groups;
 
         for (unsigned int i = 0; i < length; i++)
         {

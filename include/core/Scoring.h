@@ -27,7 +27,7 @@ namespace sgbust
         virtual ~Scoring() = default;
 
         virtual Score CreateScore(const Grid& grid, unsigned int minGroupSize) const = 0;
-        virtual Score RemoveGroup(const Score& oldScore, const Grid& oldGrid, const std::vector<Position>& group, const Grid& newGrid, unsigned int minGroupSize) const = 0;
+        virtual Score RemoveGroup(const Score& oldScore, const Grid& oldGrid, const Group& group, const Grid& newGrid, unsigned int minGroupSize) const = 0;
         virtual bool IsPerfectScore(const Score& score) const = 0;
     };
 

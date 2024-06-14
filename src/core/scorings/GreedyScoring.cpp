@@ -25,7 +25,7 @@ namespace sgbust
             return Score(score, std::numeric_limits<float>::quiet_NaN());
     }
 
-    Score GreedyScoring::RemoveGroup(const Score& oldScore, const Grid& oldGrid, const std::vector<Position>& group, const Grid& newGrid, unsigned int minGroupSize) const
+    Score GreedyScoring::RemoveGroup(const Score& oldScore, const Grid& oldGrid, const Group& group, const Grid& newGrid, unsigned int minGroupSize) const
     {
         int newScore = oldScore.Value - groupScore(group.size());
 

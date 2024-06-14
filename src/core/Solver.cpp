@@ -121,7 +121,7 @@ namespace sgbust
 
     unsigned int Solver::SolveGrid(const Grid & grid, Score score, std::map<Score, GridHashSet>&newGrids, bool& stop, bool dontAddToDB)
     {
-        static thread_local std::vector<std::vector<Position>> groups;
+        static thread_local std::vector<Group> groups;
         grid.GetGroups(groups, minGroupSize);
 
         if (groups.empty())

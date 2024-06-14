@@ -12,7 +12,7 @@ namespace sgbust
 
     Score PotentialScoring::CreateScore(const Grid& grid, unsigned int minGroupSize) const
     {
-        static thread_local std::vector<std::vector<Position>> groups;
+        static thread_local std::vector<Group> groups;
         grid.GetGroups(groups, minGroupSize);
 
         int score = 0;
@@ -26,9 +26,9 @@ namespace sgbust
         return Score(score, -potentialGroupsScore);
     }
 
-    Score PotentialScoring::RemoveGroup(const Score& oldScore, const Grid& oldGrid, const std::vector<Position>& group, const Grid& newGrid, unsigned int minGroupSize) const
+    Score PotentialScoring::RemoveGroup(const Score& oldScore, const Grid& oldGrid, const Group& group, const Grid& newGrid, unsigned int minGroupSize) const
     {
-        static thread_local std::vector<std::vector<Position>> groups;
+        static thread_local std::vector<Group> groups;
         newGrid.GetGroups(groups, minGroupSize);
 
         int newScore = oldScore.Value - groupScore(group.size());
