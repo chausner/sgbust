@@ -57,25 +57,25 @@ sgbust requires the user to specify what to optimize for.
 The following scoring schemes are currently implemented and can be chosen via the `--scoring` parameter:
 
 * `greedy` (default)
-  * A simple and straightforward scoring scheme where game states are evaluated based on the current game score
-    which is optimized in a greedy fashion.
+  * A simple scoring scheme where game states are evaluated based on the current game score which is optimized in a greedy fashion.
 * `potential`
   * A more advanced variant of `greedy` where not only the current game score is optimized but also potential future scoring opportunities are taken into account.
-  * Recommended if you want to maximize the final game score.
+  * Recommended for maximization of the final game score.
 * `num-blocks-not-in-groups`
-  * Game states are evaluated based on how many blocks in the grid are not part of a group.
-    By minimizing this number, the algorithm favors solutions allow as many blocks to be removed as possible.
-  * Recommended if you want to minimize the number of blocks remaining at the end but do not care about the final game score or the length of the solution.
+  * Game states are evaluated based on how many blocks in the grid are not part of any group.
+    By minimizing this number, the algorithm favors solutions that allow as many blocks to be removed as possible.
+  * Recommended if you want to minimize the number of blocks remaining at the end but do not care about the final game score or the number of steps in the solution.
 
 #### Configuring scoring rules
 
 The following parameters can be used to define the scoring rules:
 
 * `--scoring-group-score`: the score of a group, as a polynomial function of the group size
-* `--scoring-clearance-bonus`: bonus added to the final game score if no blocks remain
-* `--scoring-leftover-penalty`: penalty subtracted from the final game score if blocks remain, as a polynomial function of the number of blocks remaining
+* `--scoring-clearance-bonus`: bonus added to the final game score if no blocks remain (defaults to zero if not specified)
+* `--scoring-leftover-penalty`: penalty subtracted from the final game score if blocks remain, as a polynomial function of the number of blocks remaining (defaults to zero if not specified)
 
 Examples of polynomial expressions are `n^2`, `2n+1`, `2n^3+2n^2-3n+2`.
+Only integer coefficients are supported.
 
 Note that, depending on the selected optimization objective (`greedy`/`potential`/`num-blocks-not-in-groups`), some of the parameters may be mandatory, optional or not supported at all.
 
