@@ -23,7 +23,8 @@ namespace sgbust
             score += leftoverPenalty(grid.GetNumberOfBlocks());
 
         int potentialGroupsScore = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [this](const auto& group) { return groupScore(group.size()); });
-        return Score(score, -potentialGroupsScore);
+
+        return Score(score, score - potentialGroupsScore);
     }
 
     Score PotentialScoring::RemoveGroup(const Score& oldScore, const Grid& oldGrid, const Group& group, const Grid& newGrid, unsigned int minGroupSize) const
@@ -43,7 +44,7 @@ namespace sgbust
         {
             int potentialGroupsScore = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [this](const auto& group) { return groupScore(group.size()); });
 
-            newObjective = newScore * 0.99f + -potentialGroupsScore;
+            newObjective = newScore - potentialGroupsScore;
         }
         else
             newObjective = std::numeric_limits<float>::quiet_NaN();
