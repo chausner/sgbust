@@ -6,7 +6,6 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
-#include <limits>
 #include <numeric>
 #include <ranges>
 #include <utility>
@@ -34,7 +33,7 @@ namespace sgbust
         grids[initialScore].insert(CompactGrid(gridWithPrefix));
 
         solution = Solution();
-        bestScore = std::numeric_limits<int>::max();
+        bestScore = std::nullopt;
         solutionGrid = std::nullopt;
         beamSize = 1;
         multiplier = 0;
@@ -58,8 +57,8 @@ namespace sgbust
                 break;
         }
 
-        if (bestScore != std::numeric_limits<int>::max())
-            return SolverResult{ bestScore, std::move(solution), std::move(*solutionGrid) };
+        if (bestScore.has_value())
+            return SolverResult{ *bestScore, std::move(solution), std::move(*solutionGrid) };
         else
             return std::nullopt;
     }
@@ -158,11 +157,11 @@ namespace sgbust
 
     void Solver::CheckSolution(const Grid& grid, Score score, bool& stop)
     {
-        if (!stop && score.Value < bestScore)
+        if (!stop && (!bestScore.has_value() || score.Value < *bestScore))
         {
             std::scoped_lock lock(mutex);
 
-            if (!stop && score.Value < bestScore)
+            if (!stop && (!bestScore.has_value() || score.Value < *bestScore))
             {
                 bestScore = score.Value;
                 solution = solutionPrefix.Append(grid.Solution);

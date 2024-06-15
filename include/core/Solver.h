@@ -56,7 +56,7 @@ namespace sgbust
         Solution solutionPrefix;
         Solution solution;
         std::optional<Grid> solutionGrid;
-        int bestScore = 0;
+        std::optional<int> bestScore;
         unsigned int beamSize = 0;
         double multiplier = 0;
         std::mutex mutex;
