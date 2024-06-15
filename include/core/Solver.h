@@ -57,7 +57,7 @@ namespace sgbust
         Solution solution;
         std::optional<Grid> solutionGrid;
         int bestScore = 0;
-        unsigned int dbSize = 0;
+        unsigned int beamSize = 0;
         double multiplier = 0;
         std::mutex mutex;
 
@@ -65,12 +65,12 @@ namespace sgbust
         unsigned int SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop);
         void CheckSolution(const Grid& grid, Score score, bool& stop);
         void PrintStats() const;
-        void TrimDatabase();
+        void TrimBeam();
 
     public:
-        std::optional<unsigned int> MaxDBSize = std::nullopt;
+        std::optional<unsigned int> MaxBeamSize = std::nullopt;
         std::optional<unsigned int> MaxDepth = std::nullopt;
-        bool TrimDB = true;
+        bool TrimmingEnabled = true;
         double TrimmingSafetyFactor = 1.25;
         bool Quiet = false;
 

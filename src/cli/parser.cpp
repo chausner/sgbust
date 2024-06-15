@@ -81,9 +81,9 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     solveCommand->add_option("grid-file", solveCliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
     AddScoringOptions(solveCommand, solveCliOptions.ScoringOptions);
     solveCommand->add_option("--prefix", solveCliOptions.SolutionPrefix, "Solution prefix");
-    solveCommand->add_option("-s,--max-db-size", solveCliOptions.MaxDBSize, "Maximum DB size");
+    solveCommand->add_option("-s,--max-beam-size", solveCliOptions.MaxBeamSize, "Maximum beam size");
     solveCommand->add_option("-d,--max-depth", solveCliOptions.MaxDepth, "Maximum search depth");
-    solveCommand->add_flag("!--no-trim", solveCliOptions.TrimDB, "Disable DB trimming");
+    solveCommand->add_flag("!--no-trim", solveCliOptions.TrimmingEnabled, "Disable beam trimming");
     solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor");
     solveCommand->add_flag("-q,--quiet", solveCliOptions.Quiet, "Quiet mode");
     solveCommand->callback([&] {
@@ -121,7 +121,7 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     benchmarkCommand->add_option("--min-group-size", benchmarkCliOptions.MinGroupSize, "Minimal group size")->check(CLI::Range(1, 255 * 255))->required();
     benchmarkCommand->add_option("--num-grids", benchmarkCliOptions.NumGrids, "Number of grids to generate and solve");
     AddScoringOptions(benchmarkCommand, benchmarkCliOptions.ScoringOptions);
-    benchmarkCommand->add_option("--max-db-size", benchmarkCliOptions.MaxDBSize, "Maximum DB size");
+    benchmarkCommand->add_option("--max-beam-size", benchmarkCliOptions.MaxBeamSize, "Maximum beam size");
     benchmarkCommand->callback([&]() { 
         ValidateAndSetScoring(benchmarkCliOptions.ScoringOptions);
         

@@ -29,9 +29,9 @@ void RunCommand(const SolveCLIOptions& cliOptions)
 
     sgbust::Solver solver;
 
-    solver.MaxDBSize = cliOptions.MaxDBSize;
+    solver.MaxBeamSize = cliOptions.MaxBeamSize;
     solver.MaxDepth = cliOptions.MaxDepth;
-    solver.TrimDB = cliOptions.TrimDB;
+    solver.TrimmingEnabled = cliOptions.TrimmingEnabled;
     solver.TrimmingSafetyFactor = cliOptions.TrimmingSafetyFactor;
     solver.Quiet = cliOptions.Quiet;
 
@@ -148,7 +148,7 @@ void RunCommand(const BenchmarkCLIOptions& cliOptions)
 
     sgbust::Solver solver;
 
-    solver.MaxDBSize = cliOptions.MaxDBSize;
+    solver.MaxBeamSize = cliOptions.MaxBeamSize;
     solver.Quiet = true;
 
     std::cout << "Press Ctrl+C to cancel." << std::endl;

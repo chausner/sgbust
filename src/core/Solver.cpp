@@ -36,7 +36,7 @@ namespace sgbust
         solution = Solution();
         bestScore = std::numeric_limits<int>::max();
         solutionGrid = std::nullopt;
-        dbSize = 1;
+        beamSize = 1;
         multiplier = 0;
 
         bool stop = false;
@@ -49,8 +49,8 @@ namespace sgbust
             if (!Quiet)
                 PrintStats();
 
-            if (TrimDB)
-                TrimDatabase();
+            if (TrimmingEnabled)
+                TrimBeam();
 
             SolveDepth(MaxDepth && depth == *MaxDepth - 1, stop);
 
@@ -68,10 +68,10 @@ namespace sgbust
     {
         auto [minScore, maxScore] = std::ranges::minmax(grids | std::views::transform([](const auto& b) { return b.first.Value; }));
         long long scoreSum = std::transform_reduce(grids.begin(), grids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Value * b.second.size(); });
-        double avgScore = static_cast<double>(scoreSum) / dbSize;
+        double avgScore = static_cast<double>(scoreSum) / beamSize;
         std::cout <<
             "Depth: " << std::setw(3) << depth <<
-            ", grids: " << std::setw(9) << dbSize <<
+            ", grids: " << std::setw(9) << beamSize <<
             ", hash sets: " << std::setw(4) << grids.size() <<
             ", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore;
 
@@ -87,7 +87,7 @@ namespace sgbust
         std::map<Score, GridHashSet> newGrids;
 
         std::atomic_uint gridsSolved = 0;
-        std::atomic_uint newDBSize = 0;
+        std::atomic_uint newBeamSize = 0;
 
         for (auto it = grids.begin(); it != grids.end(); it = grids.erase(it))
         {
@@ -100,10 +100,10 @@ namespace sgbust
 #else
             hashSet.for_each(std::execution::par, [&](const CompactGrid& grid) {
 #endif
-                if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
+                if (stop || (MaxBeamSize && newBeamSize >= MaxBeamSize))
                     return;
 
-                newDBSize += SolveGrid(grid.Expand(), score, newGrids, maxDepthReached, stop);
+                newBeamSize += SolveGrid(grid.Expand(), score, newGrids, maxDepthReached, stop);
 
                 gridsSolved++;
 
@@ -111,17 +111,17 @@ namespace sgbust
                 const_cast<CompactGrid&>(grid) = CompactGrid();
                 });
 
-            if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
+            if (stop || (MaxBeamSize && newBeamSize >= MaxBeamSize))
                 break;
         }
 
-        multiplier = static_cast<double>(newDBSize) / gridsSolved;
+        multiplier = static_cast<double>(newBeamSize) / gridsSolved;
 
-        if (newDBSize == 0)
+        if (newBeamSize == 0)
             stop = true;
 
         grids = std::move(newGrids);
-        dbSize = newDBSize;
+        beamSize = newBeamSize;
     }
 
     unsigned int Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop)
@@ -175,13 +175,13 @@ namespace sgbust
         }
     }
 
-    void Solver::TrimDatabase()
+    void Solver::TrimBeam()
     {
-        if (MaxDBSize && multiplier > 1)
+        if (MaxBeamSize && multiplier > 1)
         {
-            unsigned int reducedDBSize = std::ceil(*MaxDBSize / multiplier * TrimmingSafetyFactor);
+            unsigned int reducedBeamSize = std::ceil(*MaxBeamSize / multiplier * TrimmingSafetyFactor);
 
-            if (dbSize > reducedDBSize)
+            if (beamSize > reducedBeamSize)
             {
                 unsigned int accumulatedSize = 0;
 
@@ -189,19 +189,19 @@ namespace sgbust
                 for (; ; it++)
                 {
                     accumulatedSize += it->second.size();
-                    if (accumulatedSize >= reducedDBSize)
+                    if (accumulatedSize >= reducedBeamSize)
                         break;
                 }
 
                 GridHashSet& hashSet = it->second;
                 auto it2 = hashSet.begin();
-                std::advance(it2, accumulatedSize - reducedDBSize);
+                std::advance(it2, accumulatedSize - reducedBeamSize);
                 hashSet.erase(hashSet.begin(), it2);
 
                 it++;
                 grids.erase(it, grids.end());
 
-                dbSize = reducedDBSize;
+                beamSize = reducedBeamSize;
             }
         }
     }

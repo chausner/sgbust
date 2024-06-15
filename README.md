@@ -84,14 +84,14 @@ Note that, depending on the selected optimization objective (`greedy`/`potential
 By default, the application attempts to search the complete game tree
 and is thereby guaranteed to find the best possible solution.
 However, this is only feasible for very small grids.
-It is usually necessary to limit the search space using the `--max-db-size` option
+It is usually necessary to limit the search space using the `--max-beam-size` option
 as otherwise the application will soon use up all available memory:
 
 ```
-.\sgbust solve sample.bgf --max-db-size 10000000
+.\sgbust solve sample.bgf --max-beam-size 10000000
 ```
 
-The number following the `--max-db-size` parameter specifies the beam width during beam search,
+The number following the `--max-beam-size` parameter specifies the beam width during beam search,
 i.e. the maximum number of grid candidates kept in memory.
 
 #### Starting at a partial solution
@@ -130,7 +130,7 @@ the average score and the average number of remaining blocks.
 Most of the parameters accepted by the `generate` and `solve` commands are supported, e.g.:
 
 ```
-.\sgbust benchmark --width 15 --height 15 --num-colors 4 --min-group-size 2 --scoring-group-score n^2-n --max-db-size 10000 --num-grids 1000
+.\sgbust benchmark --width 15 --height 15 --num-colors 4 --min-group-size 2 --scoring-group-score n^2-n --max-beam-size 10000 --num-grids 1000
 ```
 
 This will generate 1000 grids with the specified dimensions and parameters and solve them.

@@ -29,9 +29,9 @@ struct SolveCLIOptions
     std::string GridFile;
     ::ScoringOptions ScoringOptions;
     std::string SolutionPrefix;
-    std::optional<unsigned int> MaxDBSize = std::nullopt;
+    std::optional<unsigned int> MaxBeamSize = std::nullopt;
     std::optional<unsigned int> MaxDepth = std::nullopt;
-    bool TrimDB = true;
+    bool TrimmingEnabled = true;
     double TrimmingSafetyFactor = 1.25;
     bool Quiet = false;
 };
@@ -62,7 +62,7 @@ struct BenchmarkCLIOptions
     unsigned int MinGroupSize;
     std::optional<unsigned int> NumGrids = std::nullopt;
     ::ScoringOptions ScoringOptions;
-    std::optional<unsigned int> MaxDBSize = std::nullopt;
+    std::optional<unsigned int> MaxBeamSize = std::nullopt;
 };
 
 using CLIOptions = std::variant<
