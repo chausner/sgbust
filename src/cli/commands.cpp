@@ -31,7 +31,6 @@ void RunCommand(const SolveCLIOptions& cliOptions)
 
     solver.MaxDBSize = cliOptions.MaxDBSize;
     solver.MaxDepth = cliOptions.MaxDepth;
-    solver.DontAddToDBLastDepth = cliOptions.DontAddToDBLastDepth;
     solver.TrimDB = cliOptions.TrimDB;
     solver.TrimmingSafetyFactor = cliOptions.TrimmingSafetyFactor;
     solver.Quiet = cliOptions.Quiet;

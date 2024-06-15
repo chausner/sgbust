@@ -31,7 +31,6 @@ struct SolveCLIOptions
     std::string SolutionPrefix;
     std::optional<unsigned int> MaxDBSize = std::nullopt;
     std::optional<unsigned int> MaxDepth = std::nullopt;
-    bool DontAddToDBLastDepth = false;
     bool TrimDB = true;
     double TrimmingSafetyFactor = 1.25;
     bool Quiet = false;

@@ -23,13 +23,15 @@ namespace sgbust
         this->scoring = &scoring;
         this->solutionPrefix = solutionPrefix;
 
-        Grid bg = grid;
+        Grid gridWithPrefix = grid;
 
         if (!solutionPrefix.IsEmpty())
-            bg.ApplySolution(solutionPrefix, minGroupSize);
+            gridWithPrefix.ApplySolution(solutionPrefix, minGroupSize);
+
+        Score initialScore = scoring.CreateScore(gridWithPrefix, minGroupSize);
 
         grids.clear();
-        grids[scoring.CreateScore(bg, minGroupSize)].insert(CompactGrid(bg));
+        grids[initialScore].insert(CompactGrid(gridWithPrefix));
 
         solution = Solution();
         bestScore = std::numeric_limits<int>::max();
@@ -39,6 +41,9 @@ namespace sgbust
 
         bool stop = false;
 
+        if (!gridWithPrefix.HasGroups(minGroupSize))
+            CheckSolution(gridWithPrefix, initialScore, stop);
+
         for (depth = 0; depth < MaxDepth || !MaxDepth; depth++)
         {
             if (!Quiet)
@@ -47,7 +52,7 @@ namespace sgbust
             if (TrimDB)
                 TrimDatabase();
 
-            SolveDepth(stop, DontAddToDBLastDepth && MaxDepth && depth == *MaxDepth - 1);
+            SolveDepth(MaxDepth && depth == *MaxDepth - 1, stop);
 
             if (stop)
                 break;
@@ -77,7 +82,7 @@ namespace sgbust
         std::cout << std::endl;
     }
 
-    void Solver::SolveDepth(bool& stop, bool dontAddToDB)
+    void Solver::SolveDepth(bool maxDepthReached, bool& stop)
     {
         std::map<Score, GridHashSet> newGrids;
 
@@ -98,7 +103,7 @@ namespace sgbust
                 if (stop || (MaxDBSize && newDBSize >= MaxDBSize))
                     return;
 
-                newDBSize += SolveGrid(grid.Expand(), score, newGrids, stop, dontAddToDB);
+                newDBSize += SolveGrid(grid.Expand(), score, newGrids, maxDepthReached, stop);
 
                 gridsSolved++;
 
@@ -119,15 +124,12 @@ namespace sgbust
         dbSize = newDBSize;
     }
 
-    unsigned int Solver::SolveGrid(const Grid & grid, Score score, std::map<Score, GridHashSet>&newGrids, bool& stop, bool dontAddToDB)
+    unsigned int Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop)
     {
         static thread_local std::vector<Group> groups;
         grid.GetGroups(groups, minGroupSize);
 
-        if (groups.empty())
-            CheckSolution(score, grid, stop);
-
-        int c = 0;
+        unsigned int numNewGridsInserted = 0;
 
         for (int i = 0; i < groups.size(); i++)
         {
@@ -136,10 +138,10 @@ namespace sgbust
 
             Score newScore = scoring->RemoveGroup(score, grid, groups[i], newGrid, minGroupSize);
 
-            if (newGrid.IsEmpty() || std::isnan(newScore.Objective))
-                CheckSolution(newScore, newGrid, stop);
+            if (!newGrid.HasGroups(minGroupSize))
+                CheckSolution(newGrid, newScore, stop);
             else
-                if (!dontAddToDB)
+                if (!maxDepthReached)
                 {
                     std::unique_lock lock(mutex);
                     GridHashSet& hashSet = newGrids[newScore];
@@ -147,14 +149,14 @@ namespace sgbust
 
                     auto [it, inserted] = hashSet.insert(CompactGrid(std::move(newGrid)));
                     if (inserted)
-                        c++;
+                        numNewGridsInserted++;
                 }
         }
 
-        return c;
+        return numNewGridsInserted;
     }
 
-    void Solver::CheckSolution(Score score, const Grid& grid, bool& stop)
+    void Solver::CheckSolution(const Grid& grid, Score score, bool& stop)
     {
         if (!stop && score.Value < bestScore)
         {

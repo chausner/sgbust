@@ -1,7 +1,6 @@
 #include "core/scorings/PotentialScoring.h"
 
 #include <functional>
-#include <limits>
 #include <numeric>
 #include <utility>
 
@@ -38,18 +37,10 @@ namespace sgbust
             newScore -= clearanceBonus;
         if (leftoverPenalty != nullptr && groups.empty())
             newScore += leftoverPenalty(newGrid.GetNumberOfBlocks());
+        
+        int potentialGroupsScore = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [this](const auto& group) { return groupScore(group.size()); });
 
-        float newObjective;
-        if (!groups.empty())
-        {
-            int potentialGroupsScore = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [this](const auto& group) { return groupScore(group.size()); });
-
-            newObjective = newScore - potentialGroupsScore;
-        }
-        else
-            newObjective = std::numeric_limits<float>::quiet_NaN();
-
-        return Score(newScore, newObjective);
+        return Score(newScore, newScore - potentialGroupsScore);
     }
 
     bool PotentialScoring::IsPerfectScore(const Score& score) const

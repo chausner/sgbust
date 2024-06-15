@@ -1,6 +1,5 @@
 #include "core/scorings/NumBlocksNotInGroupsScoring.h"
 
-#include <limits>
 #include <numeric>
 
 namespace sgbust
@@ -13,10 +12,7 @@ namespace sgbust
         int numBlocksInGroups = std::transform_reduce(groups.begin(), groups.end(), 0, std::plus<>(), [](const auto& group) { return group.size(); });
         int numBlocksNotInGroups = grid.GetNumberOfBlocks() - numBlocksInGroups;
 
-        if (!groups.empty())
-            return Score(numBlocksNotInGroups);
-        else
-            return Score(numBlocksNotInGroups, std::numeric_limits<float>::quiet_NaN());
+        return Score(numBlocksNotInGroups);
     }
 
     Score NumBlocksNotInGroupsScoring::RemoveGroup(const Score& oldScore, const Grid& oldGrid, const Group& group, const Grid& newGrid, unsigned int minGroupSize) const

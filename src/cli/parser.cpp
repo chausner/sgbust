@@ -83,7 +83,6 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     solveCommand->add_option("--prefix", solveCliOptions.SolutionPrefix, "Solution prefix");
     solveCommand->add_option("-s,--max-db-size", solveCliOptions.MaxDBSize, "Maximum DB size");
     solveCommand->add_option("-d,--max-depth", solveCliOptions.MaxDepth, "Maximum search depth");
-    solveCommand->add_flag("--dont-add-to-db-last-depth", solveCliOptions.DontAddToDBLastDepth, "Do not add last depth to database");
     solveCommand->add_flag("!--no-trim", solveCliOptions.TrimDB, "Disable DB trimming");
     solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor");
     solveCommand->add_flag("-q,--quiet", solveCliOptions.Quiet, "Quiet mode");

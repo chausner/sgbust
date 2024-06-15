@@ -61,16 +61,15 @@ namespace sgbust
         double multiplier = 0;
         std::mutex mutex;
 
-        void SolveDepth(bool& stop, bool dontAddToDB);
-        unsigned int SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool& stop, bool dontAddToDB);
-        void CheckSolution(Score score, const Grid& grid, bool& stop);
+        void SolveDepth(bool maxDepthReached, bool& stop);
+        unsigned int SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop);
+        void CheckSolution(const Grid& grid, Score score, bool& stop);
         void PrintStats() const;
         void TrimDatabase();
 
     public:
         std::optional<unsigned int> MaxDBSize = std::nullopt;
         std::optional<unsigned int> MaxDepth = std::nullopt;
-        bool DontAddToDBLastDepth = false;
         bool TrimDB = true;
         double TrimmingSafetyFactor = 1.25;
         bool Quiet = false;

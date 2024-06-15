@@ -1,6 +1,5 @@
 #include "core/scorings/GreedyScoring.h"
 
-#include <limits>
 #include <utility>
 
 namespace sgbust
@@ -12,34 +11,24 @@ namespace sgbust
     {
         int score = 0;
 
-        bool hasGroups = grid.HasGroups(minGroupSize);
-
         if (clearanceBonus != 0 && grid.IsEmpty())
             score -= clearanceBonus;
-        if (leftoverPenalty != nullptr && !hasGroups)
+        if (leftoverPenalty != nullptr && !grid.HasGroups(minGroupSize))
             score += leftoverPenalty(grid.GetNumberOfBlocks());
 
-        if (hasGroups)
-            return Score(score);
-        else
-            return Score(score, std::numeric_limits<float>::quiet_NaN());
+        return Score(score);
     }
 
     Score GreedyScoring::RemoveGroup(const Score& oldScore, const Grid& oldGrid, const Group& group, const Grid& newGrid, unsigned int minGroupSize) const
     {
         int newScore = oldScore.Value - groupScore(group.size());
 
-        bool hasGroups = newGrid.HasGroups(minGroupSize);
-
         if (clearanceBonus != 0 && newGrid.IsEmpty())
             newScore -= clearanceBonus;
-        if (leftoverPenalty != nullptr && !hasGroups)
+        if (leftoverPenalty != nullptr && !newGrid.HasGroups(minGroupSize))
             newScore += leftoverPenalty(newGrid.GetNumberOfBlocks());
 
-        if (hasGroups)
-            return Score(newScore);
-        else
-            return Score(newScore, std::numeric_limits<float>::quiet_NaN());
+        return Score(newScore);
     }
 
     bool GreedyScoring::IsPerfectScore(const Score& score) const
