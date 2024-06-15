@@ -44,10 +44,6 @@ static void ValidateAndSetScoring(ScoringOptions& scoringOptions)
     case ScoringType::Potential:
         if (!scoringOptions.ScoringGroupScore.has_value())
             throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
-        /*if (scoringOptions.ScoringClearanceBonus.has_value())
-            throw CLI::ExcludesError("--scoring-clearance-bonus cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
-        if (scoringOptions.ScoringLeftoverPenalty.has_value())
-            throw CLI::ExcludesError("--scoring-leftover-penalty cannot be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);*/
         scoringOptions.Scoring = std::make_unique<sgbust::PotentialScoring>(
             std::bind_front(&sgbust::Polynom::Evaluate, *scoringOptions.ScoringGroupScore),
             scoringOptions.ScoringClearanceBonus.value_or(0),
