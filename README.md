@@ -9,11 +9,11 @@ sgbust is a command-line tool that uses [beam search](https://en.wikipedia.org/w
 
 To build sgbust, a C++20-compliant compiler is required.
 sgbust is tested with recent versions of MSVC, gcc and Clang.
-As of writing, Clang is only supported when libstdc++ is used as STL implementation
-since libc++ currently does not implement Parallel STL algorithms.
+As of writing, Clang is only supported when libstdc++ is used as STL implementation.
+libc++ is not supported.
 
 [vcpkg](https://github.com/microsoft/vcpkg) is recommended for installing third-party library dependencies.
-Follow the [quick start guide](https://github.com/microsoft/vcpkg#quick-start-windows) to setup vcpkg before building sgbust.
+Follow [these instructions](https://github.com/microsoft/vcpkg?tab=readme-ov-file#getting-started) to setup vcpkg before building sgbust.
 
 You may build either via CMake (supported on all platforms) or via MSBuild (Windows-only).
 
