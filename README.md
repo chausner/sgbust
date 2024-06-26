@@ -48,8 +48,8 @@ A solution is a sequence of groups that are removed from a grid until no group r
 Solutions are represented as compact strings using the following encoding scheme:
 
 * The group in each step of the sequence is represented by a numeric ID,
-  where the first group in a grid (when iterating column-first from top to bottom) is assigned the ID 0, the second the ID 1, etc.
-* Each ID is encoded in base 26 using digits 'A'..'Z'
+  with the first group in a grid (when iterating column-first from top to bottom) being assigned the ID 0, the second the ID 1, etc.
+* Each ID is encoded in base 26 using digits 'A'..'Z'.
 * The encoded IDs are concatenated. IDs with more than one digit are enclosed in parentheses.
 
 For example, the solution "(AD)(AA)GPBA" denotes the sequence consisting of the 30th, 27th, 7th, 16th, 2nd and 1st group.
@@ -62,13 +62,16 @@ The following scoring schemes are currently implemented and can be chosen via th
 
 * `greedy` (default)
   * A simple scoring scheme where game states are evaluated based on the current game score which is optimized greedily.
+  * Fast.
 * `potential`
   * A more advanced variant of `greedy` where not only the current game score is optimized but also potential future scoring opportunities are taken into account.
   * This scheme is recommended for maximization of the final game score.
+  * Slow.
 * `num-blocks-not-in-groups`
   * Game states are evaluated based on how many blocks in the grid are not part of any group.
     By minimizing this number, the algorithm favors solutions that allow as many blocks to be removed as possible.
   * Recommended if you want to minimize the number of blocks remaining at the end but do not care about the final game score or the number of steps in the solution.
+  * Fast.
 
 #### Configuring scoring rules
 
@@ -97,6 +100,7 @@ as otherwise the application would quickly use up all available memory:
 
 The number following the `--max-beam-size` parameter specifies the beam width during beam search,
 i.e. the maximum number of grid candidates kept in memory.
+Increasing the beam size typically allows the program to find better solutions.
 
 #### Starting at a partial solution
 
@@ -142,3 +146,13 @@ Most of the parameters accepted by the `generate` and `solve` commands are suppo
 ```
 
 This will generate 1000 grids with the specified dimensions and parameters and solve them.
+
+## Credits
+
+sgbust relies on the following third-party libraries:
+
+* [CLI11](https://github.com/CLIUtils/CLI11): for command-line help and parsing
+* [mdspan](https://github.com/kokkos/mdspan): for convenient 2D matrix access
+* [mimalloc](https://github.com/microsoft/mimalloc): for significant speed-ups and a reduction in memory usage
+* [Parallel Hashmap](https://github.com/greg7mdp/parallel-hashmap): for efficient parallel execution of the search algorithm
+* [wyhash](https://github.com/wangyi-fudan/wyhash): as a very fast hash function in hash maps
