@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
-        c_compiler: [gcc, clang-16, cl]
+        c_compiler: [gcc, clang, cl]
         include:
           - os: windows-latest
             c_compiler: cl
@@ -24,13 +24,13 @@ jobs:
             c_compiler: gcc
             cpp_compiler: g++
           - os: ubuntu-latest
-            c_compiler: clang-16
-            cpp_compiler: clang++-16
+            c_compiler: clang
+            cpp_compiler: clang++
         exclude:
           - os: windows-latest
             c_compiler: gcc
           - os: windows-latest
-            c_compiler: clang-16
+            c_compiler: clang
           - os: ubuntu-latest
             c_compiler: cl
 
@@ -43,13 +43,6 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
-    - name: Install Clang 16
-      if: matrix.cpp_compiler == 'clang++-16'
-      run: |
-         wget https://apt.llvm.org/llvm.sh
-         chmod +x ./llvm.sh
-         sudo ./llvm.sh 16
 
     - name: Install vcpkg
       run: |
@@ -65,7 +58,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        ${{ matrix.cpp_compiler == 'clang++-16' && '-DCMAKE_CXX_FLAGS="-stdlib=libstdc++"' || '' }}
+        ${{ matrix.cpp_compiler == 'clang++' && '-DCMAKE_CXX_FLAGS="-stdlib=libstdc++"' || '' }}
         -S ${{ github.workspace }}
 
     - name: Build
