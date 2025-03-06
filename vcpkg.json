@@ -1,16 +1,16 @@
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-    "name": "sgbust",
-    "dependencies": [
-        "cli11",
-        "mdspan",
-        "mimalloc",
-        "parallel-hashmap",
-        {
-            "name": "tbb",
-            "platform": "!windows"
-        },
-        "wyhash"
-    ],
-    "builtin-baseline": "a1a1cbc975abf909a6c8985a6a2b8fe20bbd9bd6"
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "sgbust",
+  "dependencies": [
+    "cli11",
+    "mdspan",
+    "mimalloc",
+    "parallel-hashmap",
+    {
+      "name": "tbb",
+      "platform": "!windows"
+    },
+    "wyhash"
+  ],
+  "builtin-baseline": "205a2cb9325f369d920f0cbad456fbd570077140"
 }
