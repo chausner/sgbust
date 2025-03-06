@@ -12,5 +12,11 @@
     },
     "wyhash"
   ],
-  "builtin-baseline": "5f877f132d1ac99df50f47df839467b6ee0c92b2"
+  "builtin-baseline": "5f877f132d1ac99df50f47df839467b6ee0c92b2",
+  "overrides": [
+    {
+      "name": "wyhash",
+      "version": "2023-01-25"
+    }
+  ]
 }
