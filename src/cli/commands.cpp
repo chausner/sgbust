@@ -49,12 +49,11 @@ void RunCommand(const SolveCLIOptions& cliOptions)
         std::cout << "Done! - took " << elapsedMilliseconds << "ms" << std::endl;
         if (solverResult.has_value())
         {
-            grid.ApplySolution(solverResult->BestSolution, minGroupSize);
             std::cout << "Best solution (score: " << solverResult->BestScore
-                << ", blocks: " << grid.GetNumberOfBlocks()
+                << ", blocks: " << solverResult->SolutionGrid.GetNumberOfBlocks()
                 << ", steps: " << solverResult->BestSolution.GetLength() << "): " << solverResult->BestSolution.AsString()
                 << std::endl;            
-            grid.Print();
+            solverResult->SolutionGrid.Print();
         }
         else
             std::cout << "No solution found." << std::endl;
