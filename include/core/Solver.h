@@ -59,12 +59,14 @@ namespace sgbust
         std::optional<int> bestScore;
         unsigned int beamSize = 0;
         double multiplier = 0;
-        std::shared_mutex mutex;
+        mutable std::shared_mutex mutex;
 
         void SolveDepth(bool maxDepthReached, bool& stop);
         unsigned int SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop);
         void CheckSolution(const Grid& grid, Score score, bool& stop);
         void PrintStats() const;
+        void PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize) const;
+		void ClearProgress() const;
         void TrimBeam();
 
     public:

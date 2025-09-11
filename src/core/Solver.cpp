@@ -1,13 +1,19 @@
 #include "core/Solver.h"
 
 #include <atomic>
+#include <chrono>
 #include <cmath>
+#include <condition_variable>
 #include <execution>
+#include <format>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <mutex>
 #include <numeric>
 #include <ranges>
+#include <stop_token>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -68,17 +74,72 @@ namespace sgbust
         auto [minScore, maxScore] = std::ranges::minmax(grids | std::views::transform([](const auto& b) { return b.first.Value; }));
         long long scoreSum = std::transform_reduce(grids.begin(), grids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Value * b.second.size(); });
         double avgScore = static_cast<double>(scoreSum) / beamSize;
-        std::cout <<
-            "Depth: " << std::setw(3) << depth <<
-            ", grids: " << std::setw(9) << beamSize <<
-            ", hash sets: " << std::setw(4) << grids.size() <<
-            ", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore;
+
+        std::string output = std::format(
+            "Depth: {:3}, grids: {:9}, hash sets: {:4}, scores (min/avg/max): {}/{:.1f}/{}",
+            depth,
+            beamSize,
+            grids.size(),
+            minScore,
+            avgScore,
+            maxScore
+        );
 
         std::optional<std::size_t> memoryUsage = GetCurrentMemoryUsage();
         if (memoryUsage.has_value())
-            std::cout << ", memory: " << (*memoryUsage / 1024 / 1024) << "MB";
+            output += std::format(", memory: {}MB", (*memoryUsage / 1024 / 1024));
 
-        std::cout << std::endl;
+        std::cout << output << std::endl;
+    }
+
+    void Solver::PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize) const
+    {
+        int curMinScore = 0;
+        int curMaxScore = 0;
+        double curAvgScore = 0.0;
+
+        std::shared_lock lock(mutex);
+        std::size_t numHashSets = newGrids.size();
+
+        if (!newGrids.empty())
+        {
+            auto [minScore, maxScore] = std::ranges::minmax(newGrids | std::views::transform([](const auto& b) { return b.first.Value; }));
+            curMinScore = minScore;
+            curMaxScore = maxScore;
+            long long scoreSum = std::transform_reduce(newGrids.begin(), newGrids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Value * b.second.size(); });
+            curAvgScore = static_cast<double>(scoreSum) / newBeamSize;
+        }
+
+        lock.unlock();
+
+        double percentProcessed = gridsSolved * 100.0 / beamSize;
+        double percentBeamSizeLimit = 0.0;
+        if (MaxBeamSize.has_value())
+            percentBeamSizeLimit = newBeamSize * 100.0 / *MaxBeamSize;
+        double progress = std::max(percentProcessed, percentBeamSizeLimit);
+
+        std::string output = std::format(
+            "Depth: {:3}, grids: {:9}, hash sets: {:4}, scores (min/avg/max): {}/{:.1f}/{}",
+            depth + 1,
+            newBeamSize,
+            numHashSets,
+            curMinScore,
+            curAvgScore,
+            curMaxScore
+        );
+
+        std::optional<std::size_t> memoryUsage = GetCurrentMemoryUsage();
+        if (memoryUsage.has_value())
+            output += std::format(", memory: {}MB", (*memoryUsage / 1024 / 1024));
+
+		output += std::format(" ({:.1f}%)", progress);
+
+        std::cout << "\x1b[2K\r" + output << std::flush;
+    }
+
+    void Solver::ClearProgress() const
+    {
+        std::cout << "\x1b[2K\r" << std::flush;
     }
 
     void Solver::SolveDepth(bool maxDepthReached, bool& stop)
@@ -87,6 +148,28 @@ namespace sgbust
 
         std::atomic_uint gridsSolved = 0;
         std::atomic_uint newBeamSize = 0;
+
+        std::optional<std::jthread> reporter;
+
+        if (!Quiet)
+			reporter.emplace([&](std::stop_token stopToken) {
+                std::mutex reporterMutex;
+                std::condition_variable reporterCv;
+                std::stop_callback callback(stopToken, [&]() { reporterCv.notify_all(); });
+            
+                while (true)
+                {
+                    {
+                        std::unique_lock lock(reporterMutex);
+                        if (reporterCv.wait_for(lock, std::chrono::seconds(1), [&]() { return stopToken.stop_requested(); }))
+                            break;
+                    }
+
+					PrintProgress(newGrids, gridsSolved, newBeamSize);
+                }
+
+                ClearProgress();
+            });
 
         for (auto it = grids.begin(); it != grids.end(); it = grids.erase(it))
         {
@@ -108,10 +191,16 @@ namespace sgbust
 
                 // overall, deallocation is faster if we deallocate the data inside CompactGrids here already
                 const_cast<CompactGrid&>(grid) = CompactGrid();
-                });
+            });
 
             if (stop || (MaxBeamSize && newBeamSize >= MaxBeamSize))
                 break;
+        }
+
+        if (reporter.has_value())
+        {
+            reporter->request_stop();
+            reporter->join();
         }
 
         multiplier = static_cast<double>(newBeamSize) / gridsSolved;
@@ -133,7 +222,7 @@ namespace sgbust
         auto getOrCreateHashSet = [&](const Score& score) -> GridHashSet& {
             {
                 std::shared_lock lock(mutex);
-                auto it = newGrids.find(score);				
+                auto it = newGrids.find(score);                
                 if (it != newGrids.end())
                     return it->second;
             }
