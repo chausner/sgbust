@@ -1,5 +1,6 @@
 #include "core/Polynom.h"
 
+#include <algorithm>
 #include <cmath>
 #include <regex>
 #include <sstream>
@@ -86,9 +87,9 @@ namespace sgbust
             return coefficients[0] + (coefficients[1] + (coefficients[2] + (coefficients[3] + coefficients[4] * n) * n) * n) * n;
         default:
             int result = 0;
-            for (int i = coefficients.size() - 1; i >= 0; i--)
+            for (int exponent = coefficients.size() - 1; exponent >= 0; exponent--)
             {            
-                result = result * n + coefficients[i];
+                result = result * n + coefficients[exponent];
             }
             return result;
         }
@@ -96,25 +97,46 @@ namespace sgbust
 
     std::string Polynom::AsString() const
     {
+        if (std::ranges::all_of(coefficients, [](int c) { return c == 0; }))
+            return "0";
+
         std::ostringstream result;
 
-        for (int i = 0; i < coefficients.size(); i++)
+        bool firstTerm = true;
+
+        for (int exponent = coefficients.size() - 1; exponent >= 0; --exponent)
         {
-            if (coefficients[i] == 0)
+            int coefficient = coefficients[exponent];
+            if (coefficient == 0)
                 continue;
 
-            if (i == 0 && coefficients[i] < 0)
-                result << '-';
-            else if (i > 0)
-                result << (coefficients[i] < 0 ? '-' : '+');
+            if (firstTerm)
+            {
+                if (coefficient < 0)
+                    result << '-';
+            }
+            else
+            {
+                result << (coefficient < 0 ? '-' : '+');
+            }
 
-            result << std::abs(coefficients[i]);
+            int absCoeff = std::abs(coefficient);
+            if (exponent == 0)
+            {
+                result << absCoeff;
+            }
+            else
+            {
+                if (absCoeff != 1)
+                    result << absCoeff;
 
-            int exponent = coefficients.size() - i - 1;
-            if (exponent >= 2)
-                result << "n^" << exponent;
-            else if (exponent == 1)
-                result << "n";
+                if (exponent >= 2)
+                    result << "n^" << exponent;
+                else
+                    result << "n";
+            }
+
+            firstTerm = false;
         }
 
         return result.str();
