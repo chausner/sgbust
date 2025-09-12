@@ -38,7 +38,7 @@ public:
 
 namespace sgbust
 {
-    using GridHashSet = phmap::parallel_flat_hash_set<CompactGrid, std::hash<CompactGrid>, std::equal_to<CompactGrid>, mi_stl_allocator<CompactGrid>, 6, std::mutex>;
+    using GridHashSet = phmap::parallel_flat_hash_set<CompactGrid, std::hash<CompactGrid>, std::equal_to<CompactGrid>, mi_stl_allocator<CompactGrid>, 4, std::mutex>;
 
     struct SolverResult
     {
