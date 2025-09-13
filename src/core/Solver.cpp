@@ -172,17 +172,11 @@ namespace sgbust
                 if (!maxDepthReached)
                 {
                     if (NumStepsToClear.has_value())
+                        if (std::any_of(colorCounts.begin() + 1, colorCounts.end(), [this](unsigned int count) { return count > 0 && count < minGroupSize; }))
                     {
-                        unsigned int minNumColors = std::ranges::min(
-                            std::ranges::subrange(colorCounts.begin() + 1, colorCounts.end())
-                            | std::views::filter([](unsigned int count) { return count != 0; }));
-
-                        if (minNumColors < minGroupSize)
-                        {
                             numNewGridsDiscarded++;
                             continue;
                         }
-                    }
 
                     auto [it, inserted] = getOrCreateHashSet(newScore).insert(CompactGrid(std::move(newGrid)));
                     if (inserted)
