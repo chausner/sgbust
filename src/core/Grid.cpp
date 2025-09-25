@@ -4,7 +4,9 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 namespace
@@ -294,9 +296,11 @@ namespace sgbust
         return std::all_of(BlocksBegin(), BlocksEnd(), [](auto c) { return c == Block::None; });
     }
 
-    void Grid::Print() const
+    void Grid::Print(const Group* highlightedGroup) const
     {
         auto blocks = BlocksView();
+
+        std::ostringstream output;
 
         for (int y = 0; y < Height; y++)
         {
@@ -334,10 +338,15 @@ namespace sgbust
                     throw std::out_of_range("Unexpected block color value");
                 }
 
-                std::cout << colorCode << "  ";
+                if (highlightedGroup != nullptr && std::ranges::find(*highlightedGroup, Position(x, y)) != highlightedGroup->end())
+                    output << "\x1B[30;1m" << colorCode << "[]";
+				else
+                    output << colorCode << "  ";
             }
 
-            std::cout << "\x1B[0m" << std::endl;
+            output << "\x1B[0m" << "\n";
         }
+
+        std::cout << output.str() << std::flush;
     }
 }

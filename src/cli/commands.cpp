@@ -123,10 +123,16 @@ void RunCommand(const ShowCLIOptions& cliOptions)
             bg.GetGroups(groups, minGroupSize);
             if (step >= groups.size())
                 throw std::invalid_argument("Solution string is not valid for this grid");
-            bg.RemoveGroup(groups[step]);
             std::cout << (i + 1) << ". " << groups[step].size() << " block" << pluralS(groups[step].size()) << std::endl;
-            bg.Print();
+            bg.Print(&groups[step]);
+            bg.RemoveGroup(groups[step]);
         }
+
+		std::cout << "Final grid:" << std::endl;
+        if (bg.IsEmpty())
+            std::cout << "(empty)" << std::endl;
+		else
+		    bg.Print();
     }
 }
 
