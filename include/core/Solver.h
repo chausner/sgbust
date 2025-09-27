@@ -61,8 +61,8 @@ namespace sgbust
         double multiplier = 0;
         mutable std::shared_mutex mutex;
 
-        void SolveDepth(bool maxDepthReached, bool& stop);
-        unsigned int SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop);
+        void SolveDepth(bool& stop);
+        unsigned int SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool& stop);
         void CheckSolution(const Grid& grid, Score score, bool& stop);
         void PrintStats() const;
         void PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize) const;

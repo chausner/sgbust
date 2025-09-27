@@ -57,7 +57,7 @@ namespace sgbust
             if (TrimmingEnabled)
                 TrimBeam();
 
-            SolveDepth(MaxDepth && depth == *MaxDepth - 1, stop);
+            SolveDepth(stop);
 
             if (stop)
                 break;
@@ -142,7 +142,7 @@ namespace sgbust
         std::cout << "\x1b[2K\r" << std::flush;
     }
 
-    void Solver::SolveDepth(bool maxDepthReached, bool& stop)
+    void Solver::SolveDepth(bool& stop)
     {
         std::map<Score, GridHashSet> newGrids;
 
@@ -185,7 +185,7 @@ namespace sgbust
                 if (stop || (MaxBeamSize && newBeamSize >= MaxBeamSize))
                     return;
 
-                newBeamSize += SolveGrid(grid.Expand(), score, newGrids, maxDepthReached, stop);
+                newBeamSize += SolveGrid(grid.Expand(), score, newGrids, stop);
 
                 gridsSolved++;
 
@@ -212,7 +212,7 @@ namespace sgbust
         beamSize = newBeamSize;
     }
 
-    unsigned int Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop)
+    unsigned int Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool& stop)
     {
         static thread_local std::vector<Group> groups;
         grid.GetGroups(groups, minGroupSize);
@@ -242,12 +242,15 @@ namespace sgbust
             if (!newGrid.HasGroups(minGroupSize))
                 CheckSolution(newGrid, newScore, stop);
             else
+            {
+                bool maxDepthReached = MaxDepth.has_value() && depth == *MaxDepth - 1;
                 if (!maxDepthReached)
                 {
                     auto [it, inserted] = getOrCreateHashSet(newScore).insert(CompactGrid(std::move(newGrid)));
                     if (inserted)
                         numNewGridsInserted++;
                 }
+            }
         }
 
         return numNewGridsInserted;
