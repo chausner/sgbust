@@ -155,13 +155,14 @@ namespace sgbust
             Grid newGrid(grid.Width, grid.Height, grid.Blocks.get(), grid.Solution.Append(i));
             newGrid.RemoveGroup(groups[i]);
 
-            auto colorCounts = newGrid.GetColorCounts();
-
-            if (NumStepsToClear.has_value() && origNumColors + depth >= *NumStepsToClear)
+            if (ClearingSolutionsOnly && MaxDepth.has_value() && origNumColors + depth >= *MaxDepth)
             {
-                unsigned int numColors = std::count_if(colorCounts.begin() + 1, colorCounts.end(), [](unsigned int count) { return count != 0; });
-                if (numColors + depth >= *NumStepsToClear)
+                unsigned int numColors = newGrid.GetNumberOfColors();
+                if (numColors + depth >= *MaxDepth)
+                {
+                    numNewGridsDiscarded++;
                     continue;
+                }
             }
 
             Score newScore = scoring->RemoveGroup(score, grid, groups[i], newGrid, minGroupSize);
@@ -171,12 +172,15 @@ namespace sgbust
             else
                 if (!maxDepthReached)
                 {
-                    if (NumStepsToClear.has_value())
-                        if (std::any_of(colorCounts.begin() + 1, colorCounts.end(), [this](unsigned int count) { return count > 0 && count < minGroupSize; }))
+                    if (ClearingSolutionsOnly)
                     {
+                        auto colorCounts = newGrid.GetColorCounts();
+                        if (std::any_of(colorCounts.begin() + 1, colorCounts.end(), [this](unsigned int count) { return count > 0 && count < minGroupSize; }))
+                        {
                             numNewGridsDiscarded++;
                             continue;
                         }
+                    }
 
                     auto [it, inserted] = getOrCreateHashSet(newScore).insert(CompactGrid(std::move(newGrid)));
                     if (inserted)
@@ -191,6 +195,9 @@ namespace sgbust
     {
         if (!stop && (!bestScore.has_value() || score.Value < *bestScore))
         {
+            if (ClearingSolutionsOnly && !grid.IsEmpty())
+				return;
+
             std::scoped_lock lock(mutex);
 
             if (!stop && (!bestScore.has_value() || score.Value < *bestScore))

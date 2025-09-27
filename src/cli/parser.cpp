@@ -79,7 +79,7 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     solveCommand->add_option("--prefix", solveCliOptions.SolutionPrefix, "Solution prefix");
     solveCommand->add_option("-s,--max-beam-size", solveCliOptions.MaxBeamSize, "Maximum beam size");
     solveCommand->add_option("-d,--max-depth", solveCliOptions.MaxDepth, "Maximum search depth");
-    solveCommand->add_option("--num-steps-to-clear", solveCliOptions.NumStepsToClear, "Known upper bound for the number of steps needed to clear the grid");
+    solveCommand->add_flag("--clearing-only", solveCliOptions.ClearingSolutionsOnly, "Only report solutions that clear the grid. Can be combined with --max-depth to search for solutions that clear the grid within the specified number of steps.");
     solveCommand->add_flag("!--no-trim", solveCliOptions.TrimmingEnabled, "Disable beam trimming");
     solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor");
     solveCommand->add_flag("-q,--quiet", solveCliOptions.Quiet, "Quiet mode");

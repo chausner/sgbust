@@ -31,7 +31,7 @@ struct SolveCLIOptions
     std::string SolutionPrefix;
     std::optional<unsigned int> MaxBeamSize = std::nullopt;
     std::optional<unsigned int> MaxDepth = std::nullopt;
-    std::optional<unsigned int> NumStepsToClear = std::nullopt;
+    bool ClearingSolutionsOnly = false;
     bool TrimmingEnabled = true;
     double TrimmingSafetyFactor = 1.25;
     bool Quiet = false;
