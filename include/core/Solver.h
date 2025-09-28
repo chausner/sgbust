@@ -60,6 +60,7 @@ namespace sgbust
         std::optional<Grid> solutionGrid;
         std::optional<int> bestScore;
         unsigned int beamSize = 0;
+        unsigned int gridsDiscarded = 0;
         double multiplier = 0;
         std::shared_mutex mutex;
 

@@ -37,6 +37,7 @@ namespace sgbust
         bestScore = std::nullopt;
         solutionGrid = std::nullopt;
         beamSize = 1;
+		gridsDiscarded = 0;
         multiplier = 0;
 
         bool stop = false;
@@ -73,6 +74,7 @@ namespace sgbust
             "Depth: " << std::setw(3) << depth <<
             ", grids: " << std::setw(9) << beamSize <<
             ", hash sets: " << std::setw(4) << grids.size() <<
+			", discarded: " << std::setw(7) << gridsDiscarded <<
             ", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore;
 
         std::optional<std::size_t> memoryUsage = GetCurrentMemoryUsage();
@@ -123,10 +125,9 @@ namespace sgbust
         if (newBeamSize == 0)
             stop = true;
 
-        std::cout << "Discarded: " << totalDiscarded << std::endl;
-
         grids = std::move(newGrids);
         beamSize = newBeamSize;
+		gridsDiscarded = totalDiscarded;
     }
 
     std::tuple<unsigned int, unsigned int> Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop)
