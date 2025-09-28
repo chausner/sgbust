@@ -1,13 +1,19 @@
 #include "core/Solver.h"
 
 #include <atomic>
+#include <chrono>
 #include <cmath>
+#include <condition_variable>
 #include <execution>
+#include <format>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <mutex>
 #include <numeric>
 #include <ranges>
+#include <stop_token>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -45,15 +51,18 @@ namespace sgbust
         if (!gridWithPrefix.HasGroups(minGroupSize))
             CheckSolution(gridWithPrefix, initialScore, stop);
 
+        if (!Quiet)
+            PrintStats(0);
+
         for (depth = 0; depth < MaxDepth || !MaxDepth; depth++)
         {
-            if (!Quiet)
-                PrintStats();
-
             if (TrimmingEnabled)
                 TrimBeam();
 
-            SolveDepth(MaxDepth && depth == *MaxDepth - 1, stop);
+            SolveDepth(stop);
+
+            if (!Quiet)
+                PrintStats(depth + 1);
 
             if (stop)
                 break;
@@ -65,32 +74,119 @@ namespace sgbust
             return std::nullopt;
     }
 
-    void Solver::PrintStats() const
+    void Solver::PrintStats(unsigned int depth) const
     {
-        auto [minScore, maxScore] = std::ranges::minmax(grids | std::views::transform([](const auto& b) { return b.first.Value; }));
-        long long scoreSum = std::transform_reduce(grids.begin(), grids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Value * b.second.size(); });
-        double avgScore = static_cast<double>(scoreSum) / beamSize;
-        std::cout <<
-            "Depth: " << std::setw(3) << depth <<
-            ", grids: " << std::setw(9) << beamSize <<
-            ", hash sets: " << std::setw(4) << grids.size() <<
-			", discarded: " << std::setw(7) << gridsDiscarded <<
-            ", scores (min/avg/max): " << minScore << "/" << std::fixed << std::setprecision(1) << avgScore << "/" << maxScore;
+        int curMinScore = 0;
+        int curMaxScore = 0;
+        double curAvgScore = 0.0;
+
+        if (!grids.empty())
+        {
+            auto [minScore, maxScore] = std::ranges::minmax(grids | std::views::transform([](const auto& b) { return b.first.Value; }));
+            curMinScore = minScore;
+            curMaxScore = maxScore;
+            long long scoreSum = std::transform_reduce(grids.begin(), grids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Value * b.second.size(); });
+            curAvgScore = static_cast<double>(scoreSum) / beamSize;
+        }
+
+        std::string output = std::format(
+            "Depth: {:3}, grids: {:9}, hash sets: {:4}, discarded: {:9}, scores (min/avg/max): {}/{:.1f}/{}",
+            depth,
+            beamSize,
+            grids.size(),
+			gridsDiscarded,
+            curMinScore,
+            curAvgScore,
+            curMaxScore
+        );
 
         std::optional<std::size_t> memoryUsage = GetCurrentMemoryUsage();
         if (memoryUsage.has_value())
-            std::cout << ", memory: " << (*memoryUsage / 1024 / 1024) << "MB";
+            output += std::format(", memory: {}MB", (*memoryUsage / 1024 / 1024));
 
-        std::cout << std::endl;
+        std::cout << output << std::endl;
     }
 
-    void Solver::SolveDepth(bool maxDepthReached, bool& stop)
+    void Solver::PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize, unsigned int newGridsDiscarded) const
+    {
+        int curMinScore = 0;
+        int curMaxScore = 0;
+        double curAvgScore = 0.0;
+
+        std::shared_lock lock(mutex);
+        std::size_t numHashSets = newGrids.size();
+
+        if (!newGrids.empty())
+        {
+            auto [minScore, maxScore] = std::ranges::minmax(newGrids | std::views::transform([](const auto& b) { return b.first.Value; }));
+            curMinScore = minScore;
+            curMaxScore = maxScore;
+            long long scoreSum = std::transform_reduce(newGrids.begin(), newGrids.end(), 0LL, std::plus<>(), [](auto& b) { return b.first.Value * b.second.size(); });
+            curAvgScore = static_cast<double>(scoreSum) / newBeamSize;
+        }
+
+        lock.unlock();
+
+        double percentProcessed = gridsSolved * 100.0 / beamSize;
+        double percentBeamSizeLimit = 0.0;
+        if (MaxBeamSize.has_value())
+            percentBeamSizeLimit = newBeamSize * 100.0 / *MaxBeamSize;
+        double progress = std::max(percentProcessed, percentBeamSizeLimit);
+
+        std::string output = std::format(
+            "Depth: {:3}, grids: {:9}, hash sets: {:4}, discarded: {:9}, scores (min/avg/max): {}/{:.1f}/{}",
+            depth + 1,
+            newBeamSize,
+            numHashSets,
+            newGridsDiscarded,
+            curMinScore,
+            curAvgScore,
+            curMaxScore
+        );
+
+        std::optional<std::size_t> memoryUsage = GetCurrentMemoryUsage();
+        if (memoryUsage.has_value())
+            output += std::format(", memory: {}MB", (*memoryUsage / 1024 / 1024));
+
+		output += std::format(" ({:.1f}%)", progress);
+
+        std::cout << "\x1b[2K\r" + output << std::flush;
+    }
+
+    void Solver::ClearProgress() const
+    {
+        std::cout << "\x1b[2K\r" << std::flush;
+    }
+
+    void Solver::SolveDepth(bool& stop)
     {
         std::map<Score, GridHashSet> newGrids;
 
         std::atomic_uint gridsSolved = 0;
         std::atomic_uint newBeamSize = 0;
 	    std::atomic_uint totalDiscarded = 0;
+
+        std::optional<std::jthread> reporter;
+
+        if (!Quiet)
+			reporter.emplace([&](std::stop_token stopToken) {
+                std::mutex reporterMutex;
+                std::condition_variable reporterCv;
+                std::stop_callback callback(stopToken, [&]() { reporterCv.notify_all(); });
+            
+                while (true)
+                {
+                    {
+                        std::unique_lock lock(reporterMutex);
+                        if (reporterCv.wait_for(lock, std::chrono::seconds(1), [&]() { return stopToken.stop_requested(); }))
+                            break;
+                    }
+
+					PrintProgress(newGrids, gridsSolved, newBeamSize, totalDiscarded);
+                }
+
+                ClearProgress();
+            });
 
         for (auto it = grids.begin(); it != grids.end(); it = grids.erase(it))
         {
@@ -106,7 +202,7 @@ namespace sgbust
                 if (stop || (MaxBeamSize && newBeamSize >= MaxBeamSize))
                     return;
 
-                auto [added, discarded] = SolveGrid(grid.Expand(), score, newGrids, maxDepthReached, stop);
+                auto [added, discarded] = SolveGrid(grid.Expand(), score, newGrids, stop);
 
                 newBeamSize += added;
 			    totalDiscarded += discarded;
@@ -114,10 +210,16 @@ namespace sgbust
 
                 // overall, deallocation is faster if we deallocate the data inside CompactGrids here already
                 const_cast<CompactGrid&>(grid) = CompactGrid();
-                });
+            });
 
             if (stop || (MaxBeamSize && newBeamSize >= MaxBeamSize))
                 break;
+        }
+
+        if (reporter.has_value())
+        {
+            reporter->request_stop();
+            reporter->join();
         }
 
         multiplier = static_cast<double>(newBeamSize) / gridsSolved;
@@ -130,7 +232,7 @@ namespace sgbust
 		gridsDiscarded = totalDiscarded;
     }
 
-    std::tuple<unsigned int, unsigned int> Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop)
+    std::tuple<unsigned int, unsigned int> Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool& stop)
     {
         static thread_local std::vector<Group> groups;
         grid.GetGroups(groups, minGroupSize);
@@ -141,7 +243,7 @@ namespace sgbust
         auto getOrCreateHashSet = [&](const Score& score) -> GridHashSet& {
             {
                 std::shared_lock lock(mutex);
-                auto it = newGrids.find(score);				
+                auto it = newGrids.find(score);                
                 if (it != newGrids.end())
                     return it->second;
             }
@@ -171,6 +273,8 @@ namespace sgbust
             if (!newGrid.HasGroups(minGroupSize))
                 CheckSolution(newGrid, newScore, stop);
             else
+            {
+                bool maxDepthReached = MaxDepth.has_value() && depth == *MaxDepth - 1;
                 if (!maxDepthReached)
                 {
                     if (ClearingSolutionsOnly)
@@ -187,6 +291,7 @@ namespace sgbust
                     if (inserted)
                         numNewGridsInserted++;
                 }
+            }
         }
 
         return std::make_tuple(numNewGridsInserted, numNewGridsDiscarded);

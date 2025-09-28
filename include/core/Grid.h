@@ -33,6 +33,8 @@ namespace sgbust
 
         Position() {}
         Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
+
+        bool operator==(const Position& other) const = default;
     };
 
     using Group = std::vector<Position>;
@@ -76,7 +78,7 @@ namespace sgbust
         BlocksSpan BlocksView() { return BlocksSpan(Blocks.get(), Width, Height); }
         ConstBlocksSpan BlocksView() const { return ConstBlocksSpan(Blocks.get(), Width, Height); }
 
-        void Print() const;
+        void Print(const Group* highlightedGroup = nullptr) const;
 
     private:
         static void GetAdjacentBlocksRecursive(BlocksSpan blocks, std::vector<Position>& blockList, unsigned char x, unsigned char y);

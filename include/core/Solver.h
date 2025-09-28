@@ -39,7 +39,7 @@ public:
 
 namespace sgbust
 {
-    using GridHashSet = phmap::parallel_flat_hash_set<CompactGrid, std::hash<CompactGrid>, std::equal_to<CompactGrid>, mi_stl_allocator<CompactGrid>, 6, std::mutex>;
+    using GridHashSet = phmap::parallel_flat_hash_set<CompactGrid, std::hash<CompactGrid>, std::equal_to<CompactGrid>, mi_stl_allocator<CompactGrid>, 4, std::mutex>;
 
     struct SolverResult
     {
@@ -62,12 +62,14 @@ namespace sgbust
         unsigned int beamSize = 0;
         unsigned int gridsDiscarded = 0;
         double multiplier = 0;
-        std::shared_mutex mutex;
+        mutable std::shared_mutex mutex;
 
-        void SolveDepth(bool maxDepthReached, bool& stop);
-        std::tuple<unsigned int, unsigned int> SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool maxDepthReached, bool& stop);
+        void SolveDepth(bool& stop);
+        std::tuple<unsigned int, unsigned int> SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool& stop);
         void CheckSolution(const Grid& grid, Score score, bool& stop);
-        void PrintStats() const;
+        void PrintStats(unsigned int depth) const;
+        void PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize, unsigned int newGridsDiscarded) const;
+		void ClearProgress() const;
         void TrimBeam();
 
     public:

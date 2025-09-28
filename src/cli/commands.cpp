@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <format>
 #include <fstream>
 #include <future>
 #include <iostream>
@@ -40,14 +41,13 @@ void RunCommand(const SolveCLIOptions& cliOptions)
 
     std::optional<sgbust::SolverResult> solverResult = solver.Solve(grid, minGroupSize, *cliOptions.ScoringOptions.Scoring, sgbust::Solution(cliOptions.SolutionPrefix));
 
-    auto endTime = std::chrono::steady_clock::now();
-
-    auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+    auto elapsed = std::chrono::steady_clock::now() - startTime;
+	auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
 
     if (!cliOptions.Quiet)
     {
         std::cout << std::endl;
-        std::cout << "Done! - took " << elapsedMilliseconds << "ms" << std::endl;
+        std::cout << "Elapsed: " << std::format("{:%T}", elapsedMilliseconds) << std::endl;
         if (solverResult.has_value())
         {
             std::cout << "Best solution (score: " << solverResult->BestScore
@@ -124,10 +124,16 @@ void RunCommand(const ShowCLIOptions& cliOptions)
             bg.GetGroups(groups, minGroupSize);
             if (step >= groups.size())
                 throw std::invalid_argument("Solution string is not valid for this grid");
-            bg.RemoveGroup(groups[step]);
             std::cout << (i + 1) << ". " << groups[step].size() << " block" << pluralS(groups[step].size()) << std::endl;
-            bg.Print();
+            bg.Print(&groups[step]);
+            bg.RemoveGroup(groups[step]);
         }
+
+		std::cout << "Final grid:" << std::endl;
+        if (bg.IsEmpty())
+            std::cout << "(empty)" << std::endl;
+		else
+		    bg.Print();
     }
 }
 
@@ -166,6 +172,7 @@ void RunCommand(const BenchmarkCLIOptions& cliOptions)
             std::cout << "\x1B[5F"; // move cursor to the beginning of the line five lines up
 
         auto elapsed = std::chrono::steady_clock::now() - startTime;
+        auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
         double elapsedSeconds = std::chrono::duration_cast<std::chrono::duration<double>>(elapsed).count();
         auto zeroIfNaN = [](auto x) { return std::isnan(x) ? 0 : x; };
         double gridsPerSecond = zeroIfNaN(gridsSolved / elapsedSeconds);
@@ -175,7 +182,7 @@ void RunCommand(const BenchmarkCLIOptions& cliOptions)
         double averageBlocksRemaining = zeroIfNaN(static_cast<double>(blocksRemainingSum) / gridsSolved);
 
         std::cout << std::fixed << std::setprecision(2);
-        std::cout << "Elapsed: " << elapsedSeconds << " seconds\x1B[K\n";
+        std::cout << "Elapsed: " << std::format("{:%T}", elapsedMilliseconds) << "\x1B[K\n";
         std::cout << "Grids solved: " << gridsSolved << "\x1B[K\n";
         std::cout << "Grids cleared: " << gridsCleared << " (" << gridsClearedPercent << "%)\x1B[K\n";
         std::cout << "Average score: " << averageScore << "\x1B[K\n";
