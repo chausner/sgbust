@@ -1,6 +1,12 @@
 # sgbust
 Optimized multi-threaded SameGame solver in C++
 
+🟥🟦🟩🟦🟨🟦🟦🟨🟩🟥  
+🟩🟦🟨🟥🟥🟨🟨🟩🟦🟥  
+🟨🟨🟦🟥🟨🟥🟥🟨🟨🟦  
+🟩🟩🟩🟥🟦🟨🟩🟦🟨🟥  
+🟥🟩🟦🟥🟨🟩🟩🟨🟦🟩
+
 [![license](https://img.shields.io/github/license/chausner/sgbust.svg)](https://github.com/chausner/sgbust/blob/master/LICENSE)
 
 sgbust is a command-line tool that uses [beam search](https://en.wikipedia.org/wiki/Beam_search) to find good solutions for [SameGame](https://en.wikipedia.org/wiki/SameGame) puzzles.
