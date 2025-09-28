@@ -270,27 +270,25 @@ namespace sgbust
 
             Score newScore = scoring->RemoveGroup(score, grid, groups[i], newGrid, minGroupSize);
 
-            if (!newGrid.HasGroups(minGroupSize))
+            bool maxDepthReached = MaxDepth.has_value() && depth == *MaxDepth - 1;
+
+            if (!newGrid.HasGroups(minGroupSize) || maxDepthReached)
                 CheckSolution(newGrid, newScore, stop);
             else
             {
-                bool maxDepthReached = MaxDepth.has_value() && depth == *MaxDepth - 1;
-                if (!maxDepthReached)
+                if (ClearingSolutionsOnly)
                 {
-                    if (ClearingSolutionsOnly)
+                    auto colorCounts = newGrid.GetColorCounts();
+                    if (std::any_of(colorCounts.begin() + 1, colorCounts.end(), [this](unsigned int count) { return count > 0 && count < minGroupSize; }))
                     {
-                        auto colorCounts = newGrid.GetColorCounts();
-                        if (std::any_of(colorCounts.begin() + 1, colorCounts.end(), [this](unsigned int count) { return count > 0 && count < minGroupSize; }))
-                        {
-                            numNewGridsDiscarded++;
-                            continue;
-                        }
+                        numNewGridsDiscarded++;
+                        continue;
                     }
-
-                    auto [it, inserted] = getOrCreateHashSet(newScore).insert(CompactGrid(std::move(newGrid)));
-                    if (inserted)
-                        numNewGridsInserted++;
                 }
+
+                auto [it, inserted] = getOrCreateHashSet(newScore).insert(CompactGrid(std::move(newGrid)));
+                if (inserted)
+                    numNewGridsInserted++;
             }
         }
 
