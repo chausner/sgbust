@@ -61,6 +61,12 @@ void RunCommand(const SolveCLIOptions& cliOptions)
         else
             std::println("No solution found.");
     }
+
+    if (solverResult.has_value() && !cliOptions.SolutionGridFile.empty())
+    {
+        std::ofstream file(cliOptions.SolutionGridFile, std::ios_base::binary);
+		solverResult->SolutionGrid.Save(file, minGroupSize);
+    }
 }
 
 void RunCommand(const GenerateCLIOptions& cliOptions)

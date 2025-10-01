@@ -75,6 +75,7 @@ std::expected<CLIOptions, int> ParseArgs(int argc, const char* argv[])
 
     CLI::App* solveCommand = app.add_subcommand("solve", "Solve a grid");
     solveCommand->add_option("grid-file", solveCliOptions.GridFile, "Bloc Grid File (.bgf)")->required()->check(CLI::ExistingFile);
+    solveCommand->add_option("--output", solveCliOptions.SolutionGridFile, "Path to store solution grid");
     AddScoringOptions(solveCommand, solveCliOptions.ScoringOptions);
     solveCommand->add_option("--prefix", solveCliOptions.SolutionPrefix, "Solution prefix");
     solveCommand->add_option("-s,--max-beam-size", solveCliOptions.MaxBeamSize, "Maximum beam size");

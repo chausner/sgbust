@@ -28,6 +28,7 @@ struct ScoringOptions
 struct SolveCLIOptions
 {
     std::string GridFile;
+	std::string SolutionGridFile;
     ::ScoringOptions ScoringOptions;
     std::string SolutionPrefix;
     std::optional<unsigned int> MaxBeamSize = std::nullopt;
