@@ -22,6 +22,21 @@
 
 namespace sgbust
 {
+    void ApplySolution(Grid& grid, Score& score, unsigned int minGroupSize, const Solution& solution, const Scoring& scoring)
+    {
+        for (unsigned int i = 0; i < solution.GetLength(); i++)
+        {
+            Grid oldGrid = grid;
+            unsigned char step = solution[i];
+            std::vector<Group> groups;
+            grid.GetGroups(groups, minGroupSize);
+            if (step >= groups.size())
+                throw std::invalid_argument("Solution string is not valid for this grid");
+            grid.RemoveGroup(groups[step]);
+            score = scoring.RemoveGroup(score, oldGrid, groups[step], grid, minGroupSize);
+        }
+    }
+
     std::optional<SolverResult> Solver::Solve(const Grid& grid, unsigned int minGroupSize, const Scoring& scoring, const Solution& solutionPrefix)
     {
         this->minGroupSize = minGroupSize;
@@ -29,11 +44,10 @@ namespace sgbust
         this->solutionPrefix = solutionPrefix;
 
         Grid gridWithPrefix = grid;
-
+        Score initialScore = scoring.CreateScore(grid, minGroupSize);
+        
         if (!solutionPrefix.IsEmpty())
-            gridWithPrefix.ApplySolution(solutionPrefix, minGroupSize);
-
-        Score initialScore = scoring.CreateScore(gridWithPrefix, minGroupSize);
+            ApplySolution(gridWithPrefix, initialScore, minGroupSize, solutionPrefix, scoring);
 
         grids.clear();
         grids[initialScore].insert(CompactGrid(gridWithPrefix));
