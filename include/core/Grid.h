@@ -81,7 +81,7 @@ namespace sgbust
         void Print(const Group* highlightedGroup = nullptr) const;
 
     private:
-        static void GetAdjacentBlocksRecursive(BlocksSpan blocks, std::vector<Position>& blockList, unsigned char x, unsigned char y);
+        static void GetAdjacentBlocksRecursive(BlocksSpan blocks, Group& group, unsigned char x, unsigned char y);
     };
 
     template <typename Generator>
