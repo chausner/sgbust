@@ -120,7 +120,7 @@ void RunCommand(const ShowCLIOptions& cliOptions)
         for (unsigned int i = 0; i < solution.GetLength(); i++)
         {
             unsigned char step = solution[i];
-            std::vector<std::vector<sgbust::Position>> groups;
+            std::vector<sgbust::Group> groups;
             bg.GetGroups(groups, minGroupSize);
             if (step >= groups.size())
                 throw std::invalid_argument("Solution string is not valid for this grid");

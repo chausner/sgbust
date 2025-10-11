@@ -115,7 +115,7 @@ namespace sgbust
         groups.clear();
         groups.reserve(24);
 
-        static thread_local std::vector<Position> adjacentBlocks;
+        static thread_local Group adjacentBlocks;
         adjacentBlocks.reserve(Width * Height);
 
         for (unsigned char y = 0; y < Height; y++)
@@ -144,7 +144,7 @@ namespace sgbust
 
         auto blocks = const_cast<Grid*>(this)->BlocksView();
 
-        static thread_local std::vector<Position> adjacentBlocks;
+        static thread_local Group adjacentBlocks;
         adjacentBlocks.reserve(Width * Height);
 
         bool hasGroups = false;
@@ -173,22 +173,22 @@ namespace sgbust
         return hasGroups;
     }
 
-    void Grid::GetAdjacentBlocksRecursive(BlocksSpan blocks, std::vector<Position>& blockList, unsigned char x, unsigned char y)
+    void Grid::GetAdjacentBlocksRecursive(BlocksSpan blocks, Group& group, unsigned char x, unsigned char y)
     {
-        blockList.emplace_back(x, y);
+        group.emplace_back(x, y);
 
         Block color = blocks(x, y);
 
         reinterpret_cast<char&>(blocks(x, y)) |= BlockVisited;
 
         if (x > 0 && blocks(x - 1, y) == color)
-            GetAdjacentBlocksRecursive(blocks, blockList, x - 1, y);
+            GetAdjacentBlocksRecursive(blocks, group, x - 1, y);
         if (y > 0 && blocks(x, y - 1) == color)
-            GetAdjacentBlocksRecursive(blocks, blockList, x, y - 1);
+            GetAdjacentBlocksRecursive(blocks, group, x, y - 1);
         if (x < blocks.extent(0) - 1 && blocks(x + 1, y) == color)
-            GetAdjacentBlocksRecursive(blocks, blockList, x + 1, y);
+            GetAdjacentBlocksRecursive(blocks, group, x + 1, y);
         if (y < blocks.extent(1) - 1 && blocks(x, y + 1) == color)
-            GetAdjacentBlocksRecursive(blocks, blockList, x, y + 1);
+            GetAdjacentBlocksRecursive(blocks, group, x, y + 1);
     }
 
     void Grid::RemoveGroup(const Group& group)
@@ -299,7 +299,7 @@ namespace sgbust
         unsigned int length = solution.GetLength();
 
         std::vector<Group> groups;
-
+        
         for (unsigned int i = 0; i < length; i++)
         {
             GetGroups(groups, minGroupSize);
