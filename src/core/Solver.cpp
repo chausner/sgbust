@@ -70,7 +70,9 @@ namespace sgbust
 
         for (depth = 0; depth < MaxDepth || !MaxDepth; depth++)
         {
-            if (TrimmingEnabled)
+            bool maxDepthReached = MaxDepth.has_value() && depth == *MaxDepth - 1;
+
+            if (TrimmingEnabled && !maxDepthReached)
                 TrimBeam();
 
             SolveDepth(stop);
