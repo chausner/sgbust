@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="sgbust.vcxproj" Id="daa9ccd4-521e-4660-998e-09ce26865b66" />
+</Solution>
