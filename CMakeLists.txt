@@ -20,7 +20,7 @@ add_executable(sgbust
 target_compile_features(sgbust PRIVATE cxx_std_20)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(sgbust PRIVATE "/Zc:__cplusplus")
+    target_compile_options(sgbust PRIVATE "/Zc:__cplusplus" "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:/Ob3>")
 endif()
 
 target_include_directories(sgbust PRIVATE include)
