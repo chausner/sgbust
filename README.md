@@ -177,7 +177,6 @@ This will generate 1000 grids with the specified dimensions and parameters and s
 sgbust relies on the following third-party libraries:
 
 * [CLI11](https://github.com/CLIUtils/CLI11): for command-line help and parsing
-* [mdspan](https://github.com/kokkos/mdspan): for convenient 2D matrix access
 * [mimalloc](https://github.com/microsoft/mimalloc): for significant speed-ups and a reduction in memory usage
 * [Parallel Hashmap](https://github.com/greg7mdp/parallel-hashmap): for efficient parallel execution of the search algorithm
 * [wyhash](https://github.com/wangyi-fudan/wyhash): as a very fast hash function in hash maps

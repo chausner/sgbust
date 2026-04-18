@@ -3,7 +3,6 @@
   "name": "sgbust",
   "dependencies": [
     "cli11",
-    "mdspan",
     "mimalloc",
     "parallel-hashmap",
     {

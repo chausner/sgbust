@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <istream>
+#include <mdspan>
 #include <memory>
 #include <random>
 #include <stdexcept>
@@ -10,7 +11,6 @@
 #include <vector>
 
 #include "core/Solution.h"
-#include "experimental/mdspan"
 
 namespace sgbust
 {
@@ -41,9 +41,9 @@ namespace sgbust
 
     struct Grid
     {
-        using Extents = std::experimental::extents<unsigned int, std::experimental::dynamic_extent, std::experimental::dynamic_extent>;
-        using BlocksSpan = std::experimental::mdspan<Block, Extents, std::experimental::layout_left>;
-        using ConstBlocksSpan = std::experimental::mdspan<const Block, Extents, std::experimental::layout_left>;
+        using Extents = std::extents<unsigned int, std::dynamic_extent, std::dynamic_extent>;
+        using BlocksSpan = std::mdspan<Block, Extents, std::layout_left>;
+        using ConstBlocksSpan = std::mdspan<const Block, Extents, std::layout_left>;
 
         unsigned char Width;
         unsigned char Height;
