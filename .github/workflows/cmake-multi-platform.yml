@@ -43,6 +43,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install --yes gcc-16 g++-16
 
+    - name: Install libc++ for Clang
+      if: matrix.cpp_compiler == 'clang++'
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes libc++-dev libc++abi-dev
+
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
