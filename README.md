@@ -9,7 +9,7 @@ sgbust is a command-line tool that uses [beam search](https://en.wikipedia.org/w
 
 To build sgbust, a C++23-compliant compiler is required.
 sgbust is tested with recent versions of MSVC, gcc and Clang.
-When building with Clang, either libstdc++ must be used as STL implementation or `-fexperimental-library` must be passed, to enable the use of Parallel STL algorithms.
+When building with Clang and libc++ as STL implementation, `-fexperimental-library` must be passed, to enable the use of Parallel STL algorithms.
 
 [vcpkg](https://github.com/microsoft/vcpkg) is recommended for installing third-party library dependencies.
 Follow [these instructions](https://github.com/microsoft/vcpkg?tab=readme-ov-file#getting-started) to setup vcpkg before building sgbust.
