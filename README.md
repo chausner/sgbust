@@ -12,7 +12,7 @@ sgbust is tested with recent versions of MSVC, gcc and Clang.
 When building with Clang and libc++ as STL implementation, `-fexperimental-library` must be passed, to enable the use of Parallel STL algorithms.
 
 [vcpkg](https://github.com/microsoft/vcpkg) is recommended for installing third-party library dependencies.
-Follow [these instructions](https://github.com/microsoft/vcpkg?tab=readme-ov-file#getting-started) to setup vcpkg before building sgbust.
+Follow [these instructions](https://github.com/microsoft/vcpkg?tab=readme-ov-file#get-started) to setup vcpkg before building sgbust.
 
 You may build either via CMake (supported on all platforms) or via MSBuild (Windows-only).
 
