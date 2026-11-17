@@ -1,7 +1,7 @@
 #include <exception>
+#include <expected>
 #include <iostream>
 #include <utility>
-#include <variant>
 
 #include "cli/parser.h"
 #include "cli/commands.h"
@@ -16,14 +16,12 @@ int main(int argc, const char* argv[])
         EnableVTMode();
 #endif
 
-        std::variant<CLIOptions, int> parsedArgs = ParseArgs(argc, argv);
+        std::expected<CLIOptions, int> parsedArgs = ParseArgs(argc, argv);
 
-        if (std::holds_alternative<int>(parsedArgs))
-            return std::get<int>(parsedArgs);
-        
-        CLIOptions cliOptions = std::get<CLIOptions>(std::move(parsedArgs));
+        if (!parsedArgs.has_value())
+            return parsedArgs.error();     
 
-        std::visit([](auto&& arg) { RunCommand(arg); }, cliOptions);
+        std::visit([](auto&& arg) { RunCommand(arg); }, *parsedArgs);
 
         return 0;
     }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <expected>
 #include <memory>
 #include <optional>
 #include <string>
@@ -73,4 +74,4 @@ using CLIOptions = std::variant<
     BenchmarkCLIOptions
 >;
 
-std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[]);
+std::expected<CLIOptions, int> ParseArgs(int argc, const char* argv[]);

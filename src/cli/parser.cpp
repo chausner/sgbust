@@ -62,7 +62,7 @@ static void ValidateAndSetScoring(ScoringOptions& scoringOptions)
     }
 }
 
-std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
+std::expected<CLIOptions, int> ParseArgs(int argc, const char* argv[])
 {
     CLI::App app;
 
@@ -119,16 +119,23 @@ std::variant<CLIOptions, int> ParseArgs(int argc, const char* argv[])
     benchmarkCommand->add_option("--num-grids", benchmarkCliOptions.NumGrids, "Number of grids to generate and solve");
     AddScoringOptions(benchmarkCommand, benchmarkCliOptions.ScoringOptions);
     benchmarkCommand->add_option("--max-beam-size", benchmarkCliOptions.MaxBeamSize, "Maximum beam size");
-    benchmarkCommand->callback([&]() { 
+    benchmarkCommand->callback([&]() {
         ValidateAndSetScoring(benchmarkCliOptions.ScoringOptions);
-        
+
         cliOptions = std::move(benchmarkCliOptions);
         });
 
-    CLI11_PARSE(app, argc, argv);
+    try
+    {
+        app.parse(argc, argv);
+    }
+    catch (const CLI::ParseError& e)
+    {
+        return std::unexpected(app.exit(e));
+    }
 
     if (!cliOptions.has_value())
-        return app.exit(CLI::CallForHelp());
+        return std::unexpected(app.exit(CLI::CallForHelp()));
 
     return std::move(*cliOptions);
 }
