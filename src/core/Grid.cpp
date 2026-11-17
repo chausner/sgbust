@@ -1,9 +1,10 @@
 #include "core/Grid.h"
 
 #include <algorithm>
-#include <iostream>
+#include <cstdio>
 #include <iterator>
 #include <limits>
+#include <print>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -365,6 +366,7 @@ namespace sgbust
             output << "\x1B[0m" << "\n";
         }
 
-        std::cout << output.str() << std::flush;
+        std::print("{}", output.str());
+        std::fflush(stdout);
     }
 }

@@ -1,6 +1,7 @@
+#include <cstdio>
 #include <exception>
 #include <expected>
-#include <iostream>
+#include <print>
 #include <utility>
 
 #include "cli/parser.h"
@@ -27,12 +28,12 @@ int main(int argc, const char* argv[])
     }
     catch (const std::exception& ex)
     {
-        std::cerr << "Exception: " << ex.what() << std::endl;
+        std::println(stderr, "Exception: {}", ex.what());
         return 1;
     }
     catch (...)
     {
-        std::cerr << "An unknown exception occurred";
+        std::println(stderr, "An unknown exception occurred");
         return 1;
     }
 }
