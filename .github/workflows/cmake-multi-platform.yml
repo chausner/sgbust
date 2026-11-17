@@ -15,20 +15,20 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
-        c_compiler: [gcc, clang, cl]
+        c_compiler: [gcc-16, clang, cl]
         include:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
+            c_compiler: gcc-16
+            cpp_compiler: g++-16
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
         exclude:
           - os: windows-latest
-            c_compiler: gcc
+            c_compiler: gcc-16
           - os: windows-latest
             c_compiler: clang
           - os: ubuntu-latest
@@ -36,6 +36,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Install GCC 16
+      if: matrix.c_compiler == 'gcc-16'
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes gcc-16 g++-16
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
