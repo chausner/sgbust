@@ -7,10 +7,9 @@ sgbust is a command-line tool that uses [beam search](https://en.wikipedia.org/w
 
 ## Building
 
-To build sgbust, a C++20-compliant compiler is required.
+To build sgbust, a C++23-compliant compiler is required.
 sgbust is tested with recent versions of MSVC, gcc and Clang.
-As of writing, Clang is only supported when libstdc++ is used as STL implementation.
-libc++ is not supported.
+When building with Clang and libc++ as STL implementation, `-fexperimental-library` must be passed, to enable the use of Parallel STL algorithms.
 
 [vcpkg](https://github.com/microsoft/vcpkg) is recommended for installing third-party library dependencies.
 Follow [these instructions](https://github.com/microsoft/vcpkg?tab=readme-ov-file#getting-started) to setup vcpkg before building sgbust.
@@ -177,7 +176,6 @@ This will generate 1000 grids with the specified dimensions and parameters and s
 sgbust relies on the following third-party libraries:
 
 * [CLI11](https://github.com/CLIUtils/CLI11): for command-line help and parsing
-* [mdspan](https://github.com/kokkos/mdspan): for convenient 2D matrix access
 * [mimalloc](https://github.com/microsoft/mimalloc): for significant speed-ups and a reduction in memory usage
 * [Parallel Hashmap](https://github.com/greg7mdp/parallel-hashmap): for efficient parallel execution of the search algorithm
 * [wyhash](https://github.com/wangyi-fudan/wyhash): as a very fast hash function in hash maps

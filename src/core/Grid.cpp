@@ -120,10 +120,10 @@ namespace sgbust
 
         for (unsigned char y = 0; y < Height; y++)
             for (unsigned char x = 0; x < Width; x++)
-                if ((static_cast<char>(blocks(x, y)) & BlockVisited) == 0 && blocks(x, y) != Block::None)
+                if ((static_cast<char>(blocks[x, y]) & BlockVisited) == 0 && blocks[x, y] != Block::None)
                 {
                     if (minGroupSize > 1)
-                        if (x != Width - 1 && y != Height - 1 && blocks(x, y) != blocks(x + 1, y) && blocks(x, y) != blocks(x, y + 1))
+                        if (x != Width - 1 && y != Height - 1 && blocks[x, y] != blocks[x + 1, y] && blocks[x, y] != blocks[x, y + 1])
                             continue;
 
                     adjacentBlocks.clear();
@@ -151,9 +151,9 @@ namespace sgbust
 
         for (unsigned char y = 0; y < Height; y++)
             for (unsigned char x = 0; x < Width; x++)
-                if ((static_cast<char>(blocks(x, y)) & BlockVisited) == 0 && blocks(x, y) != Block::None)
+                if ((static_cast<char>(blocks[x, y]) & BlockVisited) == 0 && blocks[x, y] != Block::None)
                 {
-                    if (x != Width - 1 && y != Height - 1 && blocks(x, y) != blocks(x + 1, y) && blocks(x, y) != blocks(x, y + 1))
+                    if (x != Width - 1 && y != Height - 1 && blocks[x, y] != blocks[x + 1, y] && blocks[x, y] != blocks[x, y + 1])
                         continue;
 
                     adjacentBlocks.clear();
@@ -177,17 +177,17 @@ namespace sgbust
     {
         group.emplace_back(x, y);
 
-        Block color = blocks(x, y);
+        Block color = blocks[x, y];
 
-        reinterpret_cast<char&>(blocks(x, y)) |= BlockVisited;
+        reinterpret_cast<char&>(blocks[x, y]) |= BlockVisited;
 
-        if (x > 0 && blocks(x - 1, y) == color)
+        if (x > 0 && blocks[x - 1, y] == color)
             GetAdjacentBlocksRecursive(blocks, group, x - 1, y);
-        if (y > 0 && blocks(x, y - 1) == color)
+        if (y > 0 && blocks[x, y - 1] == color)
             GetAdjacentBlocksRecursive(blocks, group, x, y - 1);
-        if (x < blocks.extent(0) - 1 && blocks(x + 1, y) == color)
+        if (x < blocks.extent(0) - 1 && blocks[x + 1, y] == color)
             GetAdjacentBlocksRecursive(blocks, group, x + 1, y);
-        if (y < blocks.extent(1) - 1 && blocks(x, y + 1) == color)
+        if (y < blocks.extent(1) - 1 && blocks[x, y + 1] == color)
             GetAdjacentBlocksRecursive(blocks, group, x, y + 1);
     }
 
@@ -208,7 +208,7 @@ namespace sgbust
             if (y > bottom)
                 bottom = y;
 
-            blocks(x, y) = Block::None;
+            blocks[x, y] = Block::None;
         }
 
         for (int x = left; x <= right; x++)
@@ -216,12 +216,12 @@ namespace sgbust
             int yy = bottom;
 
             for (int y = bottom; y >= 0; y--)
-                if (blocks(x, y) != Block::None)
+                if (blocks[x, y] != Block::None)
                 {
                     if (yy != y)
                     {
-                        blocks(x, yy) = blocks(x, y);
-                        blocks(x, y) = Block::None;
+                        blocks[x, yy] = blocks[x, y];
+                        blocks[x, y] = Block::None;
                     }
 
                     yy--;
@@ -235,13 +235,13 @@ namespace sgbust
             int xx = left;
 
             for (int x = left; x < Width; x++)
-                if (blocks(x, Height - 1) != Block::None)
+                if (blocks[x, Height - 1] != Block::None)
                 {
                     if (xx != x)
                         for (int y = 0; y < Height; y++)
                         {
-                            blocks(xx, y) = blocks(x, y);
-                            blocks(x, y) = Block::None;
+                            blocks[xx, y] = blocks[x, y];
+                            blocks[x, y] = Block::None;
                         }
 
                     xx++;
@@ -261,9 +261,9 @@ namespace sgbust
             if (newWidth != Width)
                 for (int y = 0; y < newHeight; y++)
                     for (int x = 0; x < newWidth; x++)
-                        newBlocksView(x, y) = blocks(x, (Height - newHeight) + y);
+                        newBlocksView[x, y] = blocks[x, (Height - newHeight) + y];
             else
-                std::copy(&blocks(0, Height - newHeight), BlocksEnd(), newBlocks.get());
+                std::copy(&blocks[0, Height - newHeight], BlocksEnd(), newBlocks.get());
 
             Width = newWidth;
             Height = newHeight;
@@ -326,7 +326,7 @@ namespace sgbust
             {
                 const char* colorCode;
 
-                switch (blocks(x, y))
+                switch (blocks[x, y])
                 {
                 case Block::None:
                     colorCode = "\x1B[40m";
