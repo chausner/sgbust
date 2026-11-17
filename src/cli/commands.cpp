@@ -3,11 +3,12 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cstdio>
 #include <format>
 #include <fstream>
 #include <future>
-#include <iostream>
 #include <optional>
+#include <print>
 #include <random>
 #include <stdexcept>
 #include <unordered_set>
@@ -46,18 +47,19 @@ void RunCommand(const SolveCLIOptions& cliOptions)
 
     if (!cliOptions.Quiet)
     {
-        std::cout << std::endl;
-        std::cout << "Elapsed: " << std::format("{:%T}", elapsedMilliseconds) << std::endl;
+        std::println();
+        std::println("Elapsed: {:%T}", elapsedMilliseconds);
         if (solverResult.has_value())
         {
-            std::cout << "Best solution (score: " << solverResult->BestScore
-                << ", blocks: " << solverResult->SolutionGrid.GetNumberOfBlocks()
-                << ", steps: " << solverResult->BestSolution.GetLength() << "): " << solverResult->BestSolution.AsString()
-                << std::endl;            
+            std::println("Best solution (score: {}, blocks: {}, steps: {}): {}",
+                solverResult->BestScore,
+                solverResult->SolutionGrid.GetNumberOfBlocks(),
+                solverResult->BestSolution.GetLength(),
+                solverResult->BestSolution.AsString());            
             solverResult->SolutionGrid.Print();
         }
         else
-            std::cout << "No solution found." << std::endl;
+            std::println("No solution found.");
     }
 }
 
@@ -85,7 +87,7 @@ void RunCommand(const GenerateCLIOptions& cliOptions)
     if (!cliOptions.Quiet)
     {
         grid.Print();
-        std::cout << std::endl;
+        std::println();
     }
 }
 
@@ -101,10 +103,10 @@ void RunCommand(const ShowCLIOptions& cliOptions)
     colors.erase(sgbust::Block::None);
     int numColors = colors.size();
 
-    std::cout << "Size: " << static_cast<int>(grid.Width) << " x " << static_cast<int>(grid.Height) << std::endl;
-    std::cout << "Number of colors: " << numColors << std::endl;
-    std::cout << "Minimal group size: " << minGroupSize << std::endl;
-    std::cout << std::endl;
+    std::println("Size: {} x {}", static_cast<int>(grid.Width), static_cast<int>(grid.Height));
+    std::println("Number of colors: {}", numColors);
+    std::println("Minimal group size: {}", minGroupSize);
+    std::println();
     grid.Print();
 
     if (!cliOptions.Solution.empty())
@@ -112,8 +114,8 @@ void RunCommand(const ShowCLIOptions& cliOptions)
         auto pluralS = [](int x) { return x == 1 ? "" : "s"; };
 
         sgbust::Solution solution(cliOptions.Solution);
-        std::cout << std::endl;
-        std::cout << "Solution: " << solution.AsString() << " (" << solution.GetLength() << " step" << pluralS(solution.GetLength()) << ")" << std::endl;
+        std::println();
+        std::println("Solution: {} ({} step{})", solution.AsString(), solution.GetLength(), pluralS(solution.GetLength()));
 
         sgbust::Grid bg = grid;
 
@@ -124,14 +126,14 @@ void RunCommand(const ShowCLIOptions& cliOptions)
             bg.GetGroups(groups, minGroupSize);
             if (step >= groups.size())
                 throw std::invalid_argument("Solution string is not valid for this grid");
-            std::cout << (i + 1) << ". " << groups[step].size() << " block" << pluralS(groups[step].size()) << std::endl;
+            std::println("{}. {} block{}", i + 1, groups[step].size(), pluralS(groups[step].size()));
             bg.Print(&groups[step]);
             bg.RemoveGroup(groups[step]);
         }
 
-		std::cout << "Final grid:" << std::endl;
+		std::println("Final grid:");
         if (bg.IsEmpty())
-            std::cout << "(empty)" << std::endl;
+            std::println("(empty)");
 		else
 		    bg.Print();
     }
@@ -157,7 +159,7 @@ void RunCommand(const BenchmarkCLIOptions& cliOptions)
     solver.MaxBeamSize = cliOptions.MaxBeamSize;
     solver.Quiet = true;
 
-    std::cout << "Press Ctrl+C to cancel." << std::endl;
+    std::println("Press Ctrl+C to cancel.");
 
     unsigned long long gridsSolved = 0;
     unsigned long long gridsCleared = 0;
@@ -169,7 +171,7 @@ void RunCommand(const BenchmarkCLIOptions& cliOptions)
 
     auto printStats = [&]() {
         if (lastStatsPrinted.has_value())
-            std::cout << "\x1B[5F"; // move cursor to the beginning of the line five lines up
+            std::print("\x1B[5F"); // move cursor to the beginning of the line five lines up
 
         auto elapsed = std::chrono::steady_clock::now() - startTime;
         auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
@@ -181,13 +183,13 @@ void RunCommand(const BenchmarkCLIOptions& cliOptions)
         double averageScore = zeroIfNaN(static_cast<double>(bestScoreSum) / gridsSolved);
         double averageBlocksRemaining = zeroIfNaN(static_cast<double>(blocksRemainingSum) / gridsSolved);
 
-        std::cout << std::fixed << std::setprecision(2);
-        std::cout << "Elapsed: " << std::format("{:%T}", elapsedMilliseconds) << "\x1B[K\n";
-        std::cout << "Grids solved: " << gridsSolved << "\x1B[K\n";
-        std::cout << "Grids cleared: " << gridsCleared << " (" << gridsClearedPercent << "%)\x1B[K\n";
-        std::cout << "Average score: " << averageScore << "\x1B[K\n";
-        std::cout << "Average number of blocks remaining: " << averageBlocksRemaining << "\x1B[K\n";
-        std::cout << "Speed: " << gridsPerSecond << " grids/second (" << secondsPerGrid << " seconds/grid)\x1B[K" << std::flush;
+        std::println("Elapsed: {:%T}\x1B[K", elapsedMilliseconds);
+        std::println("Grids solved: {}\x1B[K", gridsSolved);
+        std::println("Grids cleared: {} ({:.2f}%)\x1B[K", gridsCleared, gridsClearedPercent);
+        std::println("Average score: {:.2f}\x1B[K", averageScore);
+        std::println("Average number of blocks remaining: {:.2f}\x1B[K", averageBlocksRemaining);
+        std::print("Speed: {:.2f} grids/second ({:.2f} seconds/grid)\x1B[K", gridsPerSecond, secondsPerGrid);
+        std::fflush(stdout);
         };
 
     std::future<void> process = std::async([&] {
@@ -218,5 +220,5 @@ void RunCommand(const BenchmarkCLIOptions& cliOptions)
     process.get();
 
     printStats();
-    std::cout << std::endl;
+    std::println();
 }

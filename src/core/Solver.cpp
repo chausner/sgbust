@@ -3,13 +3,13 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <condition_variable>
 #include <execution>
 #include <format>
-#include <iomanip>
-#include <iostream>
 #include <iterator>
 #include <mutex>
+#include <print>
 #include <numeric>
 #include <ranges>
 #include <stop_token>
@@ -120,7 +120,7 @@ namespace sgbust
         if (memoryUsage.has_value())
             output += std::format(", memory: {}MB", (*memoryUsage / 1024 / 1024));
 
-        std::cout << output << std::endl;
+        std::println("{}", output);
     }
 
     void Solver::PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize, unsigned int newGridsDiscarded) const
@@ -166,12 +166,14 @@ namespace sgbust
 
 		output += std::format(" ({:.1f}%)", progress);
 
-        std::cout << "\x1b[2K\r" + output << std::flush;
+        std::print("\x1b[2K\r{}", output);
+        std::fflush(stdout);
     }
 
     void Solver::ClearProgress() const
     {
-        std::cout << "\x1b[2K\r" << std::flush;
+        std::print("\x1b[2K\r");
+        std::fflush(stdout);
     }
 
     void Solver::SolveDepth(bool& stop)
