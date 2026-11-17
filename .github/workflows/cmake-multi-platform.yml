@@ -43,11 +43,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install --yes gcc-16 g++-16
 
-    - name: Install libc++ for Clang
-      if: matrix.cpp_compiler == 'clang++'
+    - name: Install libstdc++-16-dev
+      if: matrix.c_compiler == 'clang'
       run: |
         sudo apt-get update
-        sudo apt-get install --yes libc++-dev libc++abi-dev
+        sudo apt-get install --yes libstdc++-16-dev
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -70,7 +70,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        ${{ matrix.cpp_compiler == 'clang++' && '-DCMAKE_CXX_FLAGS="-stdlib=libc++ -fexperimental-library"' || '' }}
+        ${{ matrix.cpp_compiler == 'clang++' && '-DCMAKE_CXX_FLAGS="-stdlib=libstdc++ --gcc-install-dir=/usr/lib/gcc/x86_64-linux-gnu/16"' || '' }}
         -S ${{ github.workspace }}
 
     - name: Build
