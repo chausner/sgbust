@@ -14,15 +14,15 @@ int main(int argc, const char* argv[])
     try
     {
 #ifdef _WIN32
-        EnableVTMode();
+        sgbust::cli::EnableVTMode();
 #endif
 
-        std::expected<CLIOptions, int> parsedArgs = ParseArgs(argc, argv);
+        std::expected<sgbust::cli::CLIOptions, int> parsedArgs = sgbust::cli::ParseArgs(argc, argv);
 
         if (!parsedArgs.has_value())
             return parsedArgs.error();     
 
-        std::visit([](auto&& arg) { RunCommand(arg); }, *parsedArgs);
+        std::visit([](auto&& arg) { sgbust::cli::RunCommand(arg); }, *parsedArgs);
 
         return 0;
     }
