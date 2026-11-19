@@ -9,14 +9,15 @@
 #include <format>
 #include <iterator>
 #include <mutex>
-#include <print>
 #include <numeric>
+#include <print>
 #include <ranges>
 #include <stop_token>
 #include <thread>
 #include <utility>
 #include <vector>
 
+#include "cli/utils.h"
 #include "core/CompactGrid.h"
 #include "core/MemoryUsage.h"
 
@@ -123,7 +124,7 @@ namespace sgbust
         std::println("{}", output);
     }
 
-    void Solver::PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize, unsigned int newGridsDiscarded) const
+    void Solver::PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize, unsigned int newGridsDiscarded, unsigned int& progressLength) const
     {
         int curMinScore = 0;
         int curMaxScore = 0;
@@ -147,7 +148,7 @@ namespace sgbust
         double percentBeamSizeLimit = 0.0;
         if (MaxBeamSize.has_value())
             percentBeamSizeLimit = newBeamSize * 100.0 / *MaxBeamSize;
-        double progress = std::max(percentProcessed, percentBeamSizeLimit);
+        double progress = (std::max)(percentProcessed, percentBeamSizeLimit);
 
         std::string output = std::format(
             "Depth: {:3}, grids: {:9}, hash sets: {:4}, discarded: {:9}, scores (min/avg/max): {}/{:.1f}/{}",
@@ -166,13 +167,27 @@ namespace sgbust
 
 		output += std::format(" ({:.1f}%)", progress);
 
-        std::print("\x1b[2K\r{}", output);
+        ClearProgress(progressLength);
+        progressLength = output.size();
+
+        std::print("{}", output);
         std::fflush(stdout);
     }
 
-    void Solver::ClearProgress() const
+    void Solver::ClearProgress(unsigned int progressLength) const
     {
-        std::print("\x1b[2K\r");
+        if (progressLength == 0)
+            return;
+
+        auto consoleWidth = sgbust::cli::GetConsoleWidth();
+        if (!consoleWidth.has_value())
+            return;
+
+        unsigned int progressRows = progressLength / (*consoleWidth + 1) + 1;
+
+        std::print("\r\x1b[2K");
+        for (unsigned int row = 1; row < progressRows; row++)
+            std::print("\x1b[1A\x1b[2K");
         std::fflush(stdout);
     }
 
@@ -188,6 +203,7 @@ namespace sgbust
 
         if (!Quiet)
 			reporter.emplace([&](std::stop_token stopToken) {
+                unsigned int progressLength = 0;
                 std::mutex reporterMutex;
                 std::condition_variable reporterCv;
                 std::stop_callback callback(stopToken, [&]() { reporterCv.notify_all(); });
@@ -200,10 +216,10 @@ namespace sgbust
                             break;
                     }
 
-					PrintProgress(newGrids, gridsSolved, newBeamSize, totalDiscarded);
+                    PrintProgress(newGrids, gridsSolved, newBeamSize, totalDiscarded, progressLength);
                 }
 
-                ClearProgress();
+                ClearProgress(progressLength);
             });
 
         for (auto it = grids.begin(); it != grids.end(); it = grids.erase(it))

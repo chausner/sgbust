@@ -68,8 +68,8 @@ namespace sgbust
         std::tuple<unsigned int, unsigned int> SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool& stop);
         void CheckSolution(const Grid& grid, Score score, bool& stop);
         void PrintStats(unsigned int depth) const;
-        void PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize, unsigned int newGridsDiscarded) const;
-		void ClearProgress() const;
+        void PrintProgress(const std::map<Score, GridHashSet>& newGrids, unsigned int gridsSolved, unsigned int newBeamSize, unsigned int newGridsDiscarded, unsigned int& progressLength) const;
+        void ClearProgress(unsigned int progressLength) const;
         void TrimBeam();
 
     public:
