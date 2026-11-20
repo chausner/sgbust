@@ -2,14 +2,71 @@
 
 #include <functional>
 #include <unordered_map>
+#include <utility>
 
 #include "CLI/CLI.hpp"
+#include "cli/utils.h"
 #include "core/scorings/GreedyScoring.h"
 #include "core/scorings/NumBlocksNotInGroupsScoring.h"
 #include "core/scorings/PotentialScoring.h"
 
 namespace sgbust::cli
 {
+    class HelpFormatter : public CLI::Formatter
+    {
+    public:
+        HelpFormatter()
+        {
+            long_option_alignment_ratio(0.18f);
+            enable_option_type_names(false);
+            enable_default_flag_values(false);
+            label("POSITIONALS", "Arguments");
+            label("REQUIRED", "(required)");
+        }
+
+        void column_widths_from_console_width(unsigned int consoleWidth)
+        {
+            constexpr unsigned int MIN_WIDTH = 50;
+            constexpr unsigned int MAX_WIDTH = 120;
+
+            unsigned int helpWidth = std::clamp(consoleWidth, MIN_WIDTH, MAX_WIDTH);
+            unsigned int leftColumnWidth = helpWidth * 2 / 5;
+
+            column_width(leftColumnWidth);
+            right_column_width(helpWidth - leftColumnWidth);
+        }
+
+        std::string make_usage(const CLI::App* app, std::string name) const override
+        {
+            std::string usage = "Usage: " + name;
+
+            if (!app->get_subcommands([](const CLI::App* command) { return !command->get_disabled() && !command->get_name().empty(); }).empty())
+                usage += " <command>";
+
+            for (const auto* option : app->get_options([](const CLI::Option* option) { return option->get_positional() && !option->get_group().empty(); }))
+                if (option->get_required())
+                    usage += " <" + make_option_usage(option) + ">";
+                else
+                    usage += " " + make_option_usage(option);            
+
+            return usage + " [options]\n";
+        }
+
+        std::string make_group(std::string group, bool positional, std::vector<const CLI::Option*> options) const override
+        {
+            if (group == "OPTIONS")
+                group = "Options";
+
+            return CLI::Formatter::make_group(std::move(group), positional, std::move(options));
+        }
+
+        std::string make_option_opts(const CLI::Option* option) const override
+        {
+            bool takesValue = !option->get_positional() && option->get_items_expected_max() != 0;
+            return (takesValue ? " arg" : "") + CLI::Formatter::make_option_opts(option);
+        }
+    };
+
     static const std::unordered_map<std::string, ScoringType> ScoringTypeStrings{
         { "greedy", ScoringType::Greedy },
         { "potential", ScoringType::Potential },
@@ -18,7 +75,7 @@ namespace sgbust::cli
 
     static void AddScoringOptions(CLI::App* command, ScoringOptions& scoringOptions)
     {
-        command->add_option("--scoring", scoringOptions.ScoringType, "Type of scoring")->transform(CLI::CheckedTransformer(ScoringTypeStrings, CLI::ignore_case));
+        command->add_option("--scoring", scoringOptions.ScoringType, "Scoring type (greedy, potential, num-blocks-not-in-groups)")->transform(CLI::CheckedTransformer(ScoringTypeStrings, CLI::ignore_case));
         command->add_option("--scoring-group-score", scoringOptions.ScoringGroupScore, "Group score, as a function of the group size");
         command->add_option("--scoring-clearance-bonus", scoringOptions.ScoringClearanceBonus, "Bonus for clearing a grid");
         command->add_option("--scoring-leftover-penalty", scoringOptions.ScoringLeftoverPenalty, "Penalty when a grid is not cleared, as a function of the number of blocks left");
@@ -70,6 +127,11 @@ namespace sgbust::cli
 
         app.name("sgbust");
         app.description("SameGame solver");
+        app.group("Commands");
+
+        auto helpFormatter = std::make_shared<HelpFormatter>();
+        helpFormatter->column_widths_from_console_width(GetConsoleWidth().value_or(80));
+        app.formatter(helpFormatter);
 
         std::optional<CLIOptions> cliOptions;
 
