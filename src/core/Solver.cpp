@@ -398,14 +398,10 @@ namespace sgbust
     {
         std::ofstream file(path);
 
-        file << "Solution,Score\n";
+        std::println(file, "Solution,Score");
 
         for (const auto &[scoring, hashSet] : grids)
-        {
             for (const CompactGrid& grid : hashSet)
-            {
-                file << std::format("{},{}\n", grid.Solution.AsString(), scoring.Value);
-            }
-        }
+                std::println(file, "{},{}", grid.Solution.AsString(), scoring.Value);
     }
 }
