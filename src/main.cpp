@@ -1,7 +1,8 @@
+#include <cstdio>
 #include <exception>
-#include <iostream>
+#include <expected>
+#include <print>
 #include <utility>
-#include <variant>
 
 #include "cli/parser.h"
 #include "cli/commands.h"
@@ -13,28 +14,26 @@ int main(int argc, const char* argv[])
     try
     {
 #ifdef _WIN32
-        EnableVTMode();
+        sgbust::cli::EnableVTMode();
 #endif
 
-        std::variant<CLIOptions, int> parsedArgs = ParseArgs(argc, argv);
+        std::expected<sgbust::cli::CLIOptions, int> parsedArgs = sgbust::cli::ParseArgs(argc, argv);
 
-        if (std::holds_alternative<int>(parsedArgs))
-            return std::get<int>(parsedArgs);
-        
-        CLIOptions cliOptions = std::get<CLIOptions>(std::move(parsedArgs));
+        if (!parsedArgs.has_value())
+            return parsedArgs.error();     
 
-        std::visit([](auto&& arg) { RunCommand(arg); }, cliOptions);
+        std::visit([](auto&& arg) { sgbust::cli::RunCommand(arg); }, *parsedArgs);
 
         return 0;
     }
     catch (const std::exception& ex)
     {
-        std::cerr << "Exception: " << ex.what() << std::endl;
+        std::println(stderr, "Exception: {}", ex.what());
         return 1;
     }
     catch (...)
     {
-        std::cerr << "An unknown exception occurred";
+        std::println(stderr, "An unknown exception occurred");
         return 1;
     }
 }

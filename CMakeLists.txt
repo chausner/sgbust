@@ -17,10 +17,10 @@ add_executable(sgbust
     src/main.cpp
 )
 
-target_compile_features(sgbust PRIVATE cxx_std_20)
+target_compile_features(sgbust PRIVATE cxx_std_23)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(sgbust PRIVATE "/Zc:__cplusplus")
+    target_compile_options(sgbust PRIVATE "/Zc:__cplusplus" "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:/Ob3>")
 endif()
 
 target_include_directories(sgbust PRIVATE include)
@@ -32,9 +32,6 @@ endif()
 
 find_package(CLI11 CONFIG REQUIRED)
 target_link_libraries(sgbust PRIVATE CLI11::CLI11)
-
-find_package(mdspan CONFIG REQUIRED)
-target_link_libraries(sgbust PRIVATE std::mdspan)
 
 find_package(mimalloc CONFIG REQUIRED)
 target_link_libraries(sgbust PRIVATE mimalloc)

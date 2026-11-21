@@ -3,7 +3,6 @@
   "name": "sgbust",
   "dependencies": [
     "cli11",
-    "mdspan",
     "mimalloc",
     "parallel-hashmap",
     {
@@ -12,7 +11,7 @@
     },
     "wyhash"
   ],
-  "builtin-baseline": "5f877f132d1ac99df50f47df839467b6ee0c92b2",
+  "builtin-baseline": "9ee11c38b14f8d0c6cca9a0c6f8a5d6a0859867f",
   "overrides": [
     {
       "name": "wyhash",

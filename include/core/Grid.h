@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <istream>
+#include <mdspan>
 #include <memory>
 #include <random>
 #include <stdexcept>
@@ -10,7 +11,6 @@
 #include <vector>
 
 #include "core/Solution.h"
-#include "experimental/mdspan"
 
 namespace sgbust
 {
@@ -33,15 +33,17 @@ namespace sgbust
 
         Position() {}
         Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
+
+        bool operator==(const Position& other) const = default;
     };
 
     using Group = std::vector<Position>;
 
     struct Grid
     {
-        using Extents = std::experimental::extents<unsigned int, std::experimental::dynamic_extent, std::experimental::dynamic_extent>;
-        using BlocksSpan = std::experimental::mdspan<Block, Extents, std::experimental::layout_left>;
-        using ConstBlocksSpan = std::experimental::mdspan<const Block, Extents, std::experimental::layout_left>;
+        using Extents = std::extents<unsigned int, std::dynamic_extent, std::dynamic_extent>;
+        using BlocksSpan = std::mdspan<Block, Extents, std::layout_left>;
+        using ConstBlocksSpan = std::mdspan<const Block, Extents, std::layout_left>;
 
         unsigned char Width;
         unsigned char Height;
@@ -64,6 +66,8 @@ namespace sgbust
         bool HasGroups(unsigned int minGroupSize) const;
         void RemoveGroup(const Group& group);
         unsigned int GetNumberOfBlocks() const;
+        std::array<unsigned int, 8> GetColorCounts() const;
+        unsigned int GetNumberOfColors() const;
         void ApplySolution(const sgbust::Solution& solution, unsigned int minGroupSize);
 
         Block* BlocksBegin() { return Blocks.get(); }
@@ -74,10 +78,10 @@ namespace sgbust
         BlocksSpan BlocksView() { return BlocksSpan(Blocks.get(), Width, Height); }
         ConstBlocksSpan BlocksView() const { return ConstBlocksSpan(Blocks.get(), Width, Height); }
 
-        void Print() const;
+        void Print(const Group* highlightedGroup = nullptr) const;
 
     private:
-        static void GetAdjacentBlocksRecursive(BlocksSpan blocks, std::vector<Position>& blockList, unsigned char x, unsigned char y);
+        static void GetAdjacentBlocksRecursive(BlocksSpan blocks, Group& group, unsigned char x, unsigned char y);
     };
 
     template <typename Generator>

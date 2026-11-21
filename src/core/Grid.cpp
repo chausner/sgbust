@@ -1,10 +1,13 @@
 #include "core/Grid.h"
 
 #include <algorithm>
-#include <iostream>
+#include <cstdio>
 #include <iterator>
 #include <limits>
+#include <print>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 namespace
@@ -113,15 +116,15 @@ namespace sgbust
         groups.clear();
         groups.reserve(24);
 
-        static thread_local std::vector<Position> adjacentBlocks;
+        static thread_local Group adjacentBlocks;
         adjacentBlocks.reserve(Width * Height);
 
         for (unsigned char y = 0; y < Height; y++)
             for (unsigned char x = 0; x < Width; x++)
-                if ((static_cast<char>(blocks(x, y)) & BlockVisited) == 0 && blocks(x, y) != Block::None)
+                if ((static_cast<char>(blocks[x, y]) & BlockVisited) == 0 && blocks[x, y] != Block::None)
                 {
                     if (minGroupSize > 1)
-                        if (x != Width - 1 && y != Height - 1 && blocks(x, y) != blocks(x + 1, y) && blocks(x, y) != blocks(x, y + 1))
+                        if (x != Width - 1 && y != Height - 1 && blocks[x, y] != blocks[x + 1, y] && blocks[x, y] != blocks[x, y + 1])
                             continue;
 
                     adjacentBlocks.clear();
@@ -142,16 +145,16 @@ namespace sgbust
 
         auto blocks = const_cast<Grid*>(this)->BlocksView();
 
-        static thread_local std::vector<Position> adjacentBlocks;
+        static thread_local Group adjacentBlocks;
         adjacentBlocks.reserve(Width * Height);
 
         bool hasGroups = false;
 
         for (unsigned char y = 0; y < Height; y++)
             for (unsigned char x = 0; x < Width; x++)
-                if ((static_cast<char>(blocks(x, y)) & BlockVisited) == 0 && blocks(x, y) != Block::None)
+                if ((static_cast<char>(blocks[x, y]) & BlockVisited) == 0 && blocks[x, y] != Block::None)
                 {
-                    if (x != Width - 1 && y != Height - 1 && blocks(x, y) != blocks(x + 1, y) && blocks(x, y) != blocks(x, y + 1))
+                    if (x != Width - 1 && y != Height - 1 && blocks[x, y] != blocks[x + 1, y] && blocks[x, y] != blocks[x, y + 1])
                         continue;
 
                     adjacentBlocks.clear();
@@ -171,22 +174,22 @@ namespace sgbust
         return hasGroups;
     }
 
-    void Grid::GetAdjacentBlocksRecursive(BlocksSpan blocks, std::vector<Position>& blockList, unsigned char x, unsigned char y)
+    void Grid::GetAdjacentBlocksRecursive(BlocksSpan blocks, Group& group, unsigned char x, unsigned char y)
     {
-        blockList.emplace_back(x, y);
+        group.emplace_back(x, y);
 
-        Block color = blocks(x, y);
+        Block color = blocks[x, y];
 
-        reinterpret_cast<char&>(blocks(x, y)) |= BlockVisited;
+        reinterpret_cast<char&>(blocks[x, y]) |= BlockVisited;
 
-        if (x > 0 && blocks(x - 1, y) == color)
-            GetAdjacentBlocksRecursive(blocks, blockList, x - 1, y);
-        if (y > 0 && blocks(x, y - 1) == color)
-            GetAdjacentBlocksRecursive(blocks, blockList, x, y - 1);
-        if (x < blocks.extent(0) - 1 && blocks(x + 1, y) == color)
-            GetAdjacentBlocksRecursive(blocks, blockList, x + 1, y);
-        if (y < blocks.extent(1) - 1 && blocks(x, y + 1) == color)
-            GetAdjacentBlocksRecursive(blocks, blockList, x, y + 1);
+        if (x > 0 && blocks[x - 1, y] == color)
+            GetAdjacentBlocksRecursive(blocks, group, x - 1, y);
+        if (y > 0 && blocks[x, y - 1] == color)
+            GetAdjacentBlocksRecursive(blocks, group, x, y - 1);
+        if (x < blocks.extent(0) - 1 && blocks[x + 1, y] == color)
+            GetAdjacentBlocksRecursive(blocks, group, x + 1, y);
+        if (y < blocks.extent(1) - 1 && blocks[x, y + 1] == color)
+            GetAdjacentBlocksRecursive(blocks, group, x, y + 1);
     }
 
     void Grid::RemoveGroup(const Group& group)
@@ -206,7 +209,7 @@ namespace sgbust
             if (y > bottom)
                 bottom = y;
 
-            blocks(x, y) = Block::None;
+            blocks[x, y] = Block::None;
         }
 
         for (int x = left; x <= right; x++)
@@ -214,12 +217,12 @@ namespace sgbust
             int yy = bottom;
 
             for (int y = bottom; y >= 0; y--)
-                if (blocks(x, y) != Block::None)
+                if (blocks[x, y] != Block::None)
                 {
                     if (yy != y)
                     {
-                        blocks(x, yy) = blocks(x, y);
-                        blocks(x, y) = Block::None;
+                        blocks[x, yy] = blocks[x, y];
+                        blocks[x, y] = Block::None;
                     }
 
                     yy--;
@@ -233,13 +236,13 @@ namespace sgbust
             int xx = left;
 
             for (int x = left; x < Width; x++)
-                if (blocks(x, Height - 1) != Block::None)
+                if (blocks[x, Height - 1] != Block::None)
                 {
                     if (xx != x)
                         for (int y = 0; y < Height; y++)
                         {
-                            blocks(xx, y) = blocks(x, y);
-                            blocks(x, y) = Block::None;
+                            blocks[xx, y] = blocks[x, y];
+                            blocks[x, y] = Block::None;
                         }
 
                     xx++;
@@ -259,9 +262,9 @@ namespace sgbust
             if (newWidth != Width)
                 for (int y = 0; y < newHeight; y++)
                     for (int x = 0; x < newWidth; x++)
-                        newBlocksView(x, y) = blocks(x, (Height - newHeight) + y);
+                        newBlocksView[x, y] = blocks[x, (Height - newHeight) + y];
             else
-                std::copy(&blocks(0, Height - newHeight), BlocksEnd(), newBlocks.get());
+                std::copy(&blocks[0, Height - newHeight], BlocksEnd(), newBlocks.get());
 
             Width = newWidth;
             Height = newHeight;
@@ -274,12 +277,30 @@ namespace sgbust
         return std::count_if(BlocksBegin(), BlocksEnd(), [](auto c) { return c != Block::None; });
     }
 
+    std::array<unsigned int, 8> Grid::GetColorCounts() const
+    {
+        std::array<unsigned int, 8> colorCounts{};
+        std::for_each(BlocksBegin(), BlocksEnd(), [&](Block c) {
+            colorCounts[static_cast<int>(c)]++;
+            });
+        return colorCounts;
+    }
+
+    unsigned int Grid::GetNumberOfColors() const
+    {
+        std::array<unsigned int, 8> colorCounts{};
+        std::for_each(BlocksBegin(), BlocksEnd(), [&](Block c) {
+            colorCounts[static_cast<int>(c)]++;
+            });
+        return std::count_if(colorCounts.begin() + 1, colorCounts.end(), [](unsigned int count) { return count != 0; });
+    }
+
     void Grid::ApplySolution(const sgbust::Solution& solution, unsigned int minGroupSize)
     {
         unsigned int length = solution.GetLength();
 
         std::vector<Group> groups;
-
+        
         for (unsigned int i = 0; i < length; i++)
         {
             GetGroups(groups, minGroupSize);
@@ -294,9 +315,11 @@ namespace sgbust
         return std::all_of(BlocksBegin(), BlocksEnd(), [](auto c) { return c == Block::None; });
     }
 
-    void Grid::Print() const
+    void Grid::Print(const Group* highlightedGroup) const
     {
         auto blocks = BlocksView();
+
+        std::ostringstream output;
 
         for (int y = 0; y < Height; y++)
         {
@@ -304,7 +327,7 @@ namespace sgbust
             {
                 const char* colorCode;
 
-                switch (blocks(x, y))
+                switch (blocks[x, y])
                 {
                 case Block::None:
                     colorCode = "\x1B[40m";
@@ -334,10 +357,16 @@ namespace sgbust
                     throw std::out_of_range("Unexpected block color value");
                 }
 
-                std::cout << colorCode << "  ";
+                if (highlightedGroup != nullptr && std::ranges::find(*highlightedGroup, Position(x, y)) != highlightedGroup->end())
+                    output << "\x1B[30;1m" << colorCode << "[]";
+				else
+                    output << colorCode << "  ";
             }
 
-            std::cout << "\x1B[0m" << std::endl;
+            output << "\x1B[0m" << "\n";
         }
+
+        std::print("{}", output.str());
+        std::fflush(stdout);
     }
 }

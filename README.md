@@ -7,13 +7,12 @@ sgbust is a command-line tool that uses [beam search](https://en.wikipedia.org/w
 
 ## Building
 
-To build sgbust, a C++20-compliant compiler is required.
+To build sgbust, a C++23-compliant compiler is required.
 sgbust is tested with recent versions of MSVC, gcc and Clang.
-As of writing, Clang is only supported when libstdc++ is used as STL implementation.
-libc++ is not supported.
+When building with Clang and libc++ as STL implementation, `-fexperimental-library` must be passed, to enable the use of Parallel STL algorithms.
 
 [vcpkg](https://github.com/microsoft/vcpkg) is recommended for installing third-party library dependencies.
-Follow [these instructions](https://github.com/microsoft/vcpkg?tab=readme-ov-file#getting-started) to setup vcpkg before building sgbust.
+Follow [these instructions](https://github.com/microsoft/vcpkg?tab=readme-ov-file#get-started) to setup vcpkg before building sgbust.
 
 You may build either via CMake (supported on all platforms) or via MSBuild (Windows-only).
 
@@ -91,16 +90,41 @@ Note that, depending on the selected optimization objective (`greedy`/`potential
 By default, the application attempts to search the complete game tree
 and is thereby guaranteed to find the best possible solution.
 However, this is only feasible for very small grids.
-It is usually necessary to limit the search space using the `--max-beam-size` option
+It is usually necessary to limit the search space using one of the following options,
 as otherwise the application would quickly use up all available memory:
+
+##### Beam size
+
+Use the `--max-beam-size` option to specify the beam width during beam search,
+i.e. the maximum number of grid candidates kept in memory.
+Increasing the beam size typically allows the program to find better solutions.
 
 ```
 .\sgbust solve sample.bgf --max-beam-size 10000000
 ```
 
-The number following the `--max-beam-size` parameter specifies the beam width during beam search,
-i.e. the maximum number of grid candidates kept in memory.
-Increasing the beam size typically allows the program to find better solutions.
+##### Search depth
+
+Use the `--max-depth` option to stop the search after a certain number of steps:
+
+```
+.\sgbust solve sample.bgf --max-depth 10
+```
+
+Note that the solutions reported in this case may be partial solutions,
+i.e. the resulting grid may still contain blocks that could be removed in further steps.
+
+##### Restricting search to solutions that clear the grid
+
+Specify the `--clearing-only` flag to only report solutions that fully clear the grid.
+This option can be combined with `--max-depth` to search for solutions that clear the grid within the specified number of steps (or fewer).
+
+E.g. suppose a solution is known that clears the grid in 20 steps.
+Then, the following command can be used to find out whether a shorter solution exists that still clears the grid:
+
+```
+.\sgbust solve sample.bgf --clearing-only --max-depth 19
+```
 
 #### Starting at a partial solution
 
@@ -152,7 +176,6 @@ This will generate 1000 grids with the specified dimensions and parameters and s
 sgbust relies on the following third-party libraries:
 
 * [CLI11](https://github.com/CLIUtils/CLI11): for command-line help and parsing
-* [mdspan](https://github.com/kokkos/mdspan): for convenient 2D matrix access
 * [mimalloc](https://github.com/microsoft/mimalloc): for significant speed-ups and a reduction in memory usage
 * [Parallel Hashmap](https://github.com/greg7mdp/parallel-hashmap): for efficient parallel execution of the search algorithm
 * [wyhash](https://github.com/wangyi-fudan/wyhash): as a very fast hash function in hash maps
