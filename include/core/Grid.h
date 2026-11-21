@@ -26,6 +26,8 @@ namespace sgbust
         Cyan
     };
 
+    const char* GetBlockColorCode(Block block);
+
     struct Position
     {
         unsigned char X;

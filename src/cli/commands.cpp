@@ -57,7 +57,7 @@ namespace sgbust::cli
                     solverResult->BestScore,
                     solverResult->SolutionGrid.GetNumberOfBlocks(),
                     solverResult->BestSolution.GetLength(),
-                    solverResult->BestSolution.AsString());            
+                    solverResult->BestSolution.AsColoredString(grid, minGroupSize));
                 solverResult->SolutionGrid.Print();
             }
             else

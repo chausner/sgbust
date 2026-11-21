@@ -315,6 +315,32 @@ namespace sgbust
         return std::all_of(BlocksBegin(), BlocksEnd(), [](auto c) { return c == Block::None; });
     }
 
+    const char* GetBlockColorCode(Block block)
+    {
+        switch (block)
+        {
+        case Block::None:
+            return "\x1B[40m";
+        case Block::Black:
+            return "\x1B[47m";
+        case Block::Red:
+            return "\x1B[41m";
+        case Block::Green:
+            return "\x1B[42m";
+        case Block::Blue:
+            return "\x1B[44m";
+        case Block::Magenta:
+            return "\x1B[45m";
+        case Block::Yellow:
+            return "\x1B[43m";
+        case Block::Cyan:
+            return "\x1B[46m";
+        default:
+            throw std::out_of_range("Unexpected block color value");
+        }
+
+    }
+
     void Grid::Print(const Group* highlightedGroup) const
     {
         auto blocks = BlocksView();
@@ -325,37 +351,7 @@ namespace sgbust
         {
             for (int x = 0; x < Width; x++)
             {
-                const char* colorCode;
-
-                switch (blocks[x, y])
-                {
-                case Block::None:
-                    colorCode = "\x1B[40m";
-                    break;
-                case Block::Black:
-                    colorCode = "\x1B[47m";
-                    break;
-                case Block::Red:
-                    colorCode = "\x1B[41m";
-                    break;
-                case Block::Green:
-                    colorCode = "\x1B[42m";
-                    break;
-                case Block::Blue:
-                    colorCode = "\x1B[44m";
-                    break;
-                case Block::Magenta:
-                    colorCode = "\x1B[45m";
-                    break;
-                case Block::Yellow:
-                    colorCode = "\x1B[43m";
-                    break;
-                case Block::Cyan:
-                    colorCode = "\x1B[46m";
-                    break;
-                default:
-                    throw std::out_of_range("Unexpected block color value");
-                }
+                const char* colorCode = GetBlockColorCode(blocks[x, y]);
 
                 if (highlightedGroup != nullptr && std::ranges::find(*highlightedGroup, Position(x, y)) != highlightedGroup->end())
                     output << "\x1B[30;1m" << colorCode << "[]";

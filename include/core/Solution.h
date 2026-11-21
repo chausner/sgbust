@@ -7,6 +7,8 @@
 
 namespace sgbust
 {
+    struct Grid;
+
     struct Solution
     {
         Solution() = default;
@@ -19,6 +21,7 @@ namespace sgbust
         Solution Append(unsigned char step) const;
         Solution Append(const Solution& solution) const;
         std::string AsString() const;
+        std::string AsColoredString(const Grid& initialGrid, unsigned int minGroupSize) const;
         std::vector<unsigned char> AsVector() const { return std::vector(steps.get(), steps.get() + GetLength()); }
         unsigned int GetLength() const;
         bool IsEmpty() const { return steps == nullptr; }

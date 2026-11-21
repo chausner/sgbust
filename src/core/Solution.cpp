@@ -4,6 +4,8 @@
 #include <iterator>
 #include <stdexcept>
 
+#include "core/Grid.h"
+
 namespace sgbust
 {
     Solution::Solution(std::string_view string)
@@ -125,6 +127,57 @@ namespace sgbust
             }
         }
 
+        return solution;
+    }
+
+    std::string Solution::AsColoredString(const Grid& initialGrid, unsigned int minGroupSize) const
+    {
+        if (steps == nullptr)
+            return std::string();
+
+        Grid grid = initialGrid;
+        std::vector<Group> groups;
+        std::string solution = "\x1B[30m";
+
+        const unsigned int length = GetLength();
+        for (unsigned int i = 0; i < length; ++i)
+        {
+            grid.GetGroups(groups, minGroupSize);
+            const unsigned char step = steps[i];
+            const Group& group = groups.at(step);
+            const Position& first = group.front();
+
+            solution += GetBlockColorCode(grid.BlocksView()[first.X, first.Y]);
+
+#if false
+            if (step < 26)
+                solution.push_back((char)(step + 65));
+            else
+            {
+                solution.push_back('(');
+                solution.push_back((char)((step / 26) + 64));
+                solution.push_back((char)((step % 26) + 65));
+                solution.push_back(')');
+            }
+#else
+            if (step < 26)
+            {
+                solution.push_back((char)(step + 65));
+                solution.append(group.size() - 1, ' ');
+            }
+            else
+            {
+                solution.push_back((char)((step / 26) + 64));
+                solution.push_back((char)((step % 26) + 65));
+                if (group.size() > 2)
+                    solution.append(group.size() - 2, ' ');
+            }
+#endif
+
+            grid.RemoveGroup(group);
+        }
+
+        solution += "\x1B[0m";
         return solution;
     }
 
