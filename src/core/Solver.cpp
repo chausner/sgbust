@@ -1,5 +1,6 @@
 #include "core/Solver.h"
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <cmath>
@@ -13,6 +14,7 @@
 #include <print>
 #include <ranges>
 #include <stop_token>
+#include <string_view>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -170,7 +172,9 @@ namespace sgbust
         ClearProgress(progressLength);
         progressLength = output.size();
 
-        std::print("{}", output);
+        std::string_view line = output;
+        std::size_t filledLength = static_cast<std::size_t>(line.size() * (progress / 100.0));
+        std::print("\x1b[7m{}\x1b[27m{}", line.substr(0, filledLength), line.substr(filledLength));
         std::fflush(stdout);
     }
 
