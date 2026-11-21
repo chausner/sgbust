@@ -1,16 +1,12 @@
 #include "cli/utils.h"
 
-#ifdef _WIN32
+#if defined(_WIN32)
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#else
-#include <sys/ioctl.h>
-#include <unistd.h>
-#endif
 
 namespace sgbust::cli
 {
-#ifdef _WIN32
     bool EnableVTMode()
     {
         HANDLE stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -30,11 +26,9 @@ namespace sgbust::cli
 
         return true;
     }
-#endif
 
     std::optional<unsigned int> GetConsoleWidth()
     {
-#ifdef _WIN32
         HANDLE stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
         if (stdOut == INVALID_HANDLE_VALUE)
             return std::nullopt;
@@ -44,12 +38,34 @@ namespace sgbust::cli
             return std::nullopt;
 
         return info.srWindow.Right - info.srWindow.Left + 1;
-#else
+    }
+}
+
+#elif defined(__linux__)
+
+#include <sys/ioctl.h>
+#include <unistd.h>
+
+namespace sgbust::cli
+{
+    std::optional<unsigned int> GetConsoleWidth()
+    {
         winsize size{};
         if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) != 0)
             return std::nullopt;
 
         return size.ws_col;
-#endif
     }
 }
+
+#else
+
+namespace sgbust::cli
+{
+    std::optional<unsigned int> GetConsoleWidth()
+    {
+        return std::nullopt;
+    }
+}
+
+#endif
