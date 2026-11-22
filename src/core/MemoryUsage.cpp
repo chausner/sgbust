@@ -15,11 +15,20 @@ namespace sgbust
             return std::nullopt;
         return counters.WorkingSetSize;
     }
+
+    std::optional<std::size_t> GetPeakMemoryUsage()
+    {
+        PROCESS_MEMORY_COUNTERS counters;
+        if (GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters)) == 0)
+            return std::nullopt;
+        return counters.PeakWorkingSetSize;
+    }
 }
 
 #elif defined(__linux__)
 
 #include <fstream>
+#include <sys/resource.h>
 #include <unistd.h>
 
 namespace sgbust
@@ -38,6 +47,15 @@ namespace sgbust
 
         return resident * pageSize;
     }
+
+    std::optional<std::size_t> GetPeakMemoryUsage()
+    {
+        rusage usage;
+        if (getrusage(RUSAGE_SELF, &usage) != 0)
+            return std::nullopt;
+
+        return static_cast<std::size_t>(usage.ru_maxrss) * 1024;
+    }
 }
 
 #else
@@ -45,6 +63,11 @@ namespace sgbust
 namespace sgbust
 {
     std::optional<std::size_t> GetCurrentMemoryUsage()
+    {
+        return std::nullopt;
+    }
+
+    std::optional<std::size_t> GetPeakMemoryUsage()
     {
         return std::nullopt;
     }

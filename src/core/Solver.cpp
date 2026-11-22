@@ -122,6 +122,8 @@ namespace sgbust
         std::optional<std::size_t> memoryUsage = GetCurrentMemoryUsage();
         if (memoryUsage.has_value())
             output += std::format(", memory: {}MB", (*memoryUsage / 1024 / 1024));
+        else
+            output += ", memory: ?";
 
         std::println("{}", output);
     }
@@ -166,6 +168,8 @@ namespace sgbust
         std::optional<std::size_t> memoryUsage = GetCurrentMemoryUsage();
         if (memoryUsage.has_value())
             output += std::format(", memory: {}MB", (*memoryUsage / 1024 / 1024));
+        else
+            output += ", memory: ?";
 
 		output += std::format(" ({:.1f}%)", progress);
 

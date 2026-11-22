@@ -16,6 +16,7 @@
 #include "CLI/CLI.hpp"
 #include "cli/parser.h"
 #include "core/Grid.h"
+#include "core/MemoryUsage.h"
 #include "core/Solver.h"
 
 namespace sgbust::cli
@@ -51,6 +52,13 @@ namespace sgbust::cli
         {
             std::println();
             std::println("Elapsed: {:%T}", elapsedMilliseconds);
+
+            auto peakMemoryUsage = sgbust::GetPeakMemoryUsage();
+            if (peakMemoryUsage.has_value())
+                std::println("Peak memory: {}MB", (*peakMemoryUsage / 1024 / 1024));
+            else
+                std::println("Peak memory: ?");
+
             if (solverResult.has_value())
             {
                 std::println("Best solution (score: {}, blocks: {}, steps: {}): {}",
@@ -173,11 +181,12 @@ namespace sgbust::cli
 
         auto printStats = [&]() {
             if (lastStatsPrinted.has_value())
-                std::print("\x1B[5F"); // move cursor to the beginning of the line five lines up
+                std::print("\x1B[6F"); // move cursor to the beginning of the line six lines up
 
             auto elapsed = std::chrono::steady_clock::now() - startTime;
             auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
             double elapsedSeconds = std::chrono::duration_cast<std::chrono::duration<double>>(elapsed).count();
+            auto peakMemoryUsage = sgbust::GetPeakMemoryUsage();
             auto zeroIfNaN = [](auto x) { return std::isnan(x) ? 0 : x; };
             double gridsPerSecond = zeroIfNaN(gridsSolved / elapsedSeconds);
             double secondsPerGrid = zeroIfNaN(elapsedSeconds / gridsSolved);
@@ -186,6 +195,10 @@ namespace sgbust::cli
             double averageBlocksRemaining = zeroIfNaN(static_cast<double>(blocksRemainingSum) / gridsSolved);
 
             std::println("Elapsed: {:%T}\x1B[K", elapsedMilliseconds);
+            if (peakMemoryUsage.has_value())
+                std::println("Peak memory: {}MB\x1B[K", (*peakMemoryUsage / 1024 / 1024));
+            else
+                std::println("Peak memory: ?\x1B[K");
             std::println("Grids solved: {}\x1B[K", gridsSolved);
             std::println("Grids cleared: {} ({:.2f}%)\x1B[K", gridsCleared, gridsClearedPercent);
             std::println("Average score: {:.2f}\x1B[K", averageScore);
