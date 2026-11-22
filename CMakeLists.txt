@@ -36,7 +36,7 @@ target_link_libraries(sgbust PRIVATE CLI11::CLI11)
 find_package(mimalloc CONFIG REQUIRED)
 target_link_libraries(sgbust PRIVATE mimalloc)
 
-find_package(nlohmann-json CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(sgbust PRIVATE nlohmann_json::nlohmann_json)
 
 find_path(PARALLEL_HASHMAP_INCLUDE_DIRS "parallel_hashmap/phmap.h" REQUIRED)
