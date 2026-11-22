@@ -85,6 +85,7 @@ namespace sgbust
 
     private:
         static void GetAdjacentBlocksRecursive(BlocksSpan blocks, Group& group, unsigned char x, unsigned char y);
+        void ShrinkToFit(unsigned char newWidth, unsigned char newHeight);
     };
 
     template <typename Generator>

@@ -255,21 +255,26 @@ namespace sgbust
         int newHeight = Height - std::distance(BlocksBegin(), firstBlock) / Width;
 
         if (newWidth != Width || newHeight != Height)
-        {
-            std::unique_ptr<Block[]> newBlocks = std::make_unique_for_overwrite<Block[]>(newWidth * newHeight);
-            BlocksSpan newBlocksView(newBlocks.get(), newWidth, newHeight);
+            ShrinkToFit(newWidth, newHeight);
+    }
 
-            if (newWidth != Width)
-                for (int y = 0; y < newHeight; y++)
-                    for (int x = 0; x < newWidth; x++)
-                        newBlocksView[x, y] = blocks[x, (Height - newHeight) + y];
-            else
-                std::copy(&blocks[0, Height - newHeight], BlocksEnd(), newBlocks.get());
+    void Grid::ShrinkToFit(unsigned char newWidth, unsigned char newHeight)
+    {
+        auto blocks = BlocksView();
 
-            Width = newWidth;
-            Height = newHeight;
-            Blocks = std::move(newBlocks);
-        }
+        std::unique_ptr<Block[]> newBlocks = std::make_unique_for_overwrite<Block[]>(newWidth * newHeight);
+        BlocksSpan newBlocksView(newBlocks.get(), newWidth, newHeight);
+
+        if (newWidth != Width)
+            for (int y = 0; y < newHeight; y++)
+                for (int x = 0; x < newWidth; x++)
+                    newBlocksView[x, y] = blocks[x, (Height - newHeight) + y];
+        else
+            std::copy(&blocks[0, Height - newHeight], BlocksEnd(), newBlocks.get());
+
+        Width = newWidth;
+        Height = newHeight;
+        Blocks = std::move(newBlocks);
     }
 
     unsigned int Grid::GetNumberOfBlocks() const
