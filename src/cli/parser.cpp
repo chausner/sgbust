@@ -147,6 +147,7 @@ namespace sgbust::cli
         solveCommand->add_flag("!--no-trim", solveCliOptions.TrimmingEnabled, "Disable beam trimming");
         solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor");
         solveCommand->add_flag("-q,--quiet", solveCliOptions.Quiet, "Quiet mode");
+        solveCommand->add_flag("--json", solveCliOptions.Json, "Output results in JSON format");
         solveCommand->callback([&] {
             ValidateAndSetScoring(solveCliOptions.ScoringOptions);
 

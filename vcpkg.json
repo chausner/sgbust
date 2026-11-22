@@ -4,6 +4,7 @@
   "dependencies": [
     "cli11",
     "mimalloc",
+    "nlohmann-json",
     "parallel-hashmap",
     {
       "name": "tbb",

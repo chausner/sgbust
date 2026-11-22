@@ -38,6 +38,7 @@ namespace sgbust::cli
         bool TrimmingEnabled = true;
         double TrimmingSafetyFactor = 1.25;
         bool Quiet = false;
+        bool Json = false;
     };
 
     struct GenerateCLIOptions

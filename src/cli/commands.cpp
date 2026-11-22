@@ -18,6 +18,7 @@
 #include "core/Grid.h"
 #include "core/MemoryUsage.h"
 #include "core/Solver.h"
+#include "nlohmann/json.hpp"
 
 namespace sgbust::cli
 {
@@ -29,7 +30,7 @@ namespace sgbust::cli
         sgbust::Grid grid(file, minGroupSize);
         file.close();
 
-        if (!cliOptions.Quiet)
+        if (!cliOptions.Quiet && !cliOptions.Json)
             grid.Print();
 
         sgbust::Solver solver;
@@ -39,7 +40,7 @@ namespace sgbust::cli
         solver.ClearingSolutionsOnly = cliOptions.ClearingSolutionsOnly;
         solver.TrimmingEnabled = cliOptions.TrimmingEnabled;
         solver.TrimmingSafetyFactor = cliOptions.TrimmingSafetyFactor;
-        solver.Quiet = cliOptions.Quiet;
+        solver.Quiet = cliOptions.Quiet || cliOptions.Json;
 
         auto startTime = std::chrono::steady_clock::now();
 
@@ -47,13 +48,13 @@ namespace sgbust::cli
 
         auto elapsed = std::chrono::steady_clock::now() - startTime;
         auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+        auto peakMemoryUsage = sgbust::GetPeakMemoryUsage();
 
-        if (!cliOptions.Quiet)
+        if (!cliOptions.Quiet && !cliOptions.Json)
         {
             std::println();
             std::println("Elapsed: {:%T}", elapsedMilliseconds);
 
-            auto peakMemoryUsage = sgbust::GetPeakMemoryUsage();
             if (peakMemoryUsage.has_value())
                 std::println("Peak memory: {}MB", (*peakMemoryUsage / 1024 / 1024));
             else
@@ -70,6 +71,21 @@ namespace sgbust::cli
             }
             else
                 std::println("No solution found.");
+        }
+        else if (cliOptions.Json)
+        {
+            nlohmann::json json = {
+                { "elapsedMs", elapsedMilliseconds.count() },
+                { "peakMemoryMB", peakMemoryUsage.transform([](auto value) { return value / 1024 / 1024; }) },
+                { "bestSolution", solverResult.transform([](const auto& result) { return nlohmann::json{
+                    { "score", result.BestScore },
+                    { "blocks", result.SolutionGrid.GetNumberOfBlocks() },
+                    { "steps", result.BestSolution.GetLength() },
+                    { "solution", result.BestSolution.AsString() }
+                }; }) }
+            };
+
+            std::println("{}", json.dump(4));
         }
     }
 
