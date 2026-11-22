@@ -10,6 +10,7 @@
 #include <optional>
 #include <print>
 #include <random>
+#include <ranges>
 #include <stdexcept>
 #include <unordered_set>
 
@@ -97,7 +98,7 @@ namespace sgbust::cli
         {
             std::random_device rand;
             std::array<std::seed_seq::result_type, decltype(mt)::state_size> seedData;
-            std::generate(seedData.begin(), seedData.end(), std::ref(rand));
+            std::ranges::generate(seedData, std::ref(rand));
             std::seed_seq seed(seedData.begin(), seedData.end());
             mt.seed(seed);
         }
@@ -125,9 +126,11 @@ namespace sgbust::cli
         sgbust::Grid grid(file, minGroupSize);
         file.close();
 
-        std::unordered_set<sgbust::Block> colors(grid.BlocksBegin(), grid.BlocksEnd());
-        colors.erase(sgbust::Block::None);
-        int numColors = colors.size();
+        unsigned int numColors = (
+            grid.BlocksRange()
+            | std::views::filter([](auto block) { return block != sgbust::Block::None; }) 
+            | std::ranges::to<std::unordered_set<sgbust::Block>>()
+            ).size();
 
         std::println("Size: {} x {}", static_cast<int>(grid.Width), static_cast<int>(grid.Height));
         std::println("Number of colors: {}", numColors);

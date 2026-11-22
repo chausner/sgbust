@@ -64,7 +64,7 @@ namespace sgbust
     {
         Blocks = std::make_unique_for_overwrite<Block[]>(Width * Height);
 
-        std::copy(grid.BlocksBegin(), grid.BlocksEnd(), BlocksBegin());
+        std::ranges::copy(grid.BlocksRange(), BlocksBegin());
     }
 
     Grid::Grid(Grid&& grid) noexcept
@@ -81,7 +81,7 @@ namespace sgbust
         Height = grid.Height;
         Solution = grid.Solution;
 
-        std::copy(grid.BlocksBegin(), grid.BlocksEnd(), BlocksBegin());
+        std::ranges::copy(grid.BlocksRange(), BlocksBegin());
 
         return *this;
     }
@@ -102,8 +102,8 @@ namespace sgbust
         stream << Width;
         stream << Height;
         stream << static_cast<unsigned char>(minGroupSize);
-        for (const Block* b = BlocksBegin(); b != BlocksEnd(); b++)
-            stream << static_cast<unsigned char>(*b);
+        for (Block block : BlocksRange())
+            stream << static_cast<unsigned char>(block);
 
         if (stream.fail())
             throw std::runtime_error("Could not save Grid to stream");
@@ -134,8 +134,8 @@ namespace sgbust
                         groups.emplace_back(adjacentBlocks);                    
                 }
 
-        for (auto it = const_cast<Grid*>(this)->BlocksBegin(), end = const_cast<Grid*>(this)->BlocksEnd(); it != end; it++)
-            reinterpret_cast<char&>(*it) &= ~BlockVisited;
+        for (Block& block : const_cast<Grid*>(this)->BlocksRange())
+            reinterpret_cast<char&>(block) &= ~BlockVisited;
     }
 
     bool Grid::HasGroups(unsigned int minGroupSize) const
@@ -168,8 +168,8 @@ namespace sgbust
                 }
 
     exit:
-        for (auto it = const_cast<Grid*>(this)->BlocksBegin(), end = const_cast<Grid*>(this)->BlocksEnd(); it != end; it++)
-            reinterpret_cast<char&>(*it) &= ~BlockVisited;
+        for (Block& block : const_cast<Grid*>(this)->BlocksRange())
+            reinterpret_cast<char&>(block) &= ~BlockVisited;
 
         return hasGroups;
     }
@@ -251,7 +251,7 @@ namespace sgbust
             newWidth = xx;
         }
 
-        Block* firstBlock = std::find_if(BlocksBegin(), BlocksEnd(), [](auto b) { return b != Block::None; });
+        Block* firstBlock = std::ranges::find_if(BlocksRange(), [](auto b) { return b != Block::None; });
         int newHeight = Height - std::distance(BlocksBegin(), firstBlock) / Width;
 
         if (newWidth != Width || newHeight != Height)
@@ -274,25 +274,25 @@ namespace sgbust
 
     unsigned int Grid::GetNumberOfBlocks() const
     {
-        return std::count_if(BlocksBegin(), BlocksEnd(), [](auto c) { return c != Block::None; });
+        return std::ranges::count_if(BlocksRange(), [](auto c) { return c != Block::None; });
     }
 
     std::array<unsigned int, 8> Grid::GetColorCounts() const
     {
         std::array<unsigned int, 8> colorCounts{};
-        std::for_each(BlocksBegin(), BlocksEnd(), [&](Block c) {
-            colorCounts[static_cast<int>(c)]++;
-            });
+        for (Block block : BlocksRange())
+            colorCounts[static_cast<int>(block)]++;
         return colorCounts;
     }
 
     unsigned int Grid::GetNumberOfColors() const
     {
         std::array<unsigned int, 8> colorCounts{};
-        std::for_each(BlocksBegin(), BlocksEnd(), [&](Block c) {
-            colorCounts[static_cast<int>(c)]++;
-            });
-        return std::count_if(colorCounts.begin() + 1, colorCounts.end(), [](unsigned int count) { return count != 0; });
+        for (Block block : BlocksRange())
+            colorCounts[static_cast<int>(block)]++;
+        return std::ranges::count_if(
+            colorCounts | std::views::drop(1), 
+            [](unsigned int count) { return count != 0; });
     }
 
     void Grid::ApplySolution(const sgbust::Solution& solution, unsigned int minGroupSize)
@@ -312,7 +312,7 @@ namespace sgbust
 
     bool Grid::IsEmpty() const
     {
-        return std::all_of(BlocksBegin(), BlocksEnd(), [](auto c) { return c == Block::None; });
+        return std::ranges::all_of(BlocksRange(), [](auto c) { return c == Block::None; });
     }
 
     void Grid::Print(const Group* highlightedGroup) const

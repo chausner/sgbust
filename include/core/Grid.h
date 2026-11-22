@@ -6,6 +6,7 @@
 #include <mdspan>
 #include <memory>
 #include <random>
+#include <ranges>
 #include <stdexcept>
 #include <ostream>
 #include <vector>
@@ -77,6 +78,8 @@ namespace sgbust
         bool IsEmpty() const;
         BlocksSpan BlocksView() { return BlocksSpan(Blocks.get(), Width, Height); }
         ConstBlocksSpan BlocksView() const { return ConstBlocksSpan(Blocks.get(), Width, Height); }
+        std::ranges::subrange<Block*> BlocksRange() { return std::ranges::subrange<Block*>(BlocksBegin(), BlocksEnd()); }
+        std::ranges::subrange<const Block*> BlocksRange() const { return std::ranges::subrange<const Block*>(BlocksBegin(), BlocksEnd()); }
 
         void Print(const Group* highlightedGroup = nullptr) const;
 
@@ -92,7 +95,7 @@ namespace sgbust
 
         Grid grid(width, height);
         std::uniform_int_distribution<> dist(1, numColors);
-        std::generate(grid.BlocksBegin(), grid.BlocksEnd(), [&] {
+        std::ranges::generate(grid.BlocksRange(), [&] {
             return static_cast<Block>(dist(generator));
             });
 
