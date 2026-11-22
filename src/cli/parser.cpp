@@ -85,7 +85,7 @@ namespace sgbust::cli
     {
         sgbust::LeftoverPenaltyFunc leftoverPenalty;
         if (scoringOptions.ScoringLeftoverPenalty.has_value())
-            leftoverPenalty = std::bind_front(&sgbust::Polynom::Evaluate, *scoringOptions.ScoringLeftoverPenalty);
+            leftoverPenalty = std::bind_front(&sgbust::Polynomial::Evaluate, *scoringOptions.ScoringLeftoverPenalty);
         else
             leftoverPenalty = nullptr;
 
@@ -95,7 +95,7 @@ namespace sgbust::cli
             if (!scoringOptions.ScoringGroupScore.has_value())
                 throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'greedy'", CLI::ExitCodes::ExcludesError);
             scoringOptions.Scoring = std::make_unique<sgbust::GreedyScoring>(
-                std::bind_front(&sgbust::Polynom::Evaluate, *scoringOptions.ScoringGroupScore),
+                std::bind_front(&sgbust::Polynomial::Evaluate, *scoringOptions.ScoringGroupScore),
                 scoringOptions.ScoringClearanceBonus.value_or(0),
                 std::move(leftoverPenalty)
             );
@@ -104,7 +104,7 @@ namespace sgbust::cli
             if (!scoringOptions.ScoringGroupScore.has_value())
                 throw CLI::ExcludesError("--scoring-group-score must be specified for scoring type 'potential'", CLI::ExitCodes::ExcludesError);
             scoringOptions.Scoring = std::make_unique<sgbust::PotentialScoring>(
-                std::bind_front(&sgbust::Polynom::Evaluate, *scoringOptions.ScoringGroupScore),
+                std::bind_front(&sgbust::Polynomial::Evaluate, *scoringOptions.ScoringGroupScore),
                 scoringOptions.ScoringClearanceBonus.value_or(0),
                 std::move(leftoverPenalty)
             );

@@ -156,7 +156,7 @@
     <ClCompile Include="src\core\CompactGrid.cpp" />
     <ClCompile Include="src\core\Grid.cpp" />
     <ClCompile Include="src\core\MemoryUsage.cpp" />
-    <ClCompile Include="src\core\Polynom.cpp" />
+    <ClCompile Include="src\core\Polynomial.cpp" />
     <ClCompile Include="src\core\scorings\GreedyScoring.cpp" />
     <ClCompile Include="src\core\scorings\NumBlocksNotInGroupsScoring.cpp" />
     <ClCompile Include="src\core\scorings\PotentialScoring.cpp" />
@@ -171,7 +171,7 @@
     <ClInclude Include="include\core\CompactGrid.h" />
     <ClInclude Include="include\core\Grid.h" />
     <ClInclude Include="include\core\MemoryUsage.h" />
-    <ClInclude Include="include\core\Polynom.h" />
+    <ClInclude Include="include\core\Polynomial.h" />
     <ClInclude Include="include\core\Scoring.h" />
     <ClInclude Include="include\core\scorings\GreedyScoring.h" />
     <ClInclude Include="include\core\scorings\NumBlocksNotInGroupsScoring.h" />

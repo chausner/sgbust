@@ -1,4 +1,4 @@
-#include "core/Polynom.h"
+#include "core/Polynomial.h"
 
 #include <algorithm>
 #include <cmath>
@@ -9,11 +9,11 @@
 
 namespace sgbust
 {
-    Polynom::Polynom(std::initializer_list<int> coefficients) : coefficients(coefficients)
+    Polynomial::Polynomial(std::initializer_list<int> coefficients) : coefficients(coefficients)
     {
     }
 
-    Polynom::Polynom(std::string_view str)
+    Polynomial::Polynomial(std::string_view str)
     {
         static const std::regex regex("^([+-]?[0-9]*)(n(\\^([0-9]+))?)?");
 
@@ -21,7 +21,7 @@ namespace sgbust
         {
             std::cmatch matches;
             if (!std::regex_search(str.data(), str.data() + str.length(), matches, regex) || matches.length() == 0 || matches.size() != 5)
-                throw std::invalid_argument("Not a valid polynom");
+                throw std::invalid_argument("Not a valid polynomial");
 
             int coefficient;
             if (matches[1].length() == 0)
@@ -48,28 +48,28 @@ namespace sgbust
         }
     }
 
-    Polynom::Polynom(const Polynom& other) : coefficients(other.coefficients)
+    Polynomial::Polynomial(const Polynomial& other) : coefficients(other.coefficients)
     {
     }
 
-    Polynom::Polynom(Polynom&& other) noexcept : coefficients(std::move(other.coefficients))
+    Polynomial::Polynomial(Polynomial&& other) noexcept : coefficients(std::move(other.coefficients))
     {
 
     }
 
-    Polynom& Polynom::operator=(const Polynom& other)
+    Polynomial& Polynomial::operator=(const Polynomial& other)
     {
         coefficients = other.coefficients;
         return *this;
     }
 
-    Polynom& Polynom::operator=(Polynom&& other) noexcept
+    Polynomial& Polynomial::operator=(Polynomial&& other) noexcept
     {
         coefficients = std::move(other.coefficients);
         return *this;
     }
 
-    int Polynom::Evaluate(int n) const
+    int Polynomial::Evaluate(int n) const
     {
         switch (coefficients.size())
         {
@@ -95,7 +95,7 @@ namespace sgbust
         }
     }
 
-    std::string Polynom::AsString() const
+    std::string Polynomial::AsString() const
     {
         if (std::ranges::all_of(coefficients, [](int c) { return c == 0; }))
             return "0";

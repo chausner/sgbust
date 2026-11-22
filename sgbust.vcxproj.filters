@@ -33,7 +33,7 @@
     <ClCompile Include="src\core\MemoryUsage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\Polynom.cpp">
+    <ClCompile Include="src\core\Polynomial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\Solution.cpp">
@@ -74,7 +74,7 @@
     <ClInclude Include="include\core\MemoryUsage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\core\Polynom.h">
+    <ClInclude Include="include\core\Polynomial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\core\Scoring.h">

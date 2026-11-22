@@ -6,7 +6,7 @@
 #include <string>
 #include <variant>
 
-#include "core/Polynom.h"
+#include "core/Polynomial.h"
 #include "core/Scoring.h"
 
 namespace sgbust::cli
@@ -21,9 +21,9 @@ namespace sgbust::cli
     struct ScoringOptions
     {
         cli::ScoringType ScoringType = ScoringType::Greedy;
-        std::optional<sgbust::Polynom> ScoringGroupScore;
+        std::optional<sgbust::Polynomial> ScoringGroupScore;
         std::optional<int> ScoringClearanceBonus;
-        std::optional<sgbust::Polynom> ScoringLeftoverPenalty;
+        std::optional<sgbust::Polynomial> ScoringLeftoverPenalty;
         std::unique_ptr<sgbust::Scoring> Scoring;
     };
 

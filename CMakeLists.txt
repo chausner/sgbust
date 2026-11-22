@@ -13,7 +13,7 @@ target_sources(sgbust PRIVATE
             src/core/CompactGrid.cpp
             src/core/Grid.cpp
             src/core/MemoryUsage.cpp
-            src/core/Polynom.cpp
+            src/core/Polynomial.cpp
             src/core/scorings/GreedyScoring.cpp
             src/core/scorings/NumBlocksNotInGroupsScoring.cpp
             src/core/scorings/PotentialScoring.cpp
@@ -29,7 +29,7 @@ target_sources(sgbust PRIVATE
             include/core/CompactGrid.h
             include/core/Grid.h
             include/core/MemoryUsage.h
-            include/core/Polynom.h
+            include/core/Polynomial.h
             include/core/Scoring.h
             include/core/scorings/GreedyScoring.h
             include/core/scorings/NumBlocksNotInGroupsScoring.h
