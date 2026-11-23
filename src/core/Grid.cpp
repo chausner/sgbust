@@ -24,7 +24,7 @@ namespace sgbust
     Grid::Grid(unsigned char width, unsigned char height, const Block* blocks, sgbust::Solution solution)
         : Width(width), Height(height), Blocks(std::make_unique_for_overwrite<Block[]>(width* height)), Solution(std::move(solution))
     {
-        std::copy(blocks, blocks + Width * Height, BlocksBegin());
+        std::copy_n(blocks, Width * Height, BlocksBegin());
     }
 
     Grid::Grid(std::istream& stream, unsigned int& minGroupSize)

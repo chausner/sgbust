@@ -11,7 +11,7 @@ namespace sgbust
     CompactGrid::CompactGrid(const CompactGrid& grid) : Width(grid.Width), Height(grid.Height), Solution(grid.Solution)
     {
         Data = std::make_unique_for_overwrite<std::byte[]>(grid.DataLength());
-        std::copy(grid.Data.get(), grid.Data.get() + grid.DataLength(), Data.get());
+        std::copy_n(grid.Data.get(), grid.DataLength(), Data.get());
     }
 
     CompactGrid::CompactGrid(CompactGrid&& grid) noexcept : Width(grid.Width), Height(grid.Height), Data(std::move(grid.Data)), Solution(std::move(grid.Solution))
@@ -33,7 +33,7 @@ namespace sgbust
         Width = grid.Width;
         Height = grid.Height;
         Data = std::make_unique_for_overwrite<std::byte[]>(grid.DataLength());
-        std::copy(grid.Data.get(), grid.Data.get() + grid.DataLength(), Data.get());
+        std::copy_n(grid.Data.get(), grid.DataLength(), Data.get());
         Solution = grid.Solution;
         return *this;
     }

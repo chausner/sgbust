@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <ranges>
 #include <stdexcept>
 
 namespace sgbust
@@ -36,7 +37,7 @@ namespace sgbust
         }
 
         this->steps = std::make_unique_for_overwrite<unsigned char[]>(steps.size() + 1);
-        std::copy(steps.begin(), steps.end(), this->steps.get());
+        std::ranges::copy(steps, this->steps.get());
         this->steps.get()[steps.size()] = 0xFF;
     }
 
@@ -46,7 +47,7 @@ namespace sgbust
         {
             int length = solution.GetLength();
             steps = std::make_unique_for_overwrite<unsigned char[]>(length + 1);
-            std::copy(solution.steps.get(), solution.steps.get() + length + 1, steps.get());
+            std::copy_n(solution.steps.get(), length + 1, steps.get());
         }
     }
 
@@ -56,7 +57,7 @@ namespace sgbust
         {
             int length = solution.GetLength();
             steps = std::make_unique_for_overwrite<unsigned char[]>(length + 1);
-            std::copy(solution.steps.get(), solution.steps.get() + length + 1, steps.get());
+            std::copy_n(solution.steps.get(), length + 1, steps.get());
         }
         else
             steps = nullptr;
@@ -72,7 +73,7 @@ namespace sgbust
         {
             int length = GetLength();
             result.steps = std::make_unique_for_overwrite<unsigned char[]>(length + 2);
-            std::copy(steps.get(), steps.get() + length, result.steps.get());
+            std::copy_n(steps.get(), length, result.steps.get());
             result.steps[length] = step;
             result.steps[length + 1] = 0xFF;
         }
@@ -98,8 +99,8 @@ namespace sgbust
             unsigned int length1 = GetLength();
             unsigned int length2 = solution.GetLength();
             result.steps = std::make_unique_for_overwrite<unsigned char[]>(length1 + length2 + 1);
-            std::copy(steps.get(), steps.get() + length1, result.steps.get());
-            std::copy(solution.steps.get(), solution.steps.get() + length2, result.steps.get() + length1);
+            std::copy_n(steps.get(), length1, result.steps.get());
+            std::copy_n(solution.steps.get(), length2, result.steps.get() + length1);
             result.steps[length1 + length2] = 0xFF;
             return result;
         }
