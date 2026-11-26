@@ -56,7 +56,11 @@ namespace sgbust::cli
 
         auto startTime = std::chrono::steady_clock::now();
 
-        std::optional<sgbust::SolverResult> solverResult = solver.Solve(grid, minGroupSize, *cliOptions.ScoringOptions.Scoring, sgbust::Solution(cliOptions.SolutionPrefix));
+        std::optional<sgbust::SolverResult> solverResult = solver.Solve(
+            grid, 
+            minGroupSize, 
+            *cliOptions.ScoringOptions.Scoring, 
+            sgbust::Solution(cliOptions.SolutionPrefix));
 
         auto elapsed = std::chrono::steady_clock::now() - startTime;
         auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
