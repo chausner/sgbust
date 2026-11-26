@@ -292,11 +292,8 @@ namespace sgbust
 
     unsigned int Grid::GetNumberOfColors() const
     {
-        std::array<unsigned int, 8> colorCounts{};
-        for (Block block : BlocksRange())
-            colorCounts[static_cast<int>(block)]++;
         return std::ranges::count_if(
-            colorCounts | std::views::drop(1), 
+            GetColorCounts() | std::views::drop(1),
             [](unsigned int count) { return count != 0; });
     }
 
