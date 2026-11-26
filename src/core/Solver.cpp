@@ -60,7 +60,7 @@ namespace sgbust
         bestScore = std::nullopt;
         solutionGrid = std::nullopt;
         beamSize = 1;
-		gridsDiscarded = 0;
+        gridsDiscarded = 0;
         multiplier = 0;
 
         bool stop = false;
@@ -113,7 +113,7 @@ namespace sgbust
             depth,
             beamSize,
             grids.size(),
-			gridsDiscarded,
+            gridsDiscarded,
             curMinScore,
             curAvgScore,
             curMaxScore
@@ -171,7 +171,7 @@ namespace sgbust
         else
             output += ", memory: ?";
 
-		output += std::format(" ({:.1f}%)", progress);
+        output += std::format(" ({:.1f}%)", progress);
 
         ClearProgress(progressLength);
         progressLength = output.size();
@@ -205,12 +205,12 @@ namespace sgbust
 
         std::atomic_uint gridsSolved = 0;
         std::atomic_uint newBeamSize = 0;
-	    std::atomic_uint totalDiscarded = 0;
+        std::atomic_uint totalDiscarded = 0;
 
         std::optional<std::jthread> reporter;
 
         if (!Quiet)
-			reporter.emplace([&](std::stop_token stopToken) {
+            reporter.emplace([&](std::stop_token stopToken) {
                 unsigned int progressLength = 0;
                 std::mutex reporterMutex;
                 std::condition_variable reporterCv;
@@ -247,7 +247,7 @@ namespace sgbust
                 auto [added, discarded] = SolveGrid(grid.Expand(), score, newGrids, stop);
 
                 newBeamSize += added;
-			    totalDiscarded += discarded;
+                totalDiscarded += discarded;
                 gridsSolved++;
 
                 // overall, deallocation is faster if we deallocate the data inside CompactGrids here already
@@ -271,7 +271,7 @@ namespace sgbust
 
         grids = std::move(newGrids);
         beamSize = newBeamSize;
-		gridsDiscarded = totalDiscarded;
+        gridsDiscarded = totalDiscarded;
     }
 
     std::tuple<unsigned int, unsigned int> Solver::SolveGrid(const Grid& grid, Score score, std::map<Score, GridHashSet>& newGrids, bool& stop)
@@ -280,7 +280,7 @@ namespace sgbust
         grid.GetGroups(groups, minGroupSize);
 
         unsigned int numNewGridsInserted = 0;
-	    unsigned int numNewGridsDiscarded = 0;
+        unsigned int numNewGridsDiscarded = 0;
 
         auto getOrCreateHashSet = [&](const Score& score) -> GridHashSet& {
             {
@@ -342,7 +342,7 @@ namespace sgbust
         if (!stop && (!bestScore.has_value() || score.Value < *bestScore))
         {
             if (ClearingSolutionsOnly && !grid.IsEmpty())
-				return;
+                return;
 
             std::scoped_lock lock(mutex);
 

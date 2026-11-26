@@ -364,7 +364,7 @@ namespace sgbust
 
                 if (highlightedGroup != nullptr && std::ranges::find(*highlightedGroup, Position(x, y)) != highlightedGroup->end())
                     output << "\x1B[30;1m" << colorCode << "[]";
-				else
+                else
                     output << colorCode << "  ";
             }
 
