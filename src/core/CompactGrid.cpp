@@ -4,26 +4,41 @@
 
 namespace sgbust
 {
-    CompactGrid::CompactGrid() : Width(0), Height(0)
+    CompactGrid::CompactGrid() : 
+        Width(0), 
+        Height(0)
     {
     }
 
-    CompactGrid::CompactGrid(const CompactGrid& grid) : Width(grid.Width), Height(grid.Height), Solution(grid.Solution)
+    CompactGrid::CompactGrid(const CompactGrid& grid) : 
+        Width(grid.Width), 
+        Height(grid.Height), 
+        Solution(grid.Solution)
     {
         Data = std::make_unique_for_overwrite<std::byte[]>(grid.DataLength());
         std::copy_n(grid.Data.get(), grid.DataLength(), Data.get());
     }
 
-    CompactGrid::CompactGrid(CompactGrid&& grid) noexcept : Width(grid.Width), Height(grid.Height), Data(std::move(grid.Data)), Solution(std::move(grid.Solution))
+    CompactGrid::CompactGrid(CompactGrid&& grid) noexcept : 
+        Width(grid.Width), 
+        Height(grid.Height), 
+        Data(std::move(grid.Data)), 
+        Solution(std::move(grid.Solution))
     {
     }
 
-    CompactGrid::CompactGrid(const Grid& grid) : Width(grid.Width), Height(grid.Height), Solution(grid.Solution)
+    CompactGrid::CompactGrid(const Grid& grid) : 
+        Width(grid.Width), 
+        Height(grid.Height), 
+        Solution(grid.Solution)
     {
         Compact(grid);
     }
 
-    CompactGrid::CompactGrid(Grid&& grid) : Width(grid.Width), Height(grid.Height), Solution(std::move(grid.Solution))
+    CompactGrid::CompactGrid(Grid&& grid) : 
+        Width(grid.Width), 
+        Height(grid.Height), 
+        Solution(std::move(grid.Solution))
     {
         Compact(grid);
     }

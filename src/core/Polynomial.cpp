@@ -9,7 +9,8 @@
 
 namespace sgbust
 {
-    Polynomial::Polynomial(std::initializer_list<int> coefficients) : coefficients(coefficients)
+    Polynomial::Polynomial(std::initializer_list<int> coefficients) : 
+        coefficients(coefficients)
     {
     }
 
@@ -48,13 +49,14 @@ namespace sgbust
         }
     }
 
-    Polynomial::Polynomial(const Polynomial& other) : coefficients(other.coefficients)
+    Polynomial::Polynomial(const Polynomial& other) : 
+        coefficients(other.coefficients)
     {
     }
 
-    Polynomial::Polynomial(Polynomial&& other) noexcept : coefficients(std::move(other.coefficients))
+    Polynomial::Polynomial(Polynomial&& other) noexcept : 
+        coefficients(std::move(other.coefficients))
     {
-
     }
 
     Polynomial& Polynomial::operator=(const Polynomial& other)

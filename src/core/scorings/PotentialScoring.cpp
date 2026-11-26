@@ -6,8 +6,12 @@
 
 namespace sgbust
 {
-    PotentialScoring::PotentialScoring(GroupSizeFunc groupScore, int clearanceBonus, LeftoverPenaltyFunc leftoverPenalty)
-        : groupScore(std::move(groupScore)), clearanceBonus(clearanceBonus), leftoverPenalty(std::move(leftoverPenalty)) {}
+    PotentialScoring::PotentialScoring(GroupSizeFunc groupScore, int clearanceBonus, LeftoverPenaltyFunc leftoverPenalty) : 
+        groupScore(std::move(groupScore)), 
+        clearanceBonus(clearanceBonus), 
+        leftoverPenalty(std::move(leftoverPenalty))
+    {
+    }
 
     Score PotentialScoring::CreateScore(const Grid& grid, unsigned int minGroupSize) const
     {

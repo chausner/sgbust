@@ -4,8 +4,12 @@
 
 namespace sgbust
 {
-    GreedyScoring::GreedyScoring(GroupSizeFunc groupScore, int clearanceBonus, LeftoverPenaltyFunc leftoverPenalty)
-        : groupScore(std::move(groupScore)), clearanceBonus(clearanceBonus), leftoverPenalty(std::move(leftoverPenalty)) {}
+    GreedyScoring::GreedyScoring(GroupSizeFunc groupScore, int clearanceBonus, LeftoverPenaltyFunc leftoverPenalty) : 
+        groupScore(std::move(groupScore)), 
+        clearanceBonus(clearanceBonus), 
+        leftoverPenalty(std::move(leftoverPenalty))
+    {
+    }
 
     Score GreedyScoring::CreateScore(const Grid& grid, unsigned int minGroupSize) const
     {

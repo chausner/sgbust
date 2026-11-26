@@ -17,12 +17,18 @@ namespace
 
 namespace sgbust
 {
-    Grid::Grid(unsigned char width, unsigned char height) : Width(width), Height(height), Blocks(std::make_unique<Block[]>(width* height))
+    Grid::Grid(unsigned char width, unsigned char height) : 
+        Width(width), 
+        Height(height), 
+        Blocks(std::make_unique<Block[]>(width * height))
     {
     }
 
-    Grid::Grid(unsigned char width, unsigned char height, const Block* blocks, sgbust::Solution solution)
-        : Width(width), Height(height), Blocks(std::make_unique_for_overwrite<Block[]>(width* height)), Solution(std::move(solution))
+    Grid::Grid(unsigned char width, unsigned char height, const Block* blocks, sgbust::Solution solution) : 
+        Width(width), 
+        Height(height), 
+        Blocks(std::make_unique_for_overwrite<Block[]>(width * height)), 
+        Solution(std::move(solution))
     {
         std::copy_n(blocks, Width * Height, BlocksBegin());
     }
@@ -59,16 +65,21 @@ namespace sgbust
             throw std::runtime_error("Could not read stream.");
     }
 
-    Grid::Grid(const Grid& grid)
-        : Width(grid.Width), Height(grid.Height), Solution(grid.Solution)
+    Grid::Grid(const Grid& grid) : 
+        Width(grid.Width), 
+        Height(grid.Height), 
+        Solution(grid.Solution)
     {
         Blocks = std::make_unique_for_overwrite<Block[]>(Width * Height);
 
         std::ranges::copy(grid.BlocksRange(), BlocksBegin());
     }
 
-    Grid::Grid(Grid&& grid) noexcept
-        : Width(grid.Width), Height(grid.Height), Blocks(std::move(grid.Blocks)), Solution(std::move(grid.Solution))
+    Grid::Grid(Grid&& grid) noexcept : 
+        Width(grid.Width), 
+        Height(grid.Height), 
+        Blocks(std::move(grid.Blocks)), 
+        Solution(std::move(grid.Solution))
     {
     }
 

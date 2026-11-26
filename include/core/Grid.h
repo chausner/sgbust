@@ -33,7 +33,7 @@ namespace sgbust
         unsigned char Y;
 
         Position() {}
-        Position(unsigned char x, unsigned char y) : X(x), Y(y) { }
+        Position(unsigned char x, unsigned char y) : X(x), Y(y) {}
 
         bool operator==(const Position& other) const = default;
     };
