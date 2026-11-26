@@ -12,7 +12,6 @@
 #include <random>
 #include <ranges>
 #include <stdexcept>
-#include <unordered_set>
 
 #include "CLI/CLI.hpp"
 #include "cli/parser.h"
@@ -23,6 +22,15 @@
 
 namespace sgbust::cli
 {
+    static void PrintGridInfo(const Grid& grid, unsigned int minGroupSize)
+    {
+        std::println("Size: {} x {}", static_cast<int>(grid.Width), static_cast<int>(grid.Height));
+        std::println("Number of colors: {}", grid.GetNumberOfColors());
+        std::println("Minimal group size: {}", minGroupSize);
+        std::println();
+        grid.Print();
+    }
+
     void RunCommand(const SolveCLIOptions& cliOptions)
     {
         unsigned int minGroupSize;
@@ -32,7 +40,10 @@ namespace sgbust::cli
         file.close();
 
         if (!cliOptions.Quiet && !cliOptions.Json)
-            grid.Print();
+        {
+            PrintGridInfo(grid, minGroupSize);
+            std::println();
+        }
 
         sgbust::Solver solver;
 
@@ -112,10 +123,7 @@ namespace sgbust::cli
         file.close();
 
         if (!cliOptions.Quiet)
-        {
-            grid.Print();
-            std::println();
-        }
+            PrintGridInfo(grid, cliOptions.MinGroupSize);
     }
 
     void RunCommand(const ShowCLIOptions& cliOptions)
@@ -126,17 +134,7 @@ namespace sgbust::cli
         sgbust::Grid grid(file, minGroupSize);
         file.close();
 
-        unsigned int numColors = (
-            grid.BlocksRange()
-            | std::views::filter([](auto block) { return block != sgbust::Block::None; }) 
-            | std::ranges::to<std::unordered_set<sgbust::Block>>()
-            ).size();
-
-        std::println("Size: {} x {}", static_cast<int>(grid.Width), static_cast<int>(grid.Height));
-        std::println("Number of colors: {}", numColors);
-        std::println("Minimal group size: {}", minGroupSize);
-        std::println();
-        grid.Print();
+        PrintGridInfo(grid, minGroupSize);
 
         if (!cliOptions.Solution.empty())
         {
