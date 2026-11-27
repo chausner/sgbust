@@ -1,7 +1,7 @@
 #include "core/Polynomial.h"
 
+#include <algorithm>
 #include <cmath>
-#include <ranges>
 #include <regex>
 #include <sstream>
 #include <stdexcept>
