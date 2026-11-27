@@ -1,7 +1,7 @@
 #include "core/Polynomial.h"
 
-#include <algorithm>
 #include <cmath>
+#include <ranges>
 #include <regex>
 #include <sstream>
 #include <stdexcept>
@@ -73,28 +73,7 @@ namespace sgbust
 
     int Polynomial::Evaluate(int n) const
     {
-        switch (coefficients.size())
-        {
-        case 0:
-            return 0;
-        case 1:
-            return coefficients[0];
-        case 2:
-            return coefficients[0] + coefficients[1] * n;
-        case 3:
-            return coefficients[0] + (coefficients[1] + coefficients[2] * n) * n;
-        case 4:
-            return coefficients[0] + (coefficients[1] + (coefficients[2] + coefficients[3] * n) * n) * n;
-        case 5:
-            return coefficients[0] + (coefficients[1] + (coefficients[2] + (coefficients[3] + coefficients[4] * n) * n) * n) * n;
-        default:
-            int result = 0;
-            for (int exponent = coefficients.size() - 1; exponent >= 0; exponent--)
-            {            
-                result = result * n + coefficients[exponent];
-            }
-            return result;
-        }
+        return std::ranges::fold_right(coefficients, 0, [n](int coeff, int result) { return result * n + coeff; });     
     }
 
     std::string Polynomial::AsString() const
