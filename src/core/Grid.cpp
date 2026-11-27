@@ -310,16 +310,14 @@ namespace sgbust
 
     void Grid::ApplySolution(const sgbust::Solution& solution, unsigned int minGroupSize)
     {
-        unsigned int length = solution.GetLength();
-
         std::vector<Group> groups;
         
-        for (unsigned int i = 0; i < length; i++)
+        for (unsigned char step : solution.Steps())
         {
             GetGroups(groups, minGroupSize);
-            if (solution[i] >= groups.size())
+            if (step >= groups.size())
                 throw std::runtime_error("Invalid solution");
-            RemoveGroup(groups[solution[i]]);
+            RemoveGroup(groups[step]);
         }
     }
 

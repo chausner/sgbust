@@ -27,10 +27,9 @@ namespace sgbust
 {
     void ApplySolution(Grid& grid, Score& score, unsigned int minGroupSize, const Solution& solution, const Scoring& scoring)
     {
-        for (unsigned int i = 0; i < solution.GetLength(); i++)
+        for (unsigned char step : solution.Steps())
         {
             Grid oldGrid = grid;
-            unsigned char step = solution[i];
             std::vector<Group> groups;
             grid.GetGroups(groups, minGroupSize);
             if (step >= groups.size())

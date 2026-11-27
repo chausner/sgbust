@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace sgbust
 {
@@ -19,7 +19,7 @@ namespace sgbust
         Solution Append(unsigned char step) const;
         Solution Append(const Solution& solution) const;
         std::string AsString() const;
-        std::vector<unsigned char> AsVector() const { return std::vector(steps.get(), steps.get() + GetLength()); }
+        std::span<const unsigned char> Steps() const { return std::span(steps.get(), steps.get() + GetLength()); }
         unsigned int GetLength() const;
         bool IsEmpty() const { return steps == nullptr; }
 
