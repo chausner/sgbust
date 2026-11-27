@@ -52,7 +52,7 @@ namespace sgbust
             ApplySolution(gridWithPrefix, initialScore, minGroupSize, solutionPrefix, scoring);
 
         grids.clear();
-        grids[initialScore].insert(CompactGrid(gridWithPrefix));
+        grids[initialScore].emplace(gridWithPrefix);
 
         origNumColors = gridWithPrefix.GetNumberOfColors();
         solution = Solution();
@@ -327,7 +327,7 @@ namespace sgbust
                     }
                 }
 
-                auto [it, inserted] = getOrCreateHashSet(newScore).insert(CompactGrid(std::move(newGrid)));
+                auto [it, inserted] = getOrCreateHashSet(newScore).emplace(std::move(newGrid));
                 if (inserted)
                     numNewGridsInserted++;
             }
