@@ -145,7 +145,7 @@ namespace sgbust::cli
         solveCommand->add_option("-d,--max-depth", solveCliOptions.MaxDepth, "Maximum search depth");
         solveCommand->add_flag("--clearing-only", solveCliOptions.ClearingSolutionsOnly, "Only report solutions that clear the grid. Can be combined with --max-depth to search for solutions that clear the grid within the specified number of steps.");
         solveCommand->add_flag("!--no-trim", solveCliOptions.TrimmingEnabled, "Disable beam trimming");
-        solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor");
+        solveCommand->add_option("--trimming-safety-factor", solveCliOptions.TrimmingSafetyFactor, "Trimming safety factor")->check(CLI::Range(1.0, std::numeric_limits<double>::max()));
         solveCommand->add_flag("-q,--quiet", solveCliOptions.Quiet, "Quiet mode");
         solveCommand->add_flag("--json", solveCliOptions.Json, "Output results in JSON format");
         solveCommand->callback([&] {
