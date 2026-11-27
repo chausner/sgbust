@@ -25,17 +25,19 @@ namespace sgbust
                 throw std::invalid_argument("Not a valid polynomial");
 
             int coefficient;
-            if (matches[1].length() == 0)
+            if (matches[1] == "")
                 coefficient = 1;
-            else if (matches[1].str() == "+" || matches[1].str() == "-")
-                coefficient = std::stoi(matches[1].str() + '1');
+            else if (matches[1] == "+")
+                coefficient = 1;
+            else if (matches[1] == "-")
+                coefficient = -1;
             else
-                coefficient = std::stoi(matches[1].str());
+                coefficient = std::stoi(matches[1]);
             
             int exponent;
             if (matches[2].matched)
                 if (matches[3].matched)
-                    exponent = std::stoi(matches[4].str());
+                    exponent = std::stoi(matches[4]);
                 else
                     exponent = 1;
             else
