@@ -47,7 +47,7 @@ namespace sgbust
                 coefficients.resize(exponent + 1, 0);
             coefficients[exponent] += coefficient;
 
-            str = str.substr(matches.length());
+            str.remove_prefix(matches.length());
         }
     }
 
