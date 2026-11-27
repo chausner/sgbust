@@ -320,7 +320,7 @@ namespace sgbust
                 if (ClearingSolutionsOnly)
                 {
                     auto colorCounts = newGrid.GetColorCounts();
-                    if (std::any_of(colorCounts.begin() + 1, colorCounts.end(), [this](unsigned int count) { return count > 0 && count < minGroupSize; }))
+                    if (std::ranges::any_of(colorCounts | std::views::drop(1), [this](unsigned int count) { return count > 0 && count < minGroupSize; }))
                     {
                         numNewGridsDiscarded++;
                         continue;
